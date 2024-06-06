@@ -1,0 +1,792 @@
+<template>
+    <div>
+        <div id="ywlbAdd" v-loading="loading">
+
+            <div class="ywlbTab">
+                <table style="width:100%">
+                    <tr>
+                        <th class="st">填写备案信息</th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="tr">委托单位</th>
+                        <th class="trs">
+                            <el-form ref="formInline" :model="formInline" label-width="130px" :rules="rules" size="mini">
+                                <el-col :span="6">
+                                    <el-form-item label="用户编号：" style="display: none;">
+                                        <el-input v-model="formInline.userid" disabled></el-input>
+                                    </el-form-item>
+                                    <!-- <el-form-item
+                                        label="档案编号："
+                                        prop="number"
+                                    >
+                                        <el-input v-model="formInline.number"></el-input>
+                                    </el-form-item> -->
+                                    <!--  <el-form-item
+                                    label="发票信息："
+                                    prop="invoice"
+                                >
+                                    <el-input v-model="formInline.invoice"></el-input>
+                                </el-form-item> -->
+                                    <el-form-item label="单位名称：" prop="companyName" v-if="sessionlevel">
+                                        <el-input v-model="formInline.companyName"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="合同金额：" prop="contractMoney">
+                                        <el-input v-model="formInline.contractMoney" type="number"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-form-item label="合同编号：">
+                                        <span style="color:red">{{formInline.company=='1' ? '云':'启'}}雷检字[<el-date-picker v-model="formInline.year" type="year"
+                                                value-format="yyyy" style="width:100px;" placeholder="选择年">
+                                            </el-date-picker>]</span><el-input v-model="formInline.contract"
+                                            style="width:80px;"></el-input>
+                                        <span style="color:red">第<el-input v-model="formInline.Number" type="number"
+                                                style="width:80px;"></el-input>号</span>
+                                    </el-form-item>
+                                    <el-form-item label="合同时间：" class="time" prop="contractTime">
+                                        <el-date-picker v-model="formInline.contractTime" type="date" placeholder="选择日期"
+                                            value-format="yyyy-MM-dd">
+                                        </el-date-picker>
+                                    </el-form-item>
+                                    <el-form-item label="合同附件：">
+                                        <el-upload action="" ref="upload" accept=".pdf,doc,docx"
+                                            :before-upload="uploadHttpRequest" :file-list="fileList">
+                                            <el-button slot="trigger" size="small" type="primary" plain>点击上传文件</el-button>
+                                        </el-upload>
+                                    </el-form-item>
+                                </el-col>
+                            </el-form>
+                        </th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="tr" style="line-height:160px">检测公司</th>
+                        <th class="tr_s">
+                            <el-form ref="formInline" :model="formInline" label-width="130px" :rules="rulesFrom"
+                                size="mini">
+                                <el-col :span="6">
+                                    <el-form-item label="项目名称：" prop="projectName">
+                                        <el-input v-model="formInline.projectName"></el-input>
+                                    </el-form-item>
+
+                                    <el-form-item label="支付金额：" prop="payMoney">
+                                        <el-input v-model="formInline.payMoney" type="number"></el-input>
+                                    </el-form-item>
+                                    <!--  <el-form-item
+                                        label="预拨金额："
+                                        prop="advanceMoney"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-input
+                                            v-model="formInline.advanceMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item> -->
+                                    <el-form-item label="开票金额：" prop="invoiceMoney" v-if="sessionlevel == '1'">
+                                        <el-input v-model="formInline.invoiceMoney" type="number"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="分类：">
+                                        <el-select v-model="formInline.type" placeholder="分类">
+                                            <el-option label="民用" value="民用"></el-option>
+                                            <el-option label="危化" value="危化"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="检测单位：" prop="textCompany">
+                                        <el-input v-model="formInline.textCompany"></el-input>
+                                    </el-form-item>
+                                    <!--  <el-form-item
+                                        label="开票时间："
+                                        class="time"
+                                        prop="invoiceTime"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-date-picker
+                                            v-model="formInline.invoiceTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item> -->
+                                    <el-form-item label="共同编制：" prop="common" v-if="sessionlevel == '1' || sessionlevel == '2'">
+                                        <el-radio-group v-model="formInline.common">
+                                            <el-radio :label="1">可以编制</el-radio>
+                                            <el-radio :label="0">不可以编制</el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <!-- <el-form-item
+                                        label="入账时间："
+                                        class="time"
+                                        prop="arrivalTime"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-date-picker
+                                            v-model="formInline.arrivalTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item> -->
+                                    <el-form-item label="类别：">
+                                        <el-select v-model="formInline.category" placeholder="类别">
+                                            <el-option label="验收检测" value="验收检测"></el-option>
+                                            <el-option label="定期检测" value="定期检测"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="人员归属：" class="mylabel">
+                                        <!-- <el-select v-model="formInline.company" placeholder="请选择" style="width:100%"
+                                            clearable>
+                                            <el-option v-for="item in formInline.companyauditorList" :key="item.value"
+                                                :label="item.label" :value="item.value">
+                                            </el-option>
+                                        </el-select> -->
+                                        <el-input v-model="formInline.company" disabled></el-input>
+                                    </el-form-item>
+
+                                </el-col>
+                                <el-col :span="6">
+                                    <!--  <el-form-item
+                                        label="入账金额："
+                                        prop="arrivalMoney"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-input
+                                            v-model="formInline.arrivalMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item> -->
+                                    <!--  <el-form-item
+                                        label="预拨时间："
+                                        class="time"
+                                        prop="advanceTime"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-date-picker
+                                            v-model="formInline.advanceTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item> -->
+                                    <!--  <el-form-item
+                                        label="欠款金额："
+                                        prop="arrearsMoney"
+                                        v-if="sessionlevel=='1'"
+                                    >
+                                        <el-input
+                                            v-model="formInline.arrearsMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item> -->
+                                </el-col>
+                                <el-col :span="6">
+
+                                </el-col>
+                                <el-col :span="4">
+                                    <!--  <el-form-item label="现场照片：">
+                                        <el-upload
+                                            action=""
+                                            ref="upload"
+                                            accept=".jpg,.jpeg,.png"
+                                            :limit="10"
+                                            multiple
+                                            :http-request="uploadHttpimg"
+                                            :file-list="fileList"
+                                        >
+                                            <el-button
+                                                slot="trigger"
+                                                size="small"
+                                                type="primary"
+                                                plain
+                                            >点击上传图片</el-button>
+                                        </el-upload>
+                                    </el-form-item> -->
+                                </el-col>
+
+                                </el-col>
+                            </el-form>
+                        </th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="trr" style="line-height:120px">备注</th>
+                        <th class="trss">
+                            <el-input type="textarea" :rows="4" placeholder="本项目主要检测防雷、防静电等内容。" v-model="formInline.remark">
+                            </el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="trrr">
+                            <el-button type="success" size="medium" @click="addProject">保存</el-button>
+                            <el-button type="info" size="medium" @click="goback">返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+// @ is an alias to /src
+import {
+    addProject,
+    getDockUserbianzhi,
+    getDockUserParent,
+} from "@/api/aviation";
+export default {
+    name: "XXX",
+    data() {
+        return {
+            formInline: {
+                roleId: "" /* 用户ID */,
+                userid: "" /* 用户编号 */,
+                number: "" /* 档案编号 */,
+                invoice: "" /* 发票信息 */,
+                companyName: "" /* 单位 */,
+                projectName: "" /* 项目名称 */,
+                contractMoney: "" /* 合同金额 */,
+                payMoney: "" /* 本次支付金额 */,
+                type: "民用" /* 分类 */,
+                category: "验收检测",/* 类别 */
+                textCompany: "" /* 检测单位 */,
+                tester: "" /* 检测人 */,
+                remark: "" /* 备注 */,
+                file: "" /* 合同附件，上传文档 */,
+                contractTime: "" /* 合同时间 */,
+                contractNumber: "" /*  合同编号*/,
+                contract: "" /* 合同编号前边 */,
+                Number: "" /* 合同编号后边*/,
+                year: "" /* 合同编号年份 */,
+                invoiceTime: "" /* 开票时间 */,
+                arrivalTime: "" /* 入账时间 */,
+                arrivalMoney: "" /* 入账金额 */,
+                advanceTime: "" /* 预拨时间 */,
+                advanceMoney: "" /* 预拨金额 */,
+                invoiceMoney: "" /* 开票金额 */,
+                invoiceNumber: "" /* 发票号码 */,
+                arrearsMoney: "" /* 欠款金额 */,
+                common: 0 /* 下级编制 */,
+                company:"",
+                companyauditorList: [
+                    {
+                        value: "1",
+                        label: "云南省气象灾害防御技术中心"
+                    },
+                    {
+                        value: "2",
+                        label: "云南启旭科技有限公司"
+                    }
+                ] /* 人员归属列表 */,
+            },
+            rules: {
+                number: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                invoice: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                companyName: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                contractMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                contractNumber: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                contractTime: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+            },
+            rulesFrom: {
+                projectName: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+
+                payMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                advanceMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                invoiceMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                textCompany: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                invoiceTime: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                arrivalTime: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+
+                invoiceNumber: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                arrivalMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                advanceTime: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+                arrearsMoney: [
+                    {
+                        required: true,
+                        message: "此处为必填项",
+                        trigger: "blur",
+                    },
+                ],
+            },
+            fileList: [],
+            formData: new FormData(),
+            loading: false,
+            dialogVisible: false,
+            checkList: [],
+            bianzhiList: [],
+            trueNameId: [],
+        };
+    },
+    computed: {
+        sessionlevel() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.level;
+        },
+    },
+    watch: {
+        "formInline.contractMoney"(val) {
+            if (val > 10000) {
+                this.open("合同金额超过10000，请确认无误。");
+            }
+        },
+        "formInline.invoiceMoney"(val) {
+            if (Number(val) > Number(this.formInline.contractMoney)) {
+                this.open("开票金额不能大于合同金额");
+                this.formInline.invoiceMoney = "";
+            }
+        },
+    },
+    mounted() {
+        const params = JSON.parse(sessionStorage.getItem("records"));
+        this.formInline.userid = params.id;
+        this.formInline.roleId = params.roleIdMap.id;
+        this.getPromotion();
+        this.getcompany()
+    },
+    methods: {
+        getcompany(){
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            /* console.log(params.company,'人员归属') */
+            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心':'云南启旭科技有限公司';
+        },
+        open(message) {
+            this.$alert(`<strong>${message}</strong>`, "提示", {
+                dangerouslyUseHTMLString: true,
+                type: "warning",
+            });
+        },
+        goback() {
+            this.$emit("goback", false);
+        },
+        uploadHttpRequest(data) {
+            var fileType =
+                data.name.split(".")[data.name.split(".").length - 1];
+            const extension =
+                fileType.toLowerCase() == "doc" ||
+                fileType.toLowerCase() == "pdf" ||
+                fileType.toLowerCase() == "docx";
+            if (!extension) {
+                this.$message.error("合同附件必须为doc,docx,pdf格式");
+            } else {
+                this.formData.append("file", data);
+            }
+        },
+        uploadHttpimg(data) {
+            this.formData.append("sceneFile", data.file);
+        },
+        // 查询备案审核员
+        getPromotion() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            getDockUserParent({
+                regionId: records.regionIdMap.id,
+                type: "备案审核员",
+            }).then((res) => {
+                this.formInline.applyForinfoFromauditorList = res.data.records;
+            });
+        },
+        /* 项目备案 */
+        addProject() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            var reg = /[\（]/g,
+                reg1 = /[\）]/g,
+                reg2 = /[\【]/g,
+                reg3 = /[\】]/g,
+                reg4 = /[\ ]/g;
+            this.$refs.formInline.validate((valid) => {
+                if (valid) {
+                    if (this.formData.has("file") == false) {
+                        this.$message.error("合同附件不能为空");
+                    } /* else if (
+                        this.formInline.auditor == null ||
+                        this.formInline.auditor == ""
+                    ) {
+                        this.$message.error("备案审核人不能为空");
+                    } */ else {
+                        if (this.formInline.Number.length != 4) {
+                            this.$message.info("请输入四位数字");
+                            return;
+                        }
+                        this.formData.append("userid", this.formInline.userid);
+                        this.formData.append(
+                            "number",
+                            this.formInline.number
+                                .replace(reg, "(")
+                                .replace(reg1, ")")
+                                .replace(reg2, "[")
+                                .replace(reg3, "]")
+                                .replace(reg4, "")
+                        );
+                        this.formData.append(
+                            "invoice",
+                            this.formInline.invoice
+                        );
+                        this.formData.append(
+                            "companyName",
+                            this.formInline.companyName
+                        );
+                        this.formData.append(
+                            "projectName",
+                            this.formInline.projectName
+                        );
+                        this.formData.append(
+                            "contractMoney",
+                            this.formInline.contractMoney
+                        );
+                        this.formData.append(
+                            "payMoney",
+                            this.formInline.payMoney
+                        );
+                        this.formData.append("type", this.formInline.type);
+                        this.formData.append("category", this.formInline.category);
+                        this.formData.append(
+                            "textCompany",
+                            this.formInline.textCompany
+                        );
+                        this.formData.append("remark", this.formInline.remark);
+                        this.formData.append(
+                            "contractTime",
+                            this.formInline.contractTime
+                        );
+                        this.formData.append(
+                            "contractNumber",
+                            `云雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                        );
+                        this.formData.append(
+                            "invoiceTime",
+                            this.formInline.invoiceTime
+                        );
+                        this.formData.append(
+                            "arrivalTime",
+                            this.formInline.arrivalTime
+                        );
+                        this.formData.append(
+                            "arrivalMoney",
+                            this.formInline.arrivalMoney
+                        );
+                        this.formData.append(
+                            "advanceTime",
+                            this.formInline.advanceTime
+                        );
+                        this.formData.append(
+                            "advanceMoney",
+                            this.formInline.advanceMoney
+                        );
+                        this.formData.append(
+                            "invoiceMoney",
+                            this.formInline.invoiceMoney
+                        );
+                        this.formData.append(
+                            "invoiceNumber",
+                            this.formInline.invoiceNumber
+                        );
+                        this.formData.append(
+                            "arrearsMoney",
+                            this.formInline.arrearsMoney
+                        );
+                        this.formData.append("roleId", this.formInline.roleId);
+                        this.formData.append("common", this.formInline.common);
+                        /*  this.formData.append(
+                             "reviewerId",
+                             this.formInline.auditor
+                         ); */
+                        this.formData.append(
+                            "reviewerRoleId",
+                            records.roleIdMap.id
+                        );
+                        this.formData.append(
+                            "company",
+                            this.formInline.company == '云南省气象灾害防御技术中心' ? '1':'2'
+                        );
+                        this.loading = true;
+                        addProject(this.formData).then((res) => {
+                            if (res.data.state == 200) {
+                                this.$message.success("项目备案成功");
+                                this.loading = false;
+                                this.formData = new FormData();
+                                this.goback();
+                            } else if (res.data.state == 400) {
+                                this.$message.warning(res.data.message);
+                                this.formData = new FormData();
+                                this.loading = false;
+                            } else {
+                                this.$message.error("项目备案失败");
+                                this.loading = false;
+                                this.formData = new FormData();
+                            }
+                        });
+                    }
+                } else {
+                    console.log("error submit!!");
+                    return false;
+                }
+            });
+        },
+        appendClick() {
+            this.dialogVisible = true;
+        },
+    },
+};
+</script>
+<style>
+input[type="number"] {
+    -moz-appearance: textfield;
+    /* Firefox */
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    /* Safari */
+    margin: 0;
+}
+</style>
+<style lang="scss" scoped>
+#ywlbAdd {
+    background: #fff;
+    padding: 7px;
+    height: 88vh;
+
+    ::v-deep.el-tabs__header {
+        margin: 0;
+    }
+
+    .st {
+        width: 100%;
+        line-height: 35px;
+        padding-left: 10px;
+        text-align: left;
+        background: rgb(231, 231, 231);
+        border: 1px solid #ddd;
+    }
+
+    .hang {
+        display: flex;
+    }
+
+    .tr {
+        flex: 1;
+        border: 1px solid #ddd;
+        line-height: 180px;
+        border-right: none;
+        border-bottom: none;
+        font-size: 14px;
+        color: gray;
+    }
+
+    .trs {
+        flex: 8;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        padding: 25px 0;
+
+        .el-form {
+            padding-left: 20px;
+        }
+
+        .el-form-item {
+            margin-bottom: 0px;
+
+            ::v-deep .el-form-item__label {
+                padding-top: 3px;
+            }
+        }
+
+        .el-form-item__content {
+            line-height: 34px;
+        }
+
+        .el-select {
+            width: 100%;
+        }
+
+        .el-input__inner {
+            padding: 0 0 0 15px;
+        }
+    }
+
+    .tr_s {
+        flex: 8;
+        border: 1px solid #ddd;
+        border-bottom: none;
+
+        ::v-deep.el-input-group__append {
+            cursor: pointer;
+        }
+
+        ::v-deep.el-input-group__append:hover {
+            background: rgb(128, 128, 197);
+            color: #fff;
+        }
+
+        .el-form {
+            padding: 20px;
+        }
+
+        .el-form-item {
+            margin-bottom: 0px;
+
+            ::v-deep .el-form-item__label {
+                padding-top: 3px;
+            }
+        }
+
+        .el-form-item__content {
+            line-height: 34px;
+        }
+
+        .el-select {
+            width: 100%;
+        }
+
+        ::v-deep .el-input__inner {
+            padding: 0 0 0 15px;
+        }
+    }
+
+    .trr {
+        flex: 1;
+        border: 1px solid #ddd;
+        line-height: 180px;
+        border-right: none;
+        font-size: 14px;
+        color: gray;
+    }
+
+    .trrr {
+        flex: 1;
+        border: 1px solid #ddd;
+        line-height: 60px;
+        border-top: none;
+        font-size: 14px;
+        color: gray;
+    }
+
+    .trss {
+        flex: 8;
+        border: 1px solid #ddd;
+
+        .el-textarea {
+            width: 50%;
+            display: block;
+            top: 10px;
+            left: 10px;
+            margin-bottom: 20px;
+        }
+    }
+
+    .time {
+        ::v-deep .el-input__inner {
+            padding: 0 0 0 30px;
+        }
+    }
+
+    ::v-deep .el-form-item__content {
+        text-align: left;
+    }
+
+    ::v-deep .el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
+        width: 100%;
+    }
+}
+</style>

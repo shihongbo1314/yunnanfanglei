@@ -1,0 +1,420 @@
+<template>
+    <div
+        class="app-container"
+        style="height:100%"
+    >
+        <el-form
+            :inline="true"
+            :model="formInline"
+            class="demo-form-inline"
+        >
+            <div>
+                报告签名记录
+            </div>
+            <div>
+                <el-form-item label="用户名称：">
+                    <el-input
+                        v-model="formInline.userName"
+                        placeholder="请输入用户名称"
+                    ></el-input>
+                </el-form-item>
+                <el-form-item label="项目名称：">
+                    <el-input
+                        v-model="formInline.projectName"
+                        placeholder="请输入项目名称"
+                    ></el-input>
+                </el-form-item>
+                <el-form-item label="项目归属：">
+                    <el-input
+                        v-model="formInline.company"
+                        disabled
+                    ></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        @click="fetchData(1)"
+                    >查询</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+        <div class="content">
+            <el-table
+                v-loading="listLoading"
+                :data="list"
+                element-loading-text="Loading"
+                border
+                fit
+                highlight-current-row
+                height="68vh"
+            >
+                <el-table-column
+                    align="center"
+                    label="项目名称"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.projectMap!=null ? scope.row.projectMap.project_name :'-' }}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    align="center"
+                    label="档案编号"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.projectMap!=null ? scope.row.projectMap.contract_number :'-' }}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="用章人"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.userMap!=null ? scope.row.userMap.user_name :'-' | Signature(scope.row.type,scope.row.userMap1!=null ? scope.row.userMap1.user_name :'',scope.row.userMap2!=null ? scope.row.userMap2.user_name:'')}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="负责人"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                             {{ scope.row.liableUserMap!=null ? scope.row.liableUserMap.user_name :'-' }}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="审核人"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.reviewerMap!=null ? scope.row.reviewerMap.user_name :'-' }}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="签字时间"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.saveTime }}
+                        </div>
+                    </template>
+                </el-table-column>
+               <!--  <el-table-column
+                    label="公章类型"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.type | statusFilter(scope.row.type)}}
+                        </div>
+                    </template>
+                </el-table-column> -->
+
+            </el-table>
+            <Page
+                :total="total"
+                :pageNum="current"
+                :pageSize="size"
+                @pageChange="pageChange"
+            />
+        </div>
+    </div>
+</template>
+
+<script>
+import {
+    addStamp,
+    removeStamp,
+    sealusage,
+} from "@/api/user";
+import Page from "@/components/page/index.vue";
+export default {
+    filters: {
+        statusFilter(status) {
+           switch (status) {
+               case 'test':
+                   return "检测章"
+                   break;
+               case 'company':
+                   return "行政章"
+                   break;
+               case 'sign':
+                   return "用户签字"
+                   break;
+               default:
+                   break;
+           }
+        },
+        Signature(status,name,name1,name2){
+           if(name == 'sign' && name1!='' && name2!=''){
+               return status + ',' + name1+ ',' + name2
+           }else if(name == 'sign' && name1!=''){
+               return status + ',' + name1
+           }else{
+               return status
+           }
+        }
+    },
+    data() {
+        return {
+            list: null,
+            listLoading: true,
+            /* 用户传递参数 */
+            size: 10,
+            current: 1,
+            total: 0,
+            trueName: "shengguanli",
+            regionId: "",
+            roleId: "",
+            state: "",
+            formInline: {
+                userName: "",
+                projectName: "",
+                company:"",
+            },
+            formLabelAlign: {
+                title: "",
+                content: "",
+            },
+            formLabel: {
+                title: "",
+                content: "",
+            },
+            labelPosition: "right",
+            dialog: {
+                innerVisible: false,
+            },
+            dialogone: {
+                innerVisible: false,
+            },
+            regionIdList: [],
+            fileList: [],
+            formData: new FormData(),
+            ftwoData: new FormData(),
+            imgShow: false,
+            imgList: "",
+        };
+    },
+    components: {
+        Page,
+    },
+    created() {
+        this.sealusage();
+    },
+    methods: {
+        hangdleEditor(val) {
+            this.formLabelAlign.content = val;
+        },
+        pageChange(page) {
+            this.size = page._pageSize;
+            this.current = page._currentPage;
+            this.fetchData(this.current);
+        },
+        /* 编辑用户 */
+        handleEdit(index, row) {
+            this.dialogone.innerVisible = true;
+            this.formLabel = row;
+            this.formLabel.content = row.content;
+        },
+        /* 提交 */
+        compile() {
+            this.ftwoData.append("id", this.formLabel.id);
+            this.ftwoData.append("title", this.formLabel.title);
+            addStamp(this.ftwoData).then((res) => {
+                if (res.data.stateStr == "成功") {
+                    this.$message.success("修改成功");
+                    this.dialogone.innerVisible = false;
+                    this.sealusage();
+                    this.formData = new FormData();
+                } else {
+                    this.$message.error("修改失败");
+                }
+            });
+        },
+        /* 删除信息 */
+        handleDelete(row) {
+            this.$confirm("此操作将永久删除该信息, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    removeStamp({
+                        id: row.id,
+                    }).then((res) => {
+                        if (
+                            res.data.state == 200 &&
+                            res.data.stateStr == "成功"
+                        ) {
+                            this.$message.success("删除成功");
+                            this.sealusage();
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        // 关闭dialog
+        closeBox() {
+            this.dialog.innerVisible = false;
+        },
+        /* 添加公告信息 */
+        submitForm() {
+            this.formData.append("title", this.formLabelAlign.title);
+            addStamp(this.formData).then((res) => {
+                if (res.data.stateStr == "成功") {
+                    this.$message.success("添加成功");
+                    this.closeBox();
+                    this.sealusage();
+                    this.formData = new FormData();
+                }
+            });
+        },
+        // 清空用户信息
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+        },
+        uploadHttpimg(data) {
+            this.formData.append("file", data.file);
+        },
+        uploadHttp(data) {
+            this.ftwoData.append("file", data.file);
+        },
+        sealusage() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            this.formInline.company = regionId.company=='1' ? '云南省气象灾害防御技术中心':'云南启旭科技有限公司'
+            sealusage({
+                size: this.size,
+                current: this.current,
+                regionId: regionId.regionIdMap.id,
+                type:'sign',
+                company:regionId.company
+            }).then((res) => {
+                this.list = res.data.records;
+                this.total = res.data.total;
+                this.listLoading = false;
+            });
+        },
+        fetchData(current) {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            sealusage({
+                size: this.size,
+                current: current,
+                regionId: regionId.regionIdMap.id,
+                userName:this.formInline.userName,
+                projectName:this.formInline.projectName,
+                type:'sign'
+            }).then((res) => {
+                this.list = res.data.records;
+                this.total = res.data.total;
+                this.listLoading = false;
+            });
+        },  
+    },
+};
+</script>
+<style lang="scss" scoped>
+.demo-form-inline {
+    padding: 12px 24px;
+    background: #fff;
+    margin-bottom: 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    .el-form-item {
+        margin-bottom: 0;
+    }
+}
+.content {
+    background: #fff;
+    padding: 24px;
+    height: calc(100% - 70px);
+    ::v-deep .el-table th {
+        color: #666666;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .textarea {
+        display: inline-block;
+        height: 34px;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 12px;
+    }
+}
+.imgShow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 66;
+    background: #0000005e;
+}
+.closer {
+    width: 30px;
+    height: 30px;
+    background: #0000005e;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+}
+.el-switch {
+    height: 27px;
+}
+.el-table td div {
+    white-space: nowrap;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+::v-deep .el-input__inner {
+    height: 32px;
+    line-height: 32px;
+}
+::-webkit-scrollbar {
+    width: 5px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    //滑块部分
+    border-radius: 5px;
+    background-color: rgb(206, 184, 219);
+}
+::-webkit-scrollbar-track {
+    //轨道部分
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #ededed;
+    border-radius: 5px;
+}
+::v-deep .el-dialog__body {
+    padding-bottom: 1px;
+}
+::v-deep .el-select {
+    width: 100%;
+}
+</style>

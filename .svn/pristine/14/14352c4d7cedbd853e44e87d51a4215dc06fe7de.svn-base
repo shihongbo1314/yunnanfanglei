@@ -1,0 +1,605 @@
+<template>
+    <div
+        class="app-container"
+        style="height:100%"
+    >
+        <el-form
+            :inline="true"
+            :model="formInline"
+            class="demo-form-inline"
+        >
+            <div>
+                公告管理列表 {{ total }} 条
+            </div>
+            <div>
+                <el-form-item>
+                    <el-input
+                        v-model="formInline.name"
+                        placeholder="请输入标题"
+                    ></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        @click="onblur(1)"
+                    >查询</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        @click="dialog.innerVisible = true"
+                    >添加</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+        <div class="content">
+            <el-table
+                v-loading="listLoading"
+                :data="list"
+                element-loading-text="Loading"
+                border
+                fit
+                highlight-current-row
+                height="70vh"
+            >
+                <el-table-column
+                    align="center"
+                    label="ID"
+                    width="95"
+                    type="index"
+                >
+                </el-table-column>
+                <el-table-column
+                    label="标题"
+                    align="left"
+                    width="150"
+                >
+                    <template slot-scope="scope">
+                        <div style="width: 85%">
+                            {{ scope.row.title }}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="内容">
+                    <template slot-scope="scope">
+                        <div
+                            style="width: 100%"
+                            class="textarea"
+                            v-html="scope.row.content"
+                        >
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    align="center"
+                    label="信息类型"
+                    width="95"
+                >
+                    <template slot-scope="scope">
+                        <span>{{scope.row.msgType | statusFilter}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    align="center"
+                    label="公告范围"
+                    width="105"
+                >
+                    <template slot-scope="scope">
+                        <span>{{scope.row.visibleType | statusFiltertwo}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="是否启用"
+                    width="200px"
+                >
+                    <template slot-scope="scope">
+                        <el-switch
+                            v-model="scope.row.enable"
+                            active-color="#13ce66"
+                            inactive-color="#ff4949"
+                            active-value="1"
+                            inactive-value="0"
+                            @change="getChange(scope.row)"
+                        >
+                        </el-switch>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    align="center"
+                    prop="created_at"
+                    label="编辑"
+                    width="300"
+                >
+                    <template slot-scope="scope">
+                        <el-button
+                            size="mini"
+                            @click="handleEdit(scope.$index, scope.row)"
+                        >编辑</el-button>
+                        <el-button
+                            size="mini"
+                            type="danger"
+                            @click="handleDelete(scope.row)"
+                        >删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <Page
+                :total="total"
+                :pageNum="current"
+                :pageSize="size"
+                @pageChange="pageChange"
+            />
+        </div>
+        <!-- 添加弹框 -->
+        <el-dialog
+            width="1080px"
+            title="添加公告信息"
+            :visible.sync="dialog.innerVisible"
+            append-to-body
+            @close="closeBox"
+        >
+            <el-form
+                :label-position="labelPosition"
+                label-width="70px"
+                :model="formLabelAlign"
+                ref="ruleForm"
+            >
+                <el-form-item
+                    label="标题："
+                    prop="name"
+                >
+                    <el-input v-model="formLabelAlign.title"></el-input>
+                </el-form-item>
+                <el-row
+                    type="flex"
+                    justify="space-between"
+                >
+                    <el-col :span="10">
+                        <el-form-item
+                            label="信息类型："
+                            prop="msgType"
+                            label-width='95px'
+                        >
+                            <el-radio-group v-model="formLabelAlign.msgType">
+                                <el-radio
+                                    :label="1"
+                                    border
+                                    size="medium"
+                                >管理类</el-radio>
+                                <el-radio
+                                    :label="2"
+                                    border
+                                    size="medium"
+                                >业务类</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="14">
+                        <el-form-item
+                            label="公告范围："
+                            prop="visibleType"
+                            label-width='85px'
+                        >
+                            <el-radio-group v-model="formLabelAlign.visibleType">
+                                <el-radio
+                                    :label="1"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1'&& sessionName == '管理员'"
+                                >全部可见</el-radio>
+                                <el-radio
+                                    :label="2"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1' || sessionNamelevel == '2' || sessionNamelevel == '3'"
+                                >本级可见</el-radio>
+                                <el-radio
+                                    :label="3"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1' || sessionNamelevel == '2'"
+                                >本级及下一级可见</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-form-item
+                    label="内容："
+                    prop="password"
+                >
+                    <Editor
+                        :editorContent="formLabelAlign.content"
+                        v-on:hangdleEditor="hangdleEditor"
+                    />
+                </el-form-item>
+                <el-form-item style="text-align: right;">
+                    <el-button
+                        size="small"
+                        @click="dialog.innerVisible = false"
+                    >取消</el-button>
+                    <el-button
+                        size="small"
+                        type="primary"
+                        @click="submitForm"
+                    >保存</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+        <!-- 编辑弹框 -->
+        <el-dialog
+            width="1080px"
+            title="编辑公告信息"
+            :visible.sync="dialogone.innerVisible"
+            append-to-body
+            @close="closeBox"
+        >
+            <el-form
+                :label-position="labelPosition"
+                label-width="70px"
+                :model="formLabel"
+                ref="ruleForm"
+            >
+                <el-form-item
+                    label="标题："
+                    prop="name"
+                >
+                    <el-input v-model="formLabel.title"></el-input>
+                </el-form-item>
+                <el-row
+                    type="flex"
+                    justify="space-between"
+                >
+                    <el-col :span="10">
+                        <el-form-item
+                            label="信息类型："
+                            prop="msgType"
+                            label-width='95px'
+                        >
+                            <el-radio-group v-model="formLabel.msgType">
+                                <el-radio
+                                    label="1"
+                                    border
+                                    size="medium"
+                                >管理类</el-radio>
+                                <el-radio
+                                    label="2"
+                                    border
+                                    size="medium"
+                                >业务类</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="14">
+                        <el-form-item
+                            label="公告范围："
+                            prop="visibleType"
+                            label-width='85px'
+                        >
+                            <el-radio-group v-model="formLabel.visibleType">
+                                <el-radio
+                                    label="1"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1' && sessionName == '管理员'"
+                                >全部可见</el-radio>
+                                <el-radio
+                                    label="2"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1' || sessionNamelevel == '2' || sessionNamelevel == '3'"
+                                >本级可见</el-radio>
+                                <el-radio
+                                    label="3"
+                                    border
+                                    size="medium"
+                                    v-if="sessionNamelevel == '1' || sessionNamelevel == '2'"
+                                >本级及下一级可见</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-form-item
+                    label="内容："
+                    prop="password"
+                >
+                    <Editor
+                        :editorContent="formLabel.content"
+                        v-on:hangdleEditor="hangdleEditor"
+                    />
+                </el-form-item>
+                <el-form-item style="text-align: right;">
+                    <el-button
+                        size="small"
+                        type="primary"
+                        @click="preserve"
+                    >保存</el-button>
+                    <el-button
+                        size="small"
+                        @click="dialogone.innerVisible = false"
+                    >取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </div>
+
+</template>
+
+<script>
+import { selectCement, addCement, delectCement } from "@/api/user";
+import Page from "@/components/page/index.vue";
+import Editor from "@/components/Editor/Editor.vue";
+export default {
+    filters: {
+        statusFilter(status) {
+            const statusMap = {
+                1: "管理类",
+                2: "业务类",
+            };
+            return statusMap[status];
+        },
+        statusFiltertwo(status) {
+            const statusMap = {
+                1: "全部可见",
+                2: "本级可见",
+                3:"本级及下一级可见"
+            };
+            return statusMap[status];
+        },
+    },
+    data() {
+        return {
+            list: null,
+            listLoading: true,
+            /* 用户传递参数 */
+            size: 10,
+            current: 1,
+            total: 0,
+            trueName: "shengguanli",
+            regionId: "",
+            roleId: "",
+            state: "",
+            formInline: {
+                name: "",
+            },
+            formLabelAlign: {
+                title: "",
+                content: "",
+                msgType: 1,
+                visibleType: 2,
+            },
+            formLabel: {
+                title: "",
+                content: "",
+                id: "",
+            },
+            labelPosition: "right",
+            dialog: {
+                innerVisible: false,
+            },
+            dialogone: {
+                innerVisible: false,
+            },
+            regionIdList: [],
+        };
+    },
+    computed:{
+       sessionNamelevel() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.level;
+        },
+         sessionName() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.name;
+        },
+    },
+    components: {
+        Page,
+        Editor,
+    },
+    created() {
+        this.fetchData();
+    },
+    methods: {
+        fetchData() {
+            this.listLoading = true;
+            selectCement({
+                size: this.size,
+                current: this.current,
+            }).then((response) => {
+                this.list = response.data.records;
+                this.total = this.list.length;
+                this.listLoading = false;
+            });
+        },
+        onblur(current) {
+            this.listLoading = true;
+            selectCement({
+                size: this.size,
+                current: current,
+                title: this.formInline.name,
+            }).then((response) => {
+                this.list = response.data.records;
+                this.total = response.data.total;
+                this.listLoading = false;
+            });
+        },
+        hangdleEditor(val) {
+            this.formLabel.content = val;
+            this.formLabelAlign.content = val;
+        },
+        pageChange(page) {
+            this.size = page._pageSize;
+            this.current = page._currentPage;
+            this.onblur(this.current);
+        },
+        /* 编辑用户 */
+        handleEdit(index, row) {
+            this.dialogone.innerVisible = true;
+            this.formLabel = row;
+           /*  console.log(this.formLabel); */
+            this.formLabel.content = row.content;
+        },
+        /* 删除信息 */
+        handleDelete(row) {
+            this.$confirm("此操作将永久删除该信息, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    delectCement({
+                        id: row.id,
+                    }).then((res) => {
+                        if (
+                            res.data.state == 200 &&
+                            res.data.stateStr == "成功"
+                        ) {
+                            this.$message.success("删除成功");
+                            this.fetchData();
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        /* 保存 */
+        preserve() {
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            addCement({
+                title: this.formLabel.title,
+                content: this.formLabel.content,
+                id: this.formLabel.id,
+                userid: regionId.id,
+                msgType: this.formLabel.msgType,
+                regionId: regionId.regionIdMap.id,
+                visibleType: this.formLabel.visibleType,
+            }).then((res) => {
+                if (res.data.stateStr == "成功") {
+                    this.$message.success("修改成功");
+                    this.dialogone.innerVisible = false;
+                    this.formLabelAlign = {};
+                    this.formLabel = {};
+                    this.fetchData();
+                }
+            });
+        },
+        // 关闭dialog
+        closeBox() {
+            this.dialog.innerVisible = false;
+        },
+        /* 添加公告信息 */
+        submitForm() {
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            if (
+                this.formLabelAlign.title != null &&
+                this.formLabelAlign.title != ""
+            ) {
+                addCement({
+                    title: this.formLabelAlign.title,
+                    content: this.formLabelAlign.content,
+                    msgType: this.formLabelAlign.msgType,
+                    regionId: regionId.regionIdMap.id,
+                    visibleType: this.formLabelAlign.visibleType,
+                }).then((res) => {
+                    if (res.data.stateStr == "成功") {
+                        this.$message.success("添加成功");
+                        this.formLabelAlign = {};
+                        this.formLabel = {};
+                        this.closeBox();
+                        this.fetchData();
+                    }
+                });
+            } else {
+                this.$message.error("添加失败，不能为空");
+            }
+        },
+        getChange(row) {
+            const userId = sessionStorage.getItem("records").id;
+            addCement({
+                title: this.formLabelAlign.title,
+                content: this.formLabelAlign.content,
+                userid: userId,
+                id: row.id,
+                enable: row.enable,
+            }).then((res) => {
+                if (res.data.stateStr == "成功") {
+                    this.$message.success("修改成功");
+                    this.closeBox();
+                    this.fetchData();
+                }
+            });
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+.demo-form-inline {
+    padding: 12px 24px;
+    background: #fff;
+    margin-bottom: 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    .el-form-item {
+        margin-bottom: 0;
+    }
+}
+.content {
+    background: #fff;
+    padding: 24px;
+    height: calc(100% - 70px);
+    ::v-deep .el-table th {
+        color: #666666;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .textarea {
+        display: inline-block;
+        height: 34px;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 34px;
+    }
+}
+.el-table td div {
+    white-space: nowrap;
+    /* display: inline-block; */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+::v-deep .el-input__inner {
+    height: 32px;
+    line-height: 32px;
+}
+::-webkit-scrollbar {
+    width: 5px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    //滑块部分
+    border-radius: 5px;
+    background-color: rgb(206, 184, 219);
+}
+::-webkit-scrollbar-track {
+    //轨道部分
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #ededed;
+    border-radius: 5px;
+}
+::v-deep .el-dialog__body {
+    padding-bottom: 1px;
+}
+::v-deep .el-select {
+    width: 100%;
+}
+</style>

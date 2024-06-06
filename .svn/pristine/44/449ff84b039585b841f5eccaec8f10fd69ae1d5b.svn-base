@@ -1,0 +1,4479 @@
+<template>
+        <div class="reference">
+        <div
+            class="All"
+            v-if="!addishow"
+        >
+            <div
+                class="addNewYewu"
+                v-if="sessionName == '备案人'"
+            >
+                <span @click="addClick"><i
+                        class="el-icon-plus"
+                        style="font-weight:900;margin-right:10px;"
+                    />新增备案信息</span>
+            </div>
+            <div class="condition">
+                <el-form
+                    :inline="true"
+                    :model="formInline"
+                    size='mini'
+                    class="demo-form-inline"
+                >
+                    <el-form-item label="档案编号：">
+                        <el-input
+                            v-model="formInline.number"
+                            placeholder="请填写档案编号"
+                            clearable
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item label="行政区划：">
+                        <el-input
+                            v-model="formInline.regionName"
+                            placeholder="请填写行政区划"
+                            clearable
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item label="委托方名称：">
+                        <el-input
+                            v-model="formInline.company_name"
+                            placeholder="请填写委托方名称"
+                            clearable
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目名称：">
+                        <el-input
+                            v-model="formInline.project_name"
+                            placeholder="请填写项目名称"
+                            clearable
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item label="类别：">
+                        <el-select
+                            v-model="formInline.type"
+                            placeholder="请选择"
+                            clearable
+                        >
+                            <el-option
+                                label="民用"
+                                value="民用"
+                            ></el-option>
+                            <el-option
+                                label="危化"
+                                value="危化"
+                            ></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="检测单位：">
+                        <el-input
+                            v-model="formInline.textCompany"
+                            placeholder="请填写检测单位"
+                            clearable
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目状态：">
+                        <el-select
+                            v-model="formInline.appstatusvalue"
+                            placeholder="请选择"
+                            clearable
+                            multiple
+                            style="z-index:99"
+                        >
+                            <el-option
+                                v-for="(item,index) in formInline.appstatus "
+                                :key="index"
+                                :label="item.label"
+                                :value="item.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="经手日期：">
+                        <el-date-picker
+                            v-model="formInline.timeDate"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            format="yyyy-MM-dd"
+                            value-format="yyyy-MM-dd"
+                        >
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="到账时间：">
+                        <el-date-picker
+                            v-model="formInline.timeDateArrival"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            format="yyyy-MM-dd"
+                            value-format="yyyy-MM-dd"
+                        >
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="真实姓名：">
+                        <el-input
+                            v-model="formInline.trueName"
+                            clearable
+                            placeholder="请填写真实姓名"
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="sessionNamelevel == '1'">
+                        <el-checkbox v-model="formInline.checked">省本级</el-checkbox>
+                    </el-form-item>
+                    <el-form-item v-if="sessionNamelevel == '1'">
+                        <el-checkbox v-model="formInline.checked2">存在问题报告</el-checkbox>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-date-picker
+                            v-model="formInline.SaveTime"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="备案开始时间"
+                            end-placeholder="备案结束时间"
+                            format="yyyy-MM-dd"
+                            value-format="yyyy-MM-dd"
+                        >
+                        </el-date-picker>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button
+                            type="primary"
+                            icon="el-icon-search"
+                            @click="onSubmit"
+                        >查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div
+                class="footer-table"
+                :class="sessionName == '备案人' ? 'all':'dan'"
+            >
+                <el-table
+                    ref="multipleTable"
+                    :data="tableData"
+                    tooltip-effect="dark"
+                    border
+                    style="width: 100%;"
+                    class="classsty"
+                    height="calc(100% - 85px)"
+                >
+                    <el-table-column
+                        type="expand"
+                        label="详细信息"
+                        width="80"
+                    >
+                        <template slot-scope="props">
+                            <el-form
+                                label-position="left"
+                                inline
+                                class="demo-table-expand hide"
+                            >
+                                <el-form-item
+                                    label="制作人："
+                                    v-if="props.row.makeUserMap"
+                                >
+                                    <span>{{ props.row.makeUserMap.true_name || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="合同编号：">
+                                    <span>{{ props.row.contractNumber || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="合同金额：">
+                                    <span>{{ props.row.contractMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="支付金额：">
+                                    <span>{{ props.row.payMoney || '-' }}</span>
+                                </el-form-item>
+
+                                <el-form-item label="类别：">
+                                    <span>{{ props.row.type || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="当前负责人：">
+                                    <span>{{ props.row.reviewerName || '-' }}</span>
+                                </el-form-item>
+
+                            </el-form>
+                            <el-form
+                                label-position="left"
+                                inline
+                                class="demo-table-expand hide"
+                                v-if="props.row.multiplex!='4' && props.row.multiplex!='5'"
+                            >
+                                <el-form-item label="预拨时间：">
+                                    <span>{{ props.row.advanceTime || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="预拨金额：">
+                                    <span>{{ props.row.advanceMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="欠款金额：">
+                                    <span>{{ props.row.arrearsMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="创建人：">
+                                    <span>{{ props.row.createName || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="审核时间：">
+                                    <span>{{ props.row.examineTime || '-' }}</span>
+                                </el-form-item>
+                            </el-form>
+
+                            <el-form
+                                label-position="left"
+                                inline
+                                class="demo-table-expand hide"
+                                v-if="sessionName == '对接人' || sessionName == '审核人'|| sessionName == '终审人'|| sessionName == '检测人'"
+                            >
+                                <!-- <el-form-item label="检测报告下载：">
+                                    <span
+                                        @click="Download(props.row.testImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testImg!=null ? props.row.testImg: '-'}}</span>
+                                </el-form-item> -->
+                                <el-form-item
+                                    label="检测报告痕迹版下载："
+                                    v-if="props.row.state != '16'"
+                                >
+                                    <span
+                                        @click="Download(props.row.testMarkImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testMarkImg!=null ? '(' +props.row.testMarkImg.split('(')[1]: '-'}}</span>
+                                </el-form-item>
+                                <el-form-item
+                                    label="检测报告打印版下载："
+                                    v-if="props.row.state != '16'"
+                                >
+                                    <span
+                                        @click="Download(props.row.testPrintImg!=null ? props.row.testPrintImg.split('.')[0] + '.pdf' : '')"
+                                        style="cursor:pointer;"
+                                    >{{props.row.testPrintImg!=null ? props.row.testPrintImg.split('.')[1].replaceAll('.docx','.pdf'): '-'}}</span>
+                                </el-form-item>
+                                <el-form-item
+                                    label="检测报告正式版下载："
+                                    v-if="props.row.state != '16'"
+                                >
+                                    <span
+                                        @click="Download(props.row.testFormalImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testFormalImg ? '(' +props.row.testFormalImg.split('(')[1]: '-'}}</span>
+                                </el-form-item>
+                            </el-form>
+                            <el-form
+                                label-position="left"
+                                inline
+                                class="demo-table-expand hide"
+                                v-if="sessionName == '编制人' || sessionName == '备案人'|| sessionName == '管理员'|| sessionName == '编印人'"
+                            >
+                                <!-- <el-form-item label="检测报告下载：">
+                                    <span
+                                        @click="Download(props.row.testImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testImg!=null ? props.row.testImg: '-'}}</span>
+                                </el-form-item> -->
+                                <el-form-item label="检测报告痕迹版下载：">
+                                    <span
+                                        @click="Download(props.row.testMarkImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testMarkImg!=null ? '(' +props.row.testMarkImg.split('(')[1]: '-'}}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告打印版下载：">
+                                    <span
+                                        @click="Download(props.row.testPrintImg!=null ? props.row.testPrintImg.split('.')[0] + '.pdf' : '')"
+                                        style="cursor:pointer;"
+                                    >{{props.row.testPrintImg!=null ? props.row.testPrintImg.split('.')[1].replaceAll('.docx','.pdf'): '-'}}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告正式版下载：">
+                                    <span
+                                        @click="Download(props.row.testFormalImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testFormalImg ? '(' +props.row.testFormalImg.split('(')[1]: '-'}}</span>
+                                </el-form-item>
+                            </el-form>
+                            <el-form
+                                label-position="left"
+                                inline
+                                class="demo-table-expand hides"
+                                v-if="props.row.multiplex!='4' && props.row.multiplex!='5'"
+                            >
+                                <div v-for="item in props.row.invoiceList">
+                                    <el-form-item label="发票号码：">
+                                        <div>{{ item.invoiceNumber }}</div>
+                                    </el-form-item>
+                                    <el-form-item label="开票金额：">
+                                        <span>{{ item.invoiceMoney || '-' }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="入账金额：">
+                                        <span>{{ item.arrivalMoney || '-' }}</span>
+                                    </el-form-item>
+
+                                    <el-form-item label="发票类型：">
+                                        <span>{{ item.billingType || '-' }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="开票时间：">
+                                        <span>{{ item.invoiceTime || '-' }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="入账时间：">
+                                        <span>{{ item.arrivalTime || '-' }}</span>
+                                    </el-form-item>
+                                </div>
+
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="档案编号"
+                        align="center"
+                    >
+                        <template slot-scope="scope">{{ scope.row.number }}</template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="monthCount"
+                        label="月编号"
+                        align="center"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        label="备案人信息"
+                        align="center"
+                    >
+                        <template slot-scope="scope">{{ scope.row.userMap.true_name }}</template>
+                    </el-table-column>
+                    <el-table-column
+                        label="行政区域"
+                        align="center"
+                    >
+                        <template slot-scope="scope">{{ scope.row.regionMap.name }}</template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="companyName"
+                        label="委托方名称"
+                        align="center"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="projectName"
+                        label="项目名称"
+                        align="center"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="projectName"
+                        label="原始记录"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <el-image
+                                style="width: 50px;height:50px;cursor: pointer;"
+                                fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg:'')"
+                                @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
+                                v-if="scope.row.originalRecordImg!=null"
+                            >
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="projectName"
+                        label="合同"
+                        align="center"
+                        v-if="sessionName == '备案人' || sessionName == '管理员'"
+                    >
+                        <template slot-scope="scope">
+                            <el-image
+                                style="width: 50px;height:50px;cursor: pointer;"
+                                fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg ? scope.row.contractImg:'')"
+                                @click.stop="pdfSrcShow(scope.row.contractFile)"
+                                v-if="scope.row.contractImg!=null"
+                            >
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="projectName"
+                        label="现场照片"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <el-image
+                                style="width: 50px;height:50px;cursor: pointer;"
+                                fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg ? scope.row.sceneImg:'')"
+                                @click.stop="imgShowList(scope.row.sceneImg)"
+                                v-if="scope.row.sceneImg"
+                            >
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="projectName"
+                        label="检测报告"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <span
+                                v-if="scope.row.testImg"
+                                @click.stop="docSrcShow(scope.row.testImg)"
+                                style="cursor: pointer;color: #2788EE"
+                            > {{ scope.row.testImg.split('.')[0] + '.pdf' }} </span>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="模板类型"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <span> {{scope.row.multiplex | typeFilter}} </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="roleName"
+                        label="当前节点"
+                        align="center"
+                    >
+                    </el-table-column>
+
+                    <el-table-column
+                        prop="textCompany"
+                        label="检测单位"
+                        align="center"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        label="项目状态"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <el-tag
+                                :type="scope.row.state | stateFilter(scope.row.state)"
+                                @click.stop="statusCondition(scope.row.id)"
+                                style="cursor: pointer;"
+                            >
+                                <span v-if="['32','33','26','27','28','29','31'].includes(scope.row.state)">{{ scope.row.state  | statusFilterNew}}</span>
+                                <span v-else>{{ scope.row.state  | statusFilter(scope.row.examineTaskMap!=null ? scope.row.examineTaskMap.role_id :"")}}</span>
+                            </el-tag>
+                            <div v-if="scope.row.state == '16'">{{scope.row.examineTime}}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="父项目信息"
+                        align="center"
+                    >
+                        <template slot-scope="scope">
+                            <span
+                                style="cursor: pointer;"
+                                @click="parentClick(scope.row.parentMap)"
+                            >{{scope.row.parentMap!=null ? scope.row.parentMap.number :'-'}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="handle"
+                        label="操作"
+                        align="center"
+                        width="180"
+                        v-if="sessionName != '对接人' && sessionName != '审核人'"
+                    >
+                        <template slot-scope="scope">
+                            <span
+                                class="edit"
+                                @click="edit(scope.row,scope.row.testImg)"
+                                v-if="sessionName == '编制人'  && scope.row.state == '4'&& isshow==false"
+                            >编制 |</span>
+                            <span
+                                class="submit"
+                                @click="duijie(scope.row.id)"
+                                v-if="sessionName == '编制人'&&scope.row.testImg!=null&& scope.row.state == '4' && scope.row.liableUserPhone!=null && scope.row.testTime!=null && scope.row.makeUserMap!=null && scope.row.contractNumber!=null && scope.row.originalRecordImg!=null && scope.row.sceneImg!=null"
+                            > 提交 |</span>
+                            <span
+                                class="audit"
+                                v-if="sessionName == '备案人' || sessionName == '管理员' || sessionName == '编制人'"
+                                @click="updateProject(scope.row)"
+                            >修改 |</span>
+                            <span
+                                class="delete"
+                                v-if="(sessionName == '备案人'&& sessionNamelevel == '1') || (sessionName == '管理员'&& sessionNamelevel == '1')"
+                                @click="removeProject(scope.row.id)"
+                            > 删除 |</span>
+                            <span
+                                class="submit"
+                                v-if="(sessionName == '备案人'||sessionName == '备案审核员') && sessionNamelevel == '1' && scope.row.multiplex!='4' && scope.row.multiplex!='5'"
+                                @click="entryProjectinfo(scope.row)"
+                            > 财务信息录入</span>
+                            <span
+                                class="submit"
+                                v-if="sessionName == '备案人' && sessionNamelevel != '1'"
+                                @click="applyFor(scope.row)"
+                            > 申请开票</span>
+                            <span
+                                class="audit"
+                                v-if="(sessionName == '备案人'&& scope.row.state == '16' && scope.row.regionMap.level == sessionNamelevel)"
+                                @click="reuseProject(scope.row)"
+                            > 复用</span>
+                            <div>
+                                <span
+                                    class="audit"
+                                    v-if="(sessionName == '编制人'&& scope.row.state == '16' && scope.row.multiplex!='4' && scope.row.multiplex!='5')"
+                                    @click="ChildReport(scope.row)"
+                                >子报告</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <!--  <div class="footer">
+                    <el-button size="mini" icon="el-icon-error">清理项目</el-button>
+                    <el-button size="mini" icon='el-icon-download'>下载查询结果</el-button>
+                </div> -->
+                <Page
+                    :total="total"
+                    :pageNum="current"
+                    :pageSize="size"
+                    @pageChange="pageChange"
+                />
+            </div>
+        </div>
+        <Addnew
+            v-if="addishow"
+            @goback="goback($event)"
+        />
+        <el-dialog
+            title="选择对接人"
+            :visible.sync="dialogVisible"
+            width="20%"
+        >
+            <el-select
+                style="width:100%"
+                v-model="duijierenID"
+                placeholder="选择对接人"
+            >
+                <el-option
+                    v-for="item in options"
+                    :key="item.id"
+                    @click.native="itemClick(item)"
+                    :label="item.trueName"
+                    :value="item.id"
+                >
+                </el-option>
+            </el-select>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button
+                    type="primary"
+                    @click="submitduijieren"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <div
+            v-show="pdfShow"
+            class="pdf"
+        >
+            <iframe
+                :src="pdfSrc"
+                frameborder="0"
+                class="iframes"
+            ></iframe>
+            <div
+                class="close"
+                @click.stop="pdfShow = false"
+            > × </div>
+        </div>
+        <div
+            v-show="imgShow"
+            class="imgShow"
+        >
+            <el-carousel
+                :autoplay="false"
+                height="1030px"
+            >
+                <el-carousel-item
+                    v-for="item in imgList"
+                    :key="item"
+                >
+                    <img :src="item">
+                </el-carousel-item>
+            </el-carousel>
+            <div
+                class="closer"
+                @click.stop="imgShow = false"
+            > × </div>
+        </div>
+        <el-dialog
+            title="修改信息"
+            :visible.sync="editDilong"
+            v-loading="loading"
+            @close='close'
+            top="5vh"
+            width="1080px"
+        >
+            <div class="editCont">
+                <el-form
+                    label-position="right"
+                    label-width="100px"
+                >
+                    <div class="cont_c_o">
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%;">
+                                <p>
+                                    <el-form-item label="项目名称：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.projectName"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%;">
+                                <p>
+                                    <el-form-item
+                                        label="报告档案编号："
+                                        class="item"
+                                    >
+                                        <!--  <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.number"
+                                        >
+                                        </el-input> -->
+                                        <span style="color:red">云雷检字[<el-date-picker
+                                                v-model="enquire.year"
+                                                type="year"
+                                                value-format="yyyy"
+                                                style="width:100px;"
+                                                placeholder="选择年"
+                                                :disabled="true"
+                                            >
+                                            </el-date-picker>]</span><el-input
+                                            v-model="enquire.contract"
+                                            :disabled="true"
+                                            style="width:80px;"
+                                        ></el-input>
+                                        <span style="color:red">第<el-input
+                                                v-model="enquire.Number"
+                                                :disabled="true"
+                                                @input="handleInput"
+                                                style="width:80px;"
+                                            ></el-input>号 <el-input
+                                                v-model="enquire.Number2"
+                                                style="width:60px;"
+                                            ></el-input></span>
+
+                                    </el-form-item>
+
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="委托方名称：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.companyName"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+                                <p>
+                                    <el-form-item label="存档日期：">
+                                        <el-date-picker
+                                            v-model="enquire.filingTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.contractMoney"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="支付金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.payMoney"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="类别：">
+                                        <el-select
+                                            style="width:100%"
+                                            v-model="enquire.type"
+                                            placeholder="请选择"
+                                        >
+                                            <el-option
+                                                label="民用"
+                                                value="民用"
+                                            ></el-option>
+                                            <el-option
+                                                label="危化"
+                                                value="危化"
+                                            ></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测单位：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.textCompany"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '编制人' || sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item
+                                        label="检测组长电话："
+                                        class="item"
+                                    >
+                                        <el-input
+                                            v-model="enquire.liableUserPhone"
+                                            placeholder="请输入内容"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测日期：">
+                                        <el-date-picker
+                                            v-model="enquire.testTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '编制人'"
+                            >
+                                <p>
+                                    <el-form-item label="检测人：">
+                                        <el-input
+                                            v-model="formInline.tester"
+                                            @click.native="appendClick"
+                                        ><template slot="append">添加 </template></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item
+                                        label="合同编号："
+                                        v-if="formInline.flag"
+                                    >
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.contractNumber"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item
+                                        label="合同编号："
+                                        v-else
+                                    >
+                                        <span style="color:red">云雷检字[<el-date-picker
+                                                v-model="formInline.year"
+                                                type="year"
+                                                value-format="yyyy"
+                                                style="width:100px;"
+                                                placeholder="选择年"
+                                            >
+                                            </el-date-picker>]</span><el-input
+                                            v-model="formInline.contract"
+                                            style="width:80px;"
+                                        ></el-input>
+                                        <span style="color:red">第<el-input
+                                                v-model="formInline.Number"
+                                                @input="handleInput"
+                                                style="width:80px;"
+                                            ></el-input>号</span>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+                                <p>
+                                    <el-form-item label="预拨金额：">
+                                        <el-input
+                                            v-model="Number(enquire.advanceMoney).toFixed(0)"
+                                            type="number"
+                                            disabled="true"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '编制人'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="甲方联系人：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.contactUser"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item
+                                        label="甲方联系电话："
+                                        class="item"
+                                    >
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.contactMobile"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+
+                            <div style="width: 50%">
+                                <!--  <p>
+                                    <el-form-item label="入账时间：">
+                                        <el-date-picker
+                                            v-model="enquire.arrivalTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p> -->
+
+                                <!--  <p>
+                                    <el-form-item label="欠款金额：">
+                                        <el-input
+                                            v-model="enquire.arrearsMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p> -->
+                                <p>
+                                    <el-form-item label="盖章时间：">
+                                        <el-date-picker
+                                            v-model="enquire.sealTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="预拨时间：">
+                                        <el-date-picker
+                                            v-model="enquire.advanceTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <!-- <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="入账金额：">
+                                        <el-input
+                                            v-model="enquire.arrivalMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div> -->
+
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+                                <!--  <p>
+                                    <el-form-item label="开票日期：">
+                                        <el-date-picker
+                                            v-model="enquire.invoiceTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p> -->
+                            </div>
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+
+                                <!-- <p>
+                                    <el-form-item label="发票号码：">
+                                        <el-input v-model="enquire.invoiceNumber"></el-input>
+                                    </el-form-item>
+                                </p> -->
+
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <!-- <p>
+                                    <el-form-item label="开票类型：">
+                                        <el-select
+                                            v-model="invoiceinfo.kaiTypevalue"
+                                            placeholder="请选择"
+                                            style="width:100%"
+                                            clearable
+                                        >
+                                            <el-option
+                                                v-for="(item,index) in kaiType"
+                                                :key="index"
+                                                :label="item"
+                                                :value="item"
+                                            >
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p> -->
+                            </div>
+                            <!-- <div style="width: 50%">
+                                <div>
+                                    <p>
+                                        <el-form-item label="开票金额：">
+                                            <el-input
+                                                v-model="enquire.invoiceMoney"
+                                                type="number"
+                                            ></el-input>
+                                        </el-form-item>
+                                    </p>
+
+                                </div>
+                            </div> -->
+
+                        </div>
+                        <div
+                            style="width: 50%"
+                            v-if="sessionName == '备案人'"
+                        >
+
+                        </div>
+                    </div>
+                    <div
+                        style="width: 50%"
+                        v-if="sessionNamelevel == '1' || sessionNamelevel == '2'"
+                    >
+                        <p>
+                            <el-form-item
+                                label="共同编制："
+                                prop="common"
+                            >
+                                <el-radio-group v-model="enquire.common">
+                                    <el-radio label="1">可以编制</el-radio>
+                                    <el-radio label="0">不可以编制</el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                        </p>
+
+                    </div>
+                    <div style="width: 100%;display: flex;">
+                        <div
+                            style="width: 30%"
+                            v-if="sessionName!= '编制人'"
+                        >
+                            <el-form-item label="合同附件：">
+                                <el-upload
+                                    action=""
+                                    ref="upload"
+                                    accept=".pdf,doc,docx"
+                                    :limit="10"
+                                    multiple
+                                    :http-request="uploadHttpRequest"
+                                    :file-list="fileListHE"
+                                >
+                                    <el-button
+                                        slot="trigger"
+                                        size="small"
+                                        type="primary"
+                                        plain
+                                    >点击上传文件</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+
+                        <div
+                            style="width: 30%"
+                            v-if="sessionName== '编制人'"
+                        >
+                            <el-form-item label="原始记录：">
+                                <el-upload
+                                    action=""
+                                    ref="upload"
+                                    accept=".pdf,doc"
+                                    :limit="10"
+                                    multiple
+                                    :http-request="uploadHttpRequestyuan"
+                                    :file-list="fileList"
+                                >
+                                    <el-button
+                                        slot="trigger"
+                                        size="small"
+                                        type="primary"
+                                        plain
+                                    >原始记录扫描件</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                        <div style="width: 30%">
+                            <el-form-item
+                                label="现场照片："
+                                v-if="sessionName == '编制人'"
+                            >
+                                <el-upload
+                                    action=""
+                                    ref="upload"
+                                    accept=".jpg,.jpeg,.png"
+                                    :limit="20"
+                                    multiple
+                                    :on-remove="handleRemove"
+                                    :http-request="uploadHttpimg"
+                                    :file-list="fileListPng"
+                                >
+                                    <el-button
+                                        slot="trigger"
+                                        size="small"
+                                        type="primary"
+                                        plain
+                                    >点击上传图片</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                        <div
+                            style="width: 30%"
+                            v-if="radio==2 || radio==3  || radio==5"
+                        >
+                            <el-form-item label="模板上传：">
+                                <el-upload
+                                    action=""
+                                    ref="upload"
+                                    accept=".doc,.docx,.pdf"
+                                    :limit="10"
+                                    multiple
+                                    :before-remove="beforeRemoveBan"
+                                    :http-request="uploadHttpdoc"
+                                    :file-list="fileListBan"
+                                >
+                                    <el-button
+                                        slot="trigger"
+                                        size="small"
+                                        type="primary"
+                                        plain
+                                    >非模板类报告上传</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                    </div>
+                    <div
+                        style="padding: 10px 20px;display: flex;width: 40%;justify-content: space-between;"
+                        v-if="sessionName == '编制人'"
+                    >
+                        <el-radio-group v-model="radio">
+                            <div v-if="radio == 0 || radio == 2">
+                                <el-radio :label="0">模板类报告</el-radio>
+                                <el-radio :label="2">非模板类报告</el-radio>
+                            </div>
+                            <div v-if="radio == 1 || radio == 3">
+                                <el-radio :label="1">模板类报告</el-radio>
+                                <el-radio :label="3">非模板类报告</el-radio>
+                            </div>
+                            <div v-if="radio == 4 || radio == 5">
+                                <el-radio :label="4">模板类报告</el-radio>
+                                <el-radio :label="5">非模板类报告</el-radio>
+                            </div>
+                        </el-radio-group>
+                        <el-checkbox v-model="enquire.urgent">加急</el-checkbox>
+                    </div>
+                </el-form>
+            </div>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button
+                    @click="editDilong = false"
+                    size="small"
+                >取 消</el-button>
+                <el-button
+                    type="primary"
+                    size="small"
+                    @click="editDilongclick(1)"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <Timeline
+            :dilongList="dilongList"
+            :TimeLineShow="TimeLineShow"
+            v-on:TimeLineShowlose="TimeLineShowlose"
+            v-on:docSrcShow="docSrcShow"
+        />
+        <ApplyFor
+            :dilongList1="dilongList1"
+            :TimeLineShow1="TimeLineShow1"
+            @TimeLineShowlose1="TimeLineShowlose1"
+        />
+        <ApplyForToo
+            :dilongList2="dilongList2"
+            :TimeLineShow2="TimeLineShow2"
+            @TimeLineShowlose2="TimeLineShowlose2"
+        />
+        <el-dialog
+            title="复用项目"
+            :visible.sync="reuse"
+            width="30%"
+        >
+            <el-form
+                :model="reuseform"
+                label-width="100px"
+            >
+                <el-form-item label="项目名称">
+                    <el-input v-model="reuseform.projectName"></el-input>
+                </el-form-item>
+                <el-form-item label="档案编号">
+                    <el-input v-model="reuseform.number"></el-input>
+                </el-form-item>
+            </el-form>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button @click="reuse = false">取 消</el-button>
+                <el-button
+                    type="primary"
+                    @click="multiplex"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="子报告"
+            :visible.sync="Childishow"
+            width="30%"
+        >
+            <el-form
+                :model="Childishowfrom"
+                label-width="100px"
+            >
+                <el-form-item label="项目名称">
+                    <el-input v-model="Childishowfrom.projectName"></el-input>
+                </el-form-item>
+                <el-form-item label="档案编号">
+                    <el-input v-model="Childishowfrom.number"></el-input>
+                </el-form-item>
+            </el-form>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button @click="Childishow = false">取 消</el-button>
+                <el-button
+                    type="primary"
+                    @click="childClick"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="提示"
+            :visible.sync="this.$store.state.app.refresh3"
+            width="25%"
+        >
+            <span style="font-size:15px">如果没有反应，请先</span><span style="color:red;font-size:15px">下载安装Office控件</span><span>，点此</span><span
+                class="fontsty"
+                @click="Dowkongjian"
+            >下载此控件</span>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button
+                    type="primary"
+                    size="small"
+                    @click="QueDing"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="检测人列表"
+            :visible.sync="dialogVisibleone"
+            width="30%"
+        >
+            <el-checkbox-group
+                v-model="checkList"
+                :max="3"
+            >
+                <el-checkbox
+                    :label="is.trueName"
+                    :key="is.id"
+                    v-for="is in bianzhiList"
+                >{{is.trueName}}</el-checkbox>
+            </el-checkbox-group>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button
+                    @click="dialogVisibleone = false"
+                    size="small"
+                >取 消</el-button>
+                <el-button
+                    type="primary"
+                    @click="bianzhiQue"
+                    size="small"
+                >确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="父项目详情"
+            :visible.sync="parentisshow"
+            v-loading="loading"
+            width="1080px"
+        >
+            <div class="editCont">
+                <el-form
+                    label-position="right"
+                    label-width="100px"
+                >
+                    <div class="cont_c_o">
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%;">
+                                <p>
+                                    <el-form-item label="项目名称：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.project_name"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%;">
+                                <p>
+                                    <el-form-item label="档案编号：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.number"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="委托方名称：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.company_name"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <!-- <div style="width: 50%">
+                                <p v-if="sessionName == '备案人' && sessionNamelevel == '1'">
+                                    <el-form-item label="存档日期:">
+                                        <el-date-picker
+                                            v-model="parentfrom.filing_time"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div> -->
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同编号：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.contract_number"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.contract_money"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="支付金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.pay_money"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="类别：">
+                                        <el-select
+                                            style="width:100%"
+                                            v-model="parentfrom.type"
+                                            placeholder="请选择"
+                                        >
+                                            <el-option
+                                                label="民用"
+                                                value="民用"
+                                            ></el-option>
+                                            <el-option
+                                                label="危化"
+                                                value="危化"
+                                            ></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测单位：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="parentfrom.text_company"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '编制人' || sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="负责人电话：">
+                                        <el-input
+                                            v-model="parentfrom.liable_user_phone"
+                                            placeholder="请输入内容"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测日期：">
+                                        <el-date-picker
+                                            v-model="parentfrom.test_time"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '编制人'"
+                            >
+                                <p>
+                                    <el-form-item label="检测人：">
+                                        <el-input
+                                            v-model="formInline.tester"
+                                            @click.native="appendClick"
+                                        ><template slot="append">添加 </template></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+
+                            <!--  <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+                                <p>
+                                    <el-form-item label="开票日期：">
+                                        <el-date-picker
+                                            v-model="parentfrom.invoice_time"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div> -->
+                        </div>
+
+                        <!--  <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="发票号码：">
+                                        <el-input v-model="parentfrom.invoice_number"></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="入账时间：">
+                                        <el-date-picker
+                                            v-model="parentfrom.advance_time"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="入账金额：">
+                                        <el-input
+                                            v-model="parentfrom.arrival_money"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="欠款金额：">
+                                        <el-input
+                                            v-model="parentfrom.arrears_money"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="预拨金额：">
+                                        <el-input
+                                            v-model="parentfrom.advance_money"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="预拨时间：">
+                                        <el-date-picker
+                                            v-model="parentfrom.advance_time"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+
+                            </div>
+                        </div>-->
+                    </div>
+
+                </el-form>
+            </div>
+        </el-dialog>
+        <el-dialog
+            title="财务信息录入"
+            :visible.sync="Projectinfo"
+            width="1080px"
+            custom-class='My_el-dialog'
+        >
+            <el-button
+                type="success"
+                icon="el-icon-plus"
+                size="mini"
+                style="margin:10px 0"
+                @click="AddClick()"
+            >新 增</el-button>
+            <el-table
+                :data="financialInfo"
+                style="width: 100%"
+                border
+            >
+                <el-table-column
+                    prop="invoiceNumber"
+                    label="发票号码"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="arrivalMoney"
+                    label="入账金额"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="invoiceTime"
+                    label="开票日期"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="arrivalTime"
+                    label="入账时间"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="billingType"
+                    label="开票类型"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="invoiceMoney"
+                    label="开票金额"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    label="状态"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <el-tag
+                            :type="scope.row.state | stateFilter(scope.row.state)"
+                            style="cursor: pointer;"
+                            @click.stop="invoiceexaminelistzuofei(scope.row)"
+                        >{{ scope.row.state  | applyForinfoFilterzuofei}}</el-tag>
+
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="操作"
+                    align="center"
+                    width="150"
+                >
+                    <template slot-scope="scope">
+                        <div style="display:flex;justify-content: space-around">
+                            <el-button
+                                size="mini"
+                                v-if="scope.row.state!='4'"
+                                @click="handleEdit(scope.row)"
+                            >修改</el-button>
+                            <el-button
+                                type="danger"
+                                size="mini"
+                                @click="removeClick(scope.row)"
+                            >删 除</el-button>
+                        </div>
+
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+        <el-dialog
+            title="开票信息"
+            :visible.sync="applyForinfo"
+            width="1080px"
+            custom-class='My_el-dialog'
+        >
+            <el-tabs
+                v-model="activeName"
+                type="card"
+                @tab-click="handleClick"
+            >
+                <el-tab-pane
+                    label="开票申请"
+                    name="first"
+                > <el-button
+                        type="success"
+                        icon="el-icon-plus"
+                        size="mini"
+                        style="margin:10px 0"
+                        @click="AddapplyForClick()"
+                    >申 请</el-button>
+                    <el-table
+                        :data="applyForInfoList"
+                        style="width: 100%"
+                        border
+                    >
+                        <el-table-column
+                            prop="party"
+                            label="开票方名称"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="dutyNumber"
+                            label="纳税人识别号"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="applicationAmount"
+                            label="开票金额"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="type"
+                            label="发票类型"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="reamark"
+                            label="备注信息"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            label="状态"
+                            align="center"
+                        >
+                            <template slot-scope="scope">
+                                <el-tag
+                                    :type="scope.row.state | stateFilter(scope.row.state)"
+                                    style="cursor: pointer;"
+                                    @click.stop="invoiceexaminelist(scope.row)"
+                                >{{ scope.row.state  | applyForinfoFilter}}</el-tag>
+
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            label="操作"
+                            align="center"
+                            width="150"
+                        >
+                            <template slot-scope="scope">
+                                <div style="display:flex;justify-content: space-around">
+                                    <el-button
+                                        size="mini"
+                                        v-if="scope.row.state!='4'"
+                                        @click="handleEditapplyForinfo(scope.row)"
+                                    >修改</el-button>
+                                    <el-button
+                                        type="danger"
+                                        size="mini"
+                                        v-if="scope.row.state!='4'"
+                                        @click="removeClickapplyForinfo(scope.row)"
+                                    >删 除</el-button>
+                                </div>
+
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-tab-pane>
+                <el-tab-pane
+                    label="开票记录"
+                    name="second"
+                ><!-- <el-button
+                        type="success"
+                        icon="el-icon-plus"
+                        size="mini"
+                        style="margin:10px 0"
+                        @click="AddClick()"
+                    >新 增</el-button> -->
+                    <el-table
+                        :data="financialInfo"
+                        style="width: 100%"
+                        border
+                    >
+                        <el-table-column
+                            prop="invoiceNumber"
+                            label="发票号码"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="arrivalMoney"
+                            label="入账金额"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="invoiceTime"
+                            label="开票日期"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="arrivalTime"
+                            label="入账时间"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="billingType"
+                            label="开票类型"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="invoiceMoney"
+                            label="开票金额"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            label="状态"
+                            align="center"
+                        >
+                            <template slot-scope="scope">
+                                <el-tag
+                                    :type="scope.row.state | stateFilter(scope.row.state)"
+                                    style="cursor: pointer;"
+                                    @click.stop="invoiceexaminelistzuofei(scope.row)"
+                                >{{ scope.row.state  | applyForinfoFilterzuofei}}</el-tag>
+
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            label="操作"
+                            align="center"
+                            width="150"
+                        >
+                            <template slot-scope="scope">
+                                <div style="display:flex;justify-content: space-around">
+                                    <!--   <el-button
+                                        size="mini"
+                                        v-if="scope.row.state == '3'"
+                                        @click="handleEdit(scope.row)"
+                                    >再次提交</el-button> -->
+                                    <el-button
+                                        type="danger"
+                                        size="mini"
+                                        v-if="scope.row.state == null"
+                                        @click="abolishClick(scope.row)"
+                                    >申请废除</el-button>
+                                </div>
+
+                            </template>
+                        </el-table-column>
+                    </el-table></el-tab-pane>
+            </el-tabs>
+
+        </el-dialog>
+        <el-dialog
+            :title="titleInfo"
+            :visible.sync="newProjectinfo"
+            width="1080px"
+        >
+            <div class="editCont">
+                <el-form
+                    label-position="right"
+                    label-width="100px"
+                >
+                    <div class="cont_c_o">
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item
+                                        label="发票号码："
+                                        style="width:100%"
+                                    >
+                                        <el-input v-model="invoiceinfo.invoiceNumber"></el-input>
+                                    </el-form-item>
+                                </p>
+
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="入账金额：">
+                                        <el-input
+                                            v-model="invoiceinfo.arrivalMoney"
+                                            type="number"
+                                        ></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+
+                        </div>
+                        <div
+                            style="width: 100%;display: flex;"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+                                <p>
+                                    <el-form-item label="开票日期：">
+                                        <el-date-picker
+                                            v-model="invoiceinfo.invoiceTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                            >
+
+                                <p>
+                                    <el-form-item label="入账时间：">
+                                        <el-date-picker
+                                            v-model="invoiceinfo.arrivalTime"
+                                            type="date"
+                                            placeholder="选择日期"
+                                            value-format="yyyy-MM-dd"
+                                            style="width:100%"
+                                        >
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%;display: flex"
+                            v-if="sessionName == '备案人' && sessionNamelevel == '1'"
+                        >
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="开票类型：">
+                                        <el-select
+                                            v-model="invoiceinfo.billingType"
+                                            placeholder="请选择"
+                                            style="width:100%"
+                                            clearable
+                                        >
+                                            <el-option
+                                                v-for="(item,index) in kaiType"
+                                                :key="index"
+                                                :label="item"
+                                                :value="item"
+                                            >
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <div>
+                                    <p>
+                                        <el-form-item label="开票金额：">
+                                            <el-input
+                                                v-model="invoiceinfo.invoiceMoney"
+                                                type="number"
+                                            ></el-input>
+                                        </el-form-item>
+                                    </p>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </el-form>
+            </div>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button
+                    size="small"
+                    @click="newProjectinfo = false"
+                >取 消</el-button>
+                <el-button
+                    type="primary"
+                    size="small"
+                    @click="ProjectinfoClick()"
+                >确 认</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            :title="titleApplyForInfo"
+            :visible.sync="newApplyForinfo"
+            width="750px"
+        >
+            <div class="editCont">
+                <table style="width:100%">
+                    <tr class="hang">
+                        <th class="tr">开票信息</th>
+                        <th class="tr">
+                            <div class="mytr">
+                                开票方名称
+
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                纳税人识别号
+                            </div>
+                        </th>
+                        <th class="trs">
+                            <div class="mytr">
+                                <el-input v-model="applyForinfoFrom.party"></el-input>
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                <el-input v-model="applyForinfoFrom.dutyNumber"></el-input>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">申请开票金额</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-input v-model="applyForinfoFrom.applicationAmount"></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">发票类型</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.billingType"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="(item,index) in kaiType"
+                                    :key="index"
+                                    :label="item"
+                                    :value="item"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang1"
+                        v-if="titleApplyForInfo == '申请开票'"
+                    >
+                        <th class="tr1">选择审核人</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.auditor"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="item in applyForinfoFromauditorList"
+                                    :key="item.id"
+                                    :label="item.userName"
+                                    :value="item.id"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;"
+                        >备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.reamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="invoiceRequestsaveOrUpdate()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="newApplyForinfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+
+        </el-dialog>
+        <el-dialog
+            :title="feichutitleApplyForInfo"
+            :visible.sync="feichuApplyForInfo"
+            width="750px"
+        >
+            <div class="editCont">
+                <table style="width:100%">
+                    <tr
+                        class="hang1"
+                        v-if="!applyForinfoFrom.flag"
+                    >
+                        <th
+                            class="tr1"
+                            style="line-height: 200px;"
+                        >财务信息</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <el-form
+                                label-position="right"
+                                label-width="100px"
+                            >
+                                <div class="cont_c_o">
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item
+                                                    label="发票号码："
+                                                    style="width:100%"
+                                                >
+                                                    <el-input
+                                                        v-model="invoiceinfo.invoiceNumber"
+                                                        disabled
+                                                    ></el-input>
+                                                </el-form-item>
+                                            </p>
+
+                                        </div>
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="入账金额：">
+                                                    <el-input
+                                                        v-model="invoiceinfo.arrivalMoney"
+                                                        type="number"
+                                                        disabled
+                                                    ></el-input>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票日期：">
+                                                    <el-date-picker
+                                                        disabled
+                                                        v-model="invoiceinfo.invoiceTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+
+                                            <p>
+                                                <el-form-item label="入账时间：">
+                                                    <el-date-picker
+                                                        disabled
+                                                        v-model="invoiceinfo.arrivalTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex">
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票类型：">
+                                                    <el-select
+                                                        v-model="invoiceinfo.billingType"
+                                                        placeholder="请选择"
+                                                        style="width:100%"
+                                                        clearable
+                                                        disabled
+                                                    >
+                                                        <el-option
+                                                            v-for="(item,index) in kaiType"
+                                                            :key="index"
+                                                            :label="item"
+                                                            :value="item"
+                                                        >
+                                                        </el-option>
+                                                    </el-select>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+                                            <div>
+                                                <p>
+                                                    <el-form-item label="开票金额：">
+                                                        <el-input
+                                                            v-model="invoiceinfo.invoiceMoney"
+                                                            type="number"
+                                                            disabled
+                                                        ></el-input>
+                                                    </el-form-item>
+                                                </p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-form>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">选择审核人</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.auditor"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="item in applyForinfoFromauditorList"
+                                    :key="item.id"
+                                    :label="item.userName"
+                                    :value="item.id"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;"
+                        >备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.reamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang"
+                        v-if="!applyForinfoFrom.flag"
+                    >
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="feichuProjectinfoClick()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="feichuApplyForInfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+
+        </el-dialog>
+
+    </div>
+</template>
+<script>
+// @ is an alias to /src
+import Page from "@/components/page/index.vue";
+import Addnew from "@/components/addnew/index.vue";
+import Timeline from "@/components/Timeline/Index.vue";
+import ApplyFor from "@/components/applyFor/index.vue";
+import ApplyForToo from "@/components/ApplyForToo/index.vue";
+import {
+    getProject,
+    selectDockUser,
+    selectProjectRecord,
+    getDockUser,
+    DockProject,
+    removeProject,
+    updateProject,
+    multiplex,
+    getDockUserbianzhi,
+    createSubproject,
+    getProjectInfoById,
+    ProjectinfoClick,
+    DeleteClick,
+    invoiceRequest,
+    invoiceRequestsaveOrUpdate,
+    handleEditapplyForinfo,
+    removeClickapplyForinfo,
+    invoiceexaminelist,
+    getinvoicecancel,
+    getprojectAlllist,
+    abolishinvoicecancel,
+} from "@/api/aviation";
+import * as WebCtrl from "@/assets/WebOffice.js"; //注意路径
+import {
+    initWebSocket,
+    websocketonopen,
+    websocketonerror,
+    websocketonmessage,
+    websocketsend,
+    websocketclose,
+} from "@/utils/websoket";
+import { settingGetByRegionId } from "@/api/config";
+export default {
+    name: "XXX",
+    data() {
+        return {
+            formInline: {
+                timeDate: [] /* 经手日期 */,
+                timeDateArrival: [] /* 经手日期 */,
+                appstatus: [
+                    {
+                        value: "4",
+                        label: "备案审核通过",
+                    },
+                    {
+                        value: "5",
+                        label: "备案申请不通过",
+                    },
+                    {
+                        value: "6",
+                        label: "州市对接中",
+                    },
+                    {
+                        value: "7",
+                        label: "州市已对接",
+                    },
+                    {
+                        value: "8",
+                        label: "州市对接不通过",
+                    },
+                    {
+                        value: "9",
+                        label: "州市审核中",
+                    },
+                    {
+                        value: "10",
+                        label: "州市审核通过",
+                    },
+                    {
+                        value: "11",
+                        label: "州市审核不通过",
+                    },
+                    {
+                        value: "12",
+                        label: "省级对接中",
+                    },
+                    {
+                        value: "13",
+                        label: "省级已对接",
+                    },
+                    {
+                        value: "14",
+                        label: "省级对接不通过",
+                    },
+                    {
+                        value: "15",
+                        label: "省级审核中",
+                    },
+                    {
+                        value: "16",
+                        label: "通过",
+                    },
+                    {
+                        value: "17",
+                        label: "省级审核不通过",
+                    },
+                    {
+                        value: "18",
+                        label: "市级退回",
+                    },
+                    {
+                        value: "19",
+                        label: "省级退回",
+                    },
+                    {
+                        value: "20",
+                        label: "被退回在编辑",
+                    },
+                    {
+                        value: "21",
+                        label: "被退回在编辑",
+                    },
+                    {
+                        value: "22",
+                        label: "报告已编制",
+                    },
+                    {
+                        value: "23",
+                        label: "已转交",
+                    },
+                    {
+                        value: "24",
+                        label: "被转交",
+                    },
+                    {
+                        value: "25",
+                        label: "编印撤回",
+                    },
+                ] /* 审批状态 */,
+                number: "" /* 档案编号 */,
+                regionName: "" /* 行政区划 */,
+                company_name: "" /* 单位名称*/,
+                project_name: "" /* 项目名称 */,
+                type: "" /* 类型 */,
+                textCompany: "" /* 检测单位 */,
+                tester: "" /* 检测人 */,
+                appstatusvalue: [],
+                SaveTime: [] /* 备案时间条件 */,
+                checked: false /* 省本级 */,
+                checked2: false /* 存在问题报告 */,
+                year: "" /* 合同编号年份 */,
+                contract: "" /* 合同编号前边 */,
+                Number: "" /*  合同编号后边*/,
+                flag: false /*状态区分 */,
+            },
+            tableData: [],
+            addishow: false,
+            total: 7,
+            current: 1,
+            size: 5,
+            spans: [],
+            dialogVisible: false /* 提交对接人弹框 */,
+            Visible: false /* 对接弹框 */,
+            reuse: false /* 复用弹框 */,
+            Childishow: false /* 子报告弹框 */,
+            reuseform: {
+                userid: "",
+                projectId: "",
+                number: "",
+                projectName: "",
+            },
+            Childishowfrom: {
+                userid: "",
+                projectId: "",
+                number: "",
+                projectName: "",
+            },
+            id: null /* 项目id */,
+            textarea: "",
+            options: [] /* 获得市对接人 */,
+            duijierenID: "",
+            optionsID: [] /* 获得审核人 */,
+            shenherenID: [],
+            projectId: "" /* 项目ID */,
+            itemList: [{ name: "审核人", input: "" }],
+            itemID: "",
+            input1: "",
+            input2: "",
+            input3: "",
+            inputone: "",
+            list: [] /* 备选人 */,
+            listone: [] /* 添加备选人 */,
+            listTwo: [] /* 省局备选人 */,
+            listThree: [] /* 省局备案人 */,
+            listyle: false,
+            pdfImg: "",
+            pdfShow: false,
+            imgShow: false,
+            pdfSrc: "",
+            imgList: [],
+            dilongList: "",
+            dilongList1: "",
+            dilongList2: "",
+            TimeLineShow: false,
+            TimeLineShow1: false,
+            TimeLineShow2: false,
+            isshow: false,
+            editDilong: false,
+            enquire: {
+                makeUserMap: "",
+                testTime: "",
+                sealTime: "",
+                urgent: false,
+                year: "" /* 合同编号年份 */,
+                contract: "" /* 合同编号前边 */,
+                Number: "" /*  合同编号后边*/,
+                Number2: "",
+            },
+            formData: new FormData(),
+            fileList: [] /* 原始记录 */,
+            fileListPng: [] /* 现场照片 */,
+            fileListPngList: [] /* 现场照片 */,
+            fileListBan: [] /* 模板上传 */,
+            fileListHE: [] /* 合同附件 */,
+            userid: "" /* userid */,
+            dialogVisibleone: false,
+            checkList: [],
+            bianzhiList: [],
+            trueNameId: [],
+            radio: 0,
+            loading: false,
+            roleIdMap: {
+                id: "",
+            },
+            parentisshow: false,
+            parentfrom: {},
+            kaiType: ["电子普通发票", "电子专用发票"],
+            Projectinfo: false,
+            applyForinfo: false,
+            applyForinfoFrom: {
+                party: null, // 开票方名称
+                dutyNumber: null, // 纳税人识别号
+                applicationAmount: null, //申请开票金额
+                billingType: null, // 发票类型
+                auditor: null, // 审核人,
+            },
+            applyForinfoFromauditorList: [], // 审核人列表
+            applyForinfoFromprojectId: null, // 项目id 存储
+            applyForinforowId: null, // 任务id
+            newApplyForinfo: false,
+            feichuApplyForInfo: false,
+            feichutitleApplyForInfo: "",
+            titleApplyForInfo: "",
+            newProjectinfo: false,
+            titleInfo: "",
+            invoiceinfo: {
+                billingType: "",
+                invoiceNumber: "",
+                invoiceMoney: "",
+                invoiceTime: "",
+                arrivalMoney: "",
+                arrivalTime: "",
+
+                id: "",
+            },
+            projectId: {
+                projectId: "",
+            },
+            financialInfo: [],
+            applyForInfoList: [],
+            activeName: "first",
+        };
+    },
+    components: {
+        Page,
+        Addnew,
+        Timeline,
+        ApplyFor,
+        ApplyForToo,
+    },
+    computed: {
+        sessionName() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.name;
+        },
+        sessionNameid() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.id;
+        },
+        sessionNamelevel() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.level;
+        },
+        regionId() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            return regionId.regionIdMap.id;
+        },
+        refresh2() {
+            return this.$store.state.app.refresh2;
+        },
+    },
+    watch: {
+        addishow(val) {
+            if (!val) {
+                this.getProject();
+            }
+        },
+        refresh2(newVal) {
+            console.log("已刷新");
+            if (newVal) {
+                location.reload();
+            }
+        },
+        "invoiceinfo.arrivalMoney"(val) {
+            if (val > this.enquire.contractMoney) {
+                this.open("入账金额不能大于合同金额");
+            }
+        },
+        "invoiceinfo.invoiceMoney"(val) {
+            if (val > this.enquire.contractMoney) {
+                this.open("开票金额不能大于合同金额");
+            }
+        },
+    },
+    created() {
+        this.formInline.number = this.$route.query.number;
+        this.formInline.number = this.$route.query.contractNumber;
+        this.getProject();
+
+        this.getDockUserbianzhi();
+        const regionId = JSON.parse(sessionStorage.getItem("records"));
+        initWebSocket(regionId.id);
+    },
+    destroyed() {
+        websocketclose();
+    },
+    methods: {
+        handleInput(val) {
+            // 使用正则表达式来匹配输入的内容
+            let reg = /^[0-9]{0,4}$/;
+            if (reg.test(val)) {
+                this.formInline.Number = val;
+            } else if (val == null || val == "") {
+                this.$message.error("编号不能为空");
+            } else {
+                this.$message.info("请输入四位数字");
+                this.formInline.Number = this.formInline.Number.slice(0, -1);
+            }
+        },
+        open(message) {
+            if (message == "入账金额不能大于合同金额") {
+                this.$alert(`<strong>${message}</strong>`, "提示", {
+                    dangerouslyUseHTMLString: true,
+                    type: "warning",
+                });
+                this.enquire.arrivalMoney = "";
+                this.invoiceinfo.arrivalMoney = "";
+            } else {
+                this.$alert(`<strong>${message}</strong>`, "提示", {
+                    dangerouslyUseHTMLString: true,
+                    type: "warning",
+                });
+                this.enquire.invoiceMoney = "";
+                this.invoiceinfo.invoiceMoney = "";
+            }
+        },
+        // 发票信息录入
+        entryProjectinfo(row) {
+            console.log(row);
+            this.enquire = row;
+            this.Projectinfo = true;
+            this.projectId.projectId = row.id;
+            this.financialInfo = row.invoiceList;
+        },
+        // 修改
+        handleEdit(row) {
+            this.newProjectinfo = true;
+            this.titleInfo = "修改财务信息";
+            this.invoiceinfo = row;
+        },
+        // 新增
+        AddClick() {
+            this.newProjectinfo = true;
+            this.titleInfo = "新增财务信息";
+            this.invoiceinfo = {};
+        },
+        // 删除
+        removeClick(row) {
+            this.$confirm("此操作将删除该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    DeleteClick({
+                        id: row.id,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message.success("删除成功");
+                            this.getProject(null, this.projectId.projectId);
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        // 发票修改确定
+        ProjectinfoClick() {
+            if (this.titleInfo == "新增财务信息") {
+                let parameter = {
+                    billingType: this.invoiceinfo.billingType,
+                    invoiceNumber: this.invoiceinfo.invoiceNumber,
+                    invoiceMoney: this.invoiceinfo.invoiceMoney,
+                    invoiceTime: this.invoiceinfo.invoiceTime,
+                    arrivalMoney: this.invoiceinfo.arrivalMoney,
+                    arrivalTime: this.invoiceinfo.arrivalTime,
+                    projectId: this.projectId.projectId,
+                };
+                ProjectinfoClick(parameter).then((res) => {
+                    if (res.data.state == 200) {
+                        this.newProjectinfo = false;
+                        this.$message.success("新增成功");
+                        this.getProject(null, this.projectId.projectId);
+                    } else {
+                        this.$message.error("新增失败");
+                    }
+                });
+            } else {
+                let parameter = {
+                    billingType: this.invoiceinfo.billingType,
+                    invoiceNumber: this.invoiceinfo.invoiceNumber,
+                    invoiceMoney: this.invoiceinfo.invoiceMoney,
+                    invoiceTime: this.invoiceinfo.invoiceTime,
+                    arrivalMoney: this.invoiceinfo.arrivalMoney,
+                    arrivalTime: this.invoiceinfo.arrivalTime,
+                    projectId: this.projectId.projectId,
+                    id: this.invoiceinfo.id,
+                };
+                ProjectinfoClick(parameter).then((res) => {
+                    if (res.data.state == 200) {
+                        this.newProjectinfo = false;
+                        this.$message.success("修改成功");
+                        this.getProject();
+                    } else {
+                        this.$message.error("修改失败");
+                    }
+                });
+            }
+        },
+        /* 父项目详情信息 */
+        parentClick(row) {
+            this.parentfrom = row;
+            this.parentisshow = true;
+        },
+        getDockUserbianzhi() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            getDockUserbianzhi({
+                regionId: params.regionIdMap.id,
+                type: "检测人",
+            }).then((res) => {
+                this.bianzhiList = res.data.records;
+            });
+        },
+        getProject(current, projectId) {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            let parameter2 = {};
+            let parameter = {
+                size: this.size,
+                current: current ? current : this.current,
+                number: this.formInline.number,
+                invoice: this.formInline.invoice,
+                company_name: this.formInline.company_name,
+                regionName: this.formInline.regionName,
+                type: this.formInline.type,
+                textCompany: this.formInline.textCompany,
+                project_name: this.formInline.project_name,
+                regionId: regionId.regionIdMap.id,
+                selectUserId: regionId.id,
+                roleId: regionId.roleIdMap.id,
+                trueName: this.formInline.trueName,
+            };
+            if (this.sessionName == "备案人" || this.sessionName == "编制人") {
+                Object.assign(parameter2, parameter);
+            } else if (this.sessionName == "管理员") {
+                Object.assign(parameter2, parameter);
+            } else if (this.sessionName == "备案审核员") {
+                parameter.roleId = "";
+            } else {
+                parameter.aboutUser = regionId.id;
+                parameter.roleId = regionId.roleIdMap.id;
+            }
+            parameter.projectState = this.formInline.appstatusvalue.toString();
+            if (this.formInline.timeDate) {
+                parameter.startTime = this.formInline.timeDate[0];
+                parameter.endTime = this.formInline.timeDate[1];
+            }
+            if (this.formInline.timeDateArrival) {
+                parameter.startArrivalTime = this.formInline.timeDateArrival[0];
+                parameter.endArrivalTime = this.formInline.timeDateArrival[1];
+            }
+            if (this.formInline.SaveTime) {
+                parameter.startSaveTime = this.formInline.SaveTime[0];
+                parameter.endSaveTime = this.formInline.SaveTime[1];
+            }
+            if (this.formInline.checked) {
+                parameter.justProvince = 1;
+            }
+            if (this.formInline.checked2) {
+                parameter.problem = 1;
+            }
+            if (
+                this.sessionName == "审核人" ||
+                this.sessionName == "终审人" ||
+                this.sessionName == "对接人" ||
+                this.sessionName == "编印人"
+            ) {
+                parameter.aboutUser = regionId.id;
+            }
+            getProject(parameter).then((res) => {
+                this.tableData = res.data.records;
+                this.total = res.data.total;
+                res.data.records.map((item) => {
+                    if (item.id == projectId) {
+                        this.financialInfo = item.invoiceList;
+                    }
+                });
+            });
+        },
+        handleClick() {
+            if (this.activeName != "first") {
+                getprojectAlllist({
+                    projectId: this.applyForinfoFromprojectId,
+                }).then((res) => {
+                    this.financialInfo = res.data.records;
+                });
+            }
+        },
+        /* 废除申请 */
+        abolishClick(row) {
+            this.invoiceinfo = row;
+            this.feichuApplyForInfo = true;
+            this.feichutitleApplyForInfo = "申请废除";
+        },
+        /* 废除确定 */
+        feichuProjectinfoClick() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            if (
+                this.applyForinfoFrom.auditor == null ||
+                this.applyForinfoFrom.auditor == ""
+            ) {
+                return this.$message.warning("审核人不能为空");
+            } else if (this.applyForinfoFrom.reamark == null) {
+                return this.$message.warning("备注不能为空");
+            } else {
+                abolishinvoicecancel({
+                    id: this.invoiceinfo.id,
+                    remarks: this.applyForinfoFrom.reamark,
+                    reviewer: this.applyForinfoFrom.auditor,
+                    userid: regionId.id,
+                    roleId: regionId.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.state == 200) {
+                        this.$message.success("保存成功");
+                        this.feichuApplyForInfo = false;
+                        this.handleClick();
+                    }
+                });
+            }
+        },
+        appendClick() {
+            this.dialogVisibleone = true;
+        },
+        bianzhiQue() {
+            if (this.checkList.length < 1) {
+                this.$message.error("用户不能为空");
+            } else if (this.checkList.length < 2) {
+                this.$message.error("检测人员至少勾选2个");
+            } else {
+                this.formInline.tester = this.checkList.toString();
+                this.dialogVisibleone = false;
+            }
+        },
+        uploadHttpRequest(data) {
+            const fileType =
+                data.file.name.split(".")[data.file.name.split(".").length - 1];
+            const extension =
+                fileType.toLowerCase() == "doc" ||
+                fileType.toLowerCase() == "pdf" ||
+                fileType.toLowerCase() == "docx";
+            if (!extension) {
+                this.$message.error("合同附件必须为doc,docx,pdf格式");
+                this.fileListHE = [];
+            } else {
+                if (this.fileListHE < 1) {
+                    this.fileListHE.push({ name: data.file.name });
+                } else {
+                    this.fileListHE = [];
+                    this.fileListHE.push({ name: data.file.name });
+                }
+                if (this.formData.has("file") == false) {
+                    this.formData.append("file", data.file);
+                } else {
+                    this.formData.set("file", data.file);
+                }
+            }
+        },
+        uploadHttpRequestyuan(data) {
+            if (this.fileList < 1) {
+                this.fileList.push({ name: data.file.name });
+            } else {
+                this.fileList = [];
+                this.fileList.push({ name: data.file.name });
+            }
+            if (this.formData.has("originalFile") == false) {
+                this.formData.append("originalFile", data.file);
+            } else {
+                this.formData.set("originalFile", data.file);
+            }
+        },
+        uploadHttpimg(data) {
+            this.fileListPng.push(data.file);
+            this.formData.append("sceneFile", data.file);
+        },
+        handleRemove(file, fileList) {
+            /*   console.log(file, fileList) */
+
+            this.formData = new FormData();
+            this.fileListPng = fileList;
+            fileList.map((item) => {
+                this.formData.append("sceneFile", item);
+            });
+        },
+        uploadHttpdoc(data) {
+            if (this.fileListBan < 1) {
+                this.fileListBan.push({ name: data.file.name });
+            } else {
+                this.fileListBan = [];
+                this.fileListBan.push({ name: data.file.name });
+            }
+            if (this.formData.has("testFile") == false) {
+                this.formData.append("testFile", data.file);
+            } else {
+                this.formData.set("testFile", data.file);
+            }
+        },
+        beforeRemoveBan(data) {
+            this.fileListBan.splice(data.file, 1);
+        },
+        imgCom(row) {
+            let arr = row.split(",");
+            if (arr.length > 0) {
+                return arr[0];
+            } else {
+                return arr;
+            }
+        },
+        addClick() {
+            this.addishow = true;
+        },
+        goback(e) {
+            this.addishow = e;
+        },
+        onSubmit() {
+            this.getProject(1);
+        },
+        pageChange(page) {
+            this.size = page._pageSize;
+            this.current = page._currentPage;
+            this.getProject();
+        },
+        /* 编制 */
+        async edit(row) {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            let testImg = await this.getProjectInfoById(row.id);
+            WebCtrl.ShowPage(
+                row.id,
+                records.id,
+                testImg,
+                1,
+                records.id,
+                null,
+                null,
+                records.roleIdMap.id,
+                null,
+                null,
+                null,
+                row.multiplex
+            );
+            setTimeout(() => {
+                this.$store.commit("app/REFRESH3", true);
+            }, 5000);
+        },
+        async getProjectInfoById(id) {
+            return new Promise((resolve, reject) => {
+                getProjectInfoById({
+                    projectId: id,
+                }).then((res) => {
+                    resolve(res.data.records.testImg);
+                });
+            });
+        },
+        QueDing() {
+            this.$store.commit("app/REFRESH3", false);
+        },
+        async duijie(id) {
+            this.projectId = id;
+            this.dialogVisible = true;
+            this.options = [];
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            let regionId = await this.settingGetByRegionId(
+                records.regionIdMap.id
+            );
+            if (regionId != null) {
+                /* 获取省级审核人 */
+                getDockUser({
+                    regionId: 2841,
+                    type: "对接人",
+                }).then((res) => {
+                    res.data.records.map((item) => {
+                        this.options.push(item);
+                    });
+                });
+            } else {
+                /* 获取市局审核人 */
+                getDockUser({
+                    regionId: records.regionIdMap.id,
+                    type: "对接人",
+                }).then((res) => {
+                    res.data.records.map((item) => {
+                        this.options.push(item);
+                    });
+                });
+            }
+        },
+        async settingGetByRegionId(regionId) {
+            return new Promise((resolve, reject) => {
+                settingGetByRegionId({
+                    regionId: regionId,
+                }).then((res) => {
+                    resolve(res.data.records);
+                });
+            });
+        },
+        itemClick(item) {
+            this.roleIdMap.id = item.roleIdMap.id;
+        },
+        /* 提交确认 */
+        submitduijieren() {
+            selectDockUser({
+                projectId: this.projectId,
+                DockUserId: this.duijierenID /* 对接人用户Id */,
+                roleId: this.roleIdMap.id,
+            }).then((res) => {
+                if (res.data.stateStr == "成功" && res.data.state == 200) {
+                    this.$message.success("提交对接人" + res.data.stateStr);
+                    this.isshow = true;
+                    this.dialogVisible = false;
+                    this.getProject();
+                }
+            });
+        },
+        /* 合同 */
+        pdfSrcShow(file) {
+            file = file.replaceAll("docx", "pdf");
+            file = file.replaceAll("doc", "pdf");
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/Contract/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /* 原始记录 */
+        pdfSrcShow2(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /* 现场照片 */
+        docSrcShow(file) {
+            let arr;
+            if (file.split(".")[1] == "doc") {
+                arr = file.replaceAll("doc", "pdf");
+            } else {
+                arr = file.replaceAll("docx", "pdf");
+            }
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                arr;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        Download(testImg) {
+            window.open(
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                    testImg
+            );
+        },
+        Dowkongjian() {
+            window.open("http://140.249.209.176:9080/fanglei/WebOffice.zip");
+        },
+        imgShowList(row) {
+            let arr = row.split(",");
+            this.imgList = arr
+                .map((item) => {
+                    return (
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                        item
+                    );
+                })
+                .join(",")
+                .split(",");
+            setTimeout(() => {
+                this.imgShow = true;
+            }, 1500);
+        },
+        // 项目状态
+        async statusCondition(row) {
+            const { data: res } = await selectProjectRecord({
+                id: row,
+            });
+            if (res.state == 200 && res.stateStr == "成功") {
+                this.dilongList = res.records;
+                this.TimeLineShow = true;
+            }
+        },
+        /* 删除项目 */
+        removeProject(id) {
+            this.$confirm("此操作将删除该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    removeProject({ projectId: id }).then((res) => {
+                        this.$message({
+                            type: "success",
+                            message: "删除成功!",
+                        });
+                        this.getProject();
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        /* 修改项目 */
+        updateProject(row) {
+            if (this.fileList.length < 1 && row.originalRecordPath != null) {
+                this.fileList.push({ name: row.originalRecordPath });
+            } else if (row.originalRecordPath == null) {
+                this.fileList = [];
+            } else {
+                this.fileList = this.fileList;
+            }
+            if (row.sceneImg != null) {
+                var enclo = row.sceneImg.split(",");
+                // 将文件转为blob对象，再转为file对象
+                enclo.forEach((item) => {
+                    if (item) {
+                        var name =
+                            "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                            item;
+                        this.changeBlob(name).then((res) => {
+                            var na = name.split("/");
+                            const files = new File([res], na[na.length - 1], {
+                                type: res.type,
+                            });
+                            // var Blob = window.URL.createObjectURL(res);
+                            this.fileListPng.push(files);
+                        });
+                    }
+                });
+            }
+            if (this.fileListHE.length < 1 && row.contractFile != null) {
+                this.fileListHE.push({ name: row.contractFile });
+            } else if (row.contractFile == null) {
+                this.fileListHE = [];
+            } else {
+                this.fileListHE = this.fileListHE;
+            }
+            if (this.fileListBan.length < 1 && row.testImg != null) {
+                this.fileListBan.push({ name: row.testImg });
+            } else if (row.testImg == null) {
+                this.fileListBan = [];
+            } else {
+                this.fileListBan = this.fileListBan;
+            }
+            this.userid = row.userMap.id;
+            this.editDilong = true;
+            this.enquire = row;
+            this.kaiTypevalue = row.billingType;
+            this.radio = Number(row.multiplex);
+            this.checkList = [];
+            for (let j = 0; j < this.bianzhiList.length; j++) {
+                const ele = this.bianzhiList[j];
+                if (
+                    row.makeUserMap != null &&
+                    ele.trueName == row.makeUserMap.true_name
+                ) {
+                    this.checkList.push(row.makeUserMap.true_name);
+                } else if (
+                    row.makeUserMap1 != null &&
+                    ele.trueName == row.makeUserMap1.true_name
+                ) {
+                    this.checkList.push(row.makeUserMap1.true_name);
+                } else if (
+                    row.makeUserMap2 != null &&
+                    ele.trueName == row.makeUserMap2.true_name
+                ) {
+                    this.checkList.push(row.makeUserMap2.true_name);
+                }
+            }
+            const arr = this.checkList;
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i] == "") {
+                    arr.splice(i, 1);
+                    i = i - 1;
+                }
+            }
+            this.checkList = arr;
+
+            if (row.makeUserMap == null) {
+                this.formInline.tester = "";
+            } else {
+                this.formInline.tester =
+                    (row.makeUserMap != null ? row.makeUserMap.true_name : "") +
+                    "," +
+                    (row.makeUserMap1 != null
+                        ? row.makeUserMap1.true_name
+                        : "") +
+                    "," +
+                    (row.makeUserMap2 != null
+                        ? row.makeUserMap2.true_name
+                        : "");
+            }
+
+            this.enquire.urgent = row.urgent == "1" ? true : false;
+            /* 处理合同编号 */
+            const [contract, year, Number_] =
+                this.enquire.contractNumber.split(/[\[\]]/);
+            if (year && Number_) {
+                this.formInline.year = year;
+                this.enquire.year = year;
+
+                if (Number_.includes("第") && Number_.includes("号")) {
+                    this.formInline.contract = Number_.split("第")[0];
+                    this.enquire.contract = Number_.split("第")[0];
+                    this.formInline.Number =
+                        Number_.split("第")[1].split("号")[0];
+                    this.enquire.Number = Number_.split("第")[1].split("号")[0];
+                }
+                this.formInline.flag = false;
+            } else {
+                this.formInline.flag = true;
+                this.formInline.year = "";
+                this.formInline.contract = "";
+                this.formInline.Number = "";
+            }
+        },
+        // 地址转文件
+        changeBlob(url) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", url, true);
+                xhr.responseType = "blob";
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(xhr.response);
+                    }
+                };
+                xhr.send();
+            });
+        },
+        /* 复用项目 */
+        reuseProject(row) {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            this.reuse = true;
+            this.reuseform.projectName = row.projectName;
+            this.reuseform.userid = params.id;
+            this.reuseform.projectId = row.id;
+            this.reuseform.number = row.number;
+        },
+        /* 子报告 */
+        ChildReport(row) {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            this.Childishow = true;
+            this.Childishowfrom.projectName = row.projectName;
+            this.Childishowfrom.userid = params.id;
+            this.Childishowfrom.projectId = row.id;
+            this.Childishowfrom.number = row.number;
+        },
+        /* 复用项目确认 */
+        multiplex() {
+            if (this.reuseform.projectId == "") {
+                this.$message("项目编号不能为空");
+            } else {
+                multiplex({
+                    userid: this.reuseform.userid,
+                    projectName: this.reuseform.projectName,
+                    projectId: this.reuseform.projectId,
+                    number: this.reuseform.number,
+                }).then((res) => {
+                    if (res.data.state == 200) {
+                        this.$message.success("复用成功");
+                        this.reuse = false;
+                        this.getProject();
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                });
+            }
+        },
+        /* 子报告项目确认 */
+        childClick() {
+            createSubproject({
+                userid: this.Childishowfrom.userid,
+                projectId: this.Childishowfrom.projectId,
+                number: this.Childishowfrom.number,
+                projectName: this.Childishowfrom.projectName,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message.success("创建子项目成功");
+                    this.Childishow = false;
+                    this.getProject();
+                } else {
+                    this.$message.error(res.data.message);
+                }
+            });
+        },
+        editDilongclick(re) {
+            if (this.sessionName == "备案人") {
+                this.trueNameId = [];
+                this.checkList.map((it) => {
+                    this.bianzhiList.map((item) => {
+                        if (it == item.trueName) {
+                            this.trueNameId.push(item.id);
+                        }
+                    });
+                });
+                if (
+                    this.sessionNamelevel == "1" &&
+                    this.formData.has("filingTime") == false
+                ) {
+                    if (this.enquire.filingTime != null) {
+                        this.formData.append(
+                            "filingTime",
+                            this.enquire.filingTime
+                        );
+                    }
+                } else {
+                    if (this.enquire.filingTime != null) {
+                        this.formData.set(
+                            "filingTime",
+                            this.enquire.filingTime
+                        );
+                    }
+                }
+                if (this.userid != null) {
+                    this.formData.set("userid", this.userid);
+                }
+                if (this.enquire.advanceMoney != null) {
+                    this.formData.set(
+                        "advanceMoney",
+                        this.enquire.advanceMoney
+                    );
+                }
+                if (this.enquire.invoiceMoney != null) {
+                    this.formData.set(
+                        "invoiceMoney",
+                        this.enquire.invoiceMoney
+                    );
+                }
+                if (this.enquire.number != null) {
+                   /*  this.formData.set("number", this.enquire.number); */
+                    this.formData.set(
+                            "number",
+                            `云雷检字[${this.enquire.year}]${this.enquire.contract}第${this.enquire.Number}号${this.enquire.Number2}`
+                    );
+                }
+                if (this.enquire.invoice != null) {
+                    this.formData.set("invoice", this.enquire.invoice);
+                }
+                if (this.enquire.companyName != null) {
+                    this.formData.set("companyName", this.enquire.companyName);
+                }
+                if (this.enquire.projectName != null) {
+                    this.formData.set("projectName", this.enquire.projectName);
+                }
+                if (this.enquire.contractMoney != null) {
+                    this.formData.set(
+                        "contractMoney",
+                        this.enquire.contractMoney
+                    );
+                }
+                if (this.enquire.payMoney != null) {
+                    this.formData.set("payMoney", this.enquire.payMoney);
+                }
+                if (this.enquire.type != null) {
+                    this.formData.set("type", this.enquire.type);
+                }
+                if (this.enquire.textCompany != null) {
+                    this.formData.set("textCompany", this.enquire.textCompany);
+                }
+                if (this.enquire.remark != null) {
+                    this.formData.set("remark", this.enquire.remark);
+                }
+                if (this.enquire.contractTime != null) {
+                    this.formData.set(
+                        "contractTime",
+                        this.enquire.contractTime
+                    );
+                }
+                if (this.enquire.invoiceTime != null) {
+                    this.formData.set("invoiceTime", this.enquire.invoiceTime);
+                }
+                if (this.enquire.invoiceNumber != null) {
+                    this.formData.set(
+                        "invoiceNumber",
+                        this.enquire.invoiceNumber
+                    );
+                }
+                if (this.enquire.arrivalTime != null) {
+                    this.formData.set("arrivalTime", this.enquire.arrivalTime);
+                }
+                if (this.enquire.arrivalMoney != null) {
+                    this.formData.set(
+                        "arrivalMoney",
+                        this.enquire.arrivalMoney
+                    );
+                }
+                if (this.enquire.arrearsMoney != null) {
+                    this.formData.set(
+                        "arrearsMoney",
+                        this.enquire.arrearsMoney
+                    );
+                }
+                if (this.enquire.advanceTime != null) {
+                    this.formData.set("advanceTime", this.enquire.advanceTime);
+                }
+                if (this.enquire.liableUserPhone != null) {
+                    this.formData.set(
+                        "liableUserPhone",
+                        this.enquire.liableUserPhone
+                    );
+                }
+                if (this.enquire.testTime != null) {
+                    this.formData.set("testTime", this.enquire.testTime);
+                }
+                if (this.enquire.contractNumber != null) {
+                    if (
+                        this.formInline.year == null ||
+                        this.formInline.year == ""
+                    ) {
+                        this.$message.info("合同编号年份不能为空");
+                        return;
+                    } else if (
+                        this.formInline.contract == null ||
+                        this.formInline.contract == ""
+                    ) {
+                        this.$message.info("合同编号不能为空");
+                        return;
+                    } else if (
+                        this.formInline.Number == null ||
+                        this.formInline.Number == ""
+                    ) {
+                        this.$message.info("合同编号不能为空");
+                        return;
+                    } else {
+                        this.formData.set(
+                            "contractNumber",
+                            `云雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                        );
+                    }
+                }
+
+                if (this.enquire.id != null) {
+                    this.formData.set("id", this.enquire.id);
+                }
+                if (this.enquire.common != null) {
+                    this.formData.set("common", this.enquire.common);
+                }
+                if (this.formData.has("sealTime" == false)) {
+                    if (this.enquire.sealTime != null) {
+                        this.formData.append("sealTime", this.enquire.sealTime);
+                    }
+                } else {
+                    if (this.enquire.sealTime != null) {
+                        this.formData.set("sealTime", this.enquire.sealTime);
+                    }
+                }
+                if (this.formData.has("BillingType" == false)) {
+                    if (this.kaiTypevalue != null) {
+                        this.formData.append("BillingType", this.kaiTypevalue);
+                    }
+                } else {
+                    if (this.kaiTypevalue != null) {
+                        this.formData.set("BillingType", this.kaiTypevalue);
+                    }
+                }
+                this.loading = true;
+                if (re == 1) {
+                    updateProject(this.formData).then((res) => {
+                        if (
+                            res.data.state == 200 &&
+                            res.data.stateStr == "成功"
+                        ) {
+                            this.$message.success("修改成功");
+                            this.getProject();
+                            this.loading = false;
+                            this.editDilong = false;
+                            this.close();
+                        } else {
+                            this.$message.error("修改失败");
+                            this.loading = false;
+                            this.editDilong = false;
+                        }
+                    });
+                } else {
+                    this.editDilong = false;
+                    this.loading = false;
+                }
+            } else if (this.sessionName == "编制人") {
+                if (
+                    this.formInline.tester == undefined ||
+                    this.formInline.tester == ""
+                ) {
+                    this.$message.error("检测人不能为空");
+                } else if (
+                    this.enquire.liableUserPhone == "" ||
+                    this.enquire.liableUserPhone == null
+                ) {
+                    this.$message.error("负责人电话不能为空");
+                } else if (
+                    this.enquire.testTime == "" ||
+                    this.enquire.testTime == "null"
+                ) {
+                    this.$message.error("检测日期不能为空");
+                } else if (this.fileList.length == 0) {
+                    this.$message.error("原始记录不能为空");
+                } else if (this.fileListPng.length == 0) {
+                    this.$message.error("现场照片不能为空");
+                } else if (
+                    this.enquire.contactMobile == "" ||
+                    this.enquire.contactMobile == null
+                ) {
+                    this.$message.error("联系电话不能为空");
+                } else if (
+                    this.enquire.contactUser == "" ||
+                    this.enquire.contactUser == null
+                ) {
+                    this.$message.error("联系人不能为空");
+                } else if (
+                    (this.radio == 2 && this.fileListBan.length == 0) ||
+                    (this.radio == 3 && this.fileListBan.length == 0) ||
+                    (this.radio == 5 && this.fileListBan.length == 0)
+                ) {
+                    this.$message.error("非模板报告不能为空");
+                } else {
+                    this.trueNameId = [];
+                    this.checkList.map((it) => {
+                        this.bianzhiList.map((item) => {
+                            if (it == item.trueName) {
+                                this.trueNameId.push(item.id);
+                            }
+                        });
+                    });
+                    if (
+                        this.radio == 0 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 0); /* 正常模板 */
+                    } else if (
+                        this.radio == 2 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 2); /* 非模板项目 */
+                    } else if (
+                        this.radio == 0 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 0); /* 正常模板 */
+                    } else if (
+                        this.radio == 2 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 2); /* 非模板项目 */
+                    }
+                    if (
+                        this.radio == 1 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 1); /* 正常模板 */
+                    } else if (
+                        this.radio == 3 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 3); /* 非模板项目 */
+                    } else if (
+                        this.radio == 1 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 1); /* 正常模板 */
+                    } else if (
+                        this.radio == 3 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 3); /* 非模板项目 */
+                    }
+                    if (
+                        this.radio == 4 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 4); /* 正常模板 */
+                    } else if (
+                        this.radio == 5 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == false
+                    ) {
+                        this.formData.append("multiplex", 5); /* 非模板项目 */
+                    } else if (
+                        this.radio == 4 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 4); /* 正常模板 */
+                    } else if (
+                        this.radio == 5 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("multiplex") == true
+                    ) {
+                        this.formData.set("multiplex", 5); /* 非模板项目 */
+                    }
+                    if (
+                        this.sessionName == "编制人" &&
+                        this.formData.has("urgent") == false
+                    ) {
+                        this.formData.append(
+                            "urgent",
+                            this.enquire.urgent ? 1 : 0
+                        );
+                    } else {
+                        this.formData.set(
+                            "urgent",
+                            this.enquire.urgent ? 1 : 0
+                        );
+                    }
+                    if (this.userid != null) {
+                        this.formData.set("userid", this.userid);
+                    }
+                    if (this.enquire.number != null) {
+                        this.formData.set("number", this.enquire.number);
+                    }
+                    if (this.enquire.invoice != null) {
+                        this.formData.set("invoice", this.enquire.invoice);
+                    }
+                    if (this.enquire.companyName != null) {
+                        this.formData.set(
+                            "companyName",
+                            this.enquire.companyName
+                        );
+                    }
+                    if (this.enquire.projectName != null) {
+                        this.formData.set(
+                            "projectName",
+                            this.enquire.projectName
+                        );
+                    }
+                    if (this.enquire.contractMoney != null) {
+                        this.formData.set(
+                            "contractMoney",
+                            this.enquire.contractMoney
+                        );
+                    }
+                    if (this.enquire.payMoney != null) {
+                        this.formData.set("payMoney", this.enquire.payMoney);
+                    }
+                    if (this.enquire.type != null) {
+                        this.formData.set("type", this.enquire.type);
+                    }
+                    if (this.enquire.textCompany != null) {
+                        this.formData.set(
+                            "textCompany",
+                            this.enquire.textCompany
+                        );
+                    }
+                    if (this.enquire.remark != null) {
+                        this.formData.set("remark", this.enquire.remark);
+                    }
+                    if (this.enquire.contractTime != null) {
+                        this.formData.set(
+                            "contractTime",
+                            this.enquire.contractTime
+                        );
+                    }
+                    if (this.formInline.flag) {
+                        if (this.enquire.contractNumber != null) {
+                            this.formData.set(
+                                "contractNumber",
+                                this.enquire.contractNumber
+                            );
+                        }
+                    } else {
+                        this.formData.set(
+                            "contractNumber",
+                            `云雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                        );
+                    }
+
+                    if (this.enquire.liableUserPhone != null) {
+                        this.formData.set(
+                            "liableUserPhone",
+                            this.enquire.liableUserPhone
+                        );
+                    }
+                    if (this.enquire.testTime != null) {
+                        this.formData.set("testTime", this.enquire.testTime);
+                    }
+                    if (this.enquire.id != null) {
+                        this.formData.set("id", this.enquire.id);
+                    }
+                    if (this.enquire.common != null) {
+                        this.formData.set("common", this.enquire.common);
+                    }
+                    if (
+                        this.sessionName == "编制人" &&
+                        this.formData.has("contactUser" == false) &&
+                        this.enquire.contactUser != null
+                    ) {
+                        this.formData.append(
+                            "contactUser",
+                            this.enquire.contactUser
+                        );
+                    } else {
+                        this.formData.set(
+                            "contactUser",
+                            this.enquire.contactUser
+                        );
+                    }
+                    if (
+                        this.sessionName == "编制人" &&
+                        this.formData.has("contactMobile" == false) &&
+                        this.enquire.contactMobile != null
+                    ) {
+                        this.formData.append(
+                            "contactMobile",
+                            this.enquire.contactMobile
+                        );
+                    } else {
+                        this.formData.set(
+                            "contactMobile",
+                            this.enquire.contactMobile
+                        );
+                    }
+                    if (
+                        this.checkList.length == 1 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("makeUserId" == false)
+                    ) {
+                        this.formData.append(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.append("makeUserId1", -1);
+                        this.formData.append("makeUserId2", -1);
+                    } else if (this.sessionName == "编制人") {
+                        this.formData.set(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.set("makeUserId1", -1);
+                        this.formData.set("makeUserId2", -1);
+                    }
+                    if (
+                        this.checkList.length == 2 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("makeUserId" == false) &&
+                        this.formData.has("makeUserId1" == false)
+                    ) {
+                        this.formData.append(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.append(
+                            "makeUserId1",
+                            this.trueNameId.toString().split(",")[1]
+                        );
+                        this.formData.append("makeUserId2", -1);
+                    } else if (this.sessionName == "编制人") {
+                        this.formData.set(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.set(
+                            "makeUserId1",
+                            this.trueNameId.toString().split(",")[1]
+                        );
+                        this.formData.set("makeUserId2", -1);
+                    }
+                    if (
+                        this.checkList.length == 3 &&
+                        this.sessionName == "编制人" &&
+                        this.formData.has("makeUserId" == false) &&
+                        this.formData.has("makeUserId1" == false) &&
+                        this.formData.has("makeUserId2" == false)
+                    ) {
+                        this.formData.append(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.append(
+                            "makeUserId1",
+                            this.trueNameId.toString().split(",")[1]
+                        );
+                        this.formData.append(
+                            "makeUserId2",
+                            this.trueNameId.toString().split(",")[2]
+                        );
+                    } else if (
+                        this.sessionName == "编制人" &&
+                        this.checkList.length == 3
+                    ) {
+                        this.formData.set(
+                            "makeUserId",
+                            this.trueNameId.toString().split(",")[0]
+                        );
+                        this.formData.set(
+                            "makeUserId1",
+                            this.trueNameId.toString().split(",")[1]
+                        );
+                        this.formData.set(
+                            "makeUserId2",
+                            this.trueNameId.toString().split(",")[2]
+                        );
+                    }
+                    this.loading = true;
+                    if (re == 1) {
+                        updateProject(this.formData).then((res) => {
+                            if (
+                                res.data.state == 200 &&
+                                res.data.stateStr == "成功"
+                            ) {
+                                this.$message.success("修改成功");
+                                this.getProject();
+                                this.loading = false;
+                                this.editDilong = false;
+                                this.close();
+                            } else {
+                                this.$message.error("修改失败");
+                                this.loading = false;
+                                this.editDilong = false;
+                            }
+                        });
+                    } else {
+                        this.editDilong = false;
+                        this.loading = false;
+                    }
+                }
+            } else {
+                if (
+                    this.sessionNamelevel == "1" &&
+                    this.formData.has("filingTime") == false
+                ) {
+                    this.formData.append("filingTime", this.enquire.filingTime);
+                } else {
+                    this.formData.set("filingTime", this.enquire.filingTime);
+                }
+                if (this.userid != null) {
+                    this.formData.set("userid", this.userid);
+                }
+                if (this.enquire.number != null) {
+                    this.formData.set("number", this.enquire.number);
+                }
+                if (this.enquire.invoice != null) {
+                    this.formData.set("invoice", this.enquire.invoice);
+                }
+                if (this.enquire.companyName != null) {
+                    this.formData.set("companyName", this.enquire.companyName);
+                }
+                if (this.enquire.projectName != null) {
+                    this.formData.set("projectName", this.enquire.projectName);
+                }
+                if (this.enquire.contractMoney != null) {
+                    this.formData.set(
+                        "contractMoney",
+                        this.enquire.contractMoney
+                    );
+                }
+                if (this.enquire.payMoney != null) {
+                    this.formData.set("payMoney", this.enquire.payMoney);
+                }
+                if (this.enquire.type != null) {
+                    this.formData.set("type", this.enquire.type);
+                }
+                if (this.enquire.textCompany != null) {
+                    this.formData.set("textCompany", this.enquire.textCompany);
+                }
+                if (this.enquire.remark != null) {
+                    this.formData.set("remark", this.enquire.remark);
+                }
+                if (this.enquire.contractTime != null) {
+                    this.formData.set(
+                        "contractTime",
+                        this.enquire.contractTime
+                    );
+                }
+                if (this.enquire.invoiceTime != null) {
+                    this.formData.set("invoiceTime", this.enquire.invoiceTime);
+                }
+                if (this.enquire.invoiceNumber != null) {
+                    this.formData.set(
+                        "invoiceNumber",
+                        this.enquire.invoiceNumber
+                    );
+                }
+                if (this.enquire.arrivalTime != null) {
+                    this.formData.set("arrivalTime", this.enquire.arrivalTime);
+                }
+                if (this.enquire.arrivalMoney != null) {
+                    this.formData.set(
+                        "arrivalMoney",
+                        this.enquire.arrivalMoney
+                    );
+                }
+                if (this.enquire.arrearsMoney != null) {
+                    this.formData.set(
+                        "arrearsMoney",
+                        this.enquire.arrearsMoney
+                    );
+                }
+                if (this.enquire.advanceTime != null) {
+                    this.formData.set("advanceTime", this.enquire.advanceTime);
+                }
+                if (this.enquire.liableUserPhone != null) {
+                    this.formData.set(
+                        "liableUserPhone",
+                        this.enquire.liableUserPhone
+                    );
+                }
+                if (this.enquire.testTime != null) {
+                    this.formData.set("testTime", this.enquire.testTime);
+                }
+                if (this.enquire.contractNumber != null) {
+                    this.formData.set(
+                        "contractNumber",
+                        this.enquire.contractNumber
+                    );
+                }
+                if (this.enquire.id != null) {
+                    this.formData.set("id", this.enquire.id);
+                }
+                if (this.enquire.common != null) {
+                    this.formData.set("common", this.enquire.common);
+                }
+                this.loading = true;
+                if (re == 1) {
+                    updateProject(this.formData).then((res) => {
+                        if (
+                            res.data.state == 200 &&
+                            res.data.stateStr == "成功"
+                        ) {
+                            this.$message.success("修改成功");
+                            this.getProject();
+                            this.loading = false;
+                            this.editDilong = false;
+                            this.close();
+                        } else {
+                            this.$message.error("修改失败");
+                            this.loading = false;
+                            this.editDilong = false;
+                        }
+                    });
+                } else {
+                    this.editDilong = false;
+                    this.loading = false;
+                }
+            }
+        },
+        TimeLineShowlose(val) {
+            this.TimeLineShow = val;
+        },
+        TimeLineShowlose1(val) {
+            this.TimeLineShow1 = val;
+        },
+        TimeLineShowlose2(val) {
+            this.TimeLineShow2 = val;
+        },
+        close() {
+            this.enquire = {};
+            this.formData = new FormData();
+            this.fileListPng = [];
+            this.fileListPngList = [];
+            this.fileListBan = [];
+            this.fileList = [];
+            this.fileListHE = [];
+        },
+        // 申请开票
+        applyFor(row) {
+            this.applyForinfo = true;
+            this.applyForinfoFromprojectId = row.id;
+            this.invoiceRequest(row.id);
+            this.getPromotion();
+        },
+        // 申请
+        AddapplyForClick() {
+            this.newApplyForinfo = true;
+            this.titleApplyForInfo = "申请开票";
+            this.applyForinfoFrom = {};
+        },
+        // 查询申请开票记录
+        invoiceRequest(projectId) {
+            if (projectId) {
+                invoiceRequest({
+                    projectId: projectId,
+                }).then((res) => {
+                    console.log(res, "开票记录");
+                    if (res.data.state != 204) {
+                        this.applyForInfoList = res.data.records;
+                    } else {
+                        this.applyForInfoList = [];
+                    }
+                });
+            }
+        },
+        // 查询省级备案审核员
+        getPromotion() {
+            getDockUser({
+                regionId: 2841,
+                type: "备案审核员",
+            }).then((res) => {
+                this.applyForinfoFromauditorList = res.data.records;
+            });
+        },
+        // 申请开票确定
+        invoiceRequestsaveOrUpdate() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            if (this.titleApplyForInfo == "申请开票") {
+                if (this.applyForinfoFrom.party == null) {
+                    return this.$message.warning("开票方名称不能为空");
+                } else if (this.applyForinfoFrom.dutyNumber == null) {
+                    return this.$message.warning("纳税人识别号不能为空");
+                } else if (this.applyForinfoFrom.applicationAmount == null) {
+                    return this.$message.warning("申请开票金额不能为空");
+                } else if (this.applyForinfoFrom.auditor == null) {
+                    return this.$message.warning("审核人不能为空");
+                } else if (this.applyForinfoFrom.billingType == null) {
+                    return this.$message.warning("发票类型不能为空");
+                } else {
+                    invoiceRequestsaveOrUpdate({
+                        reviewer: this.applyForinfoFrom.auditor,
+                        party: this.applyForinfoFrom.party,
+                        dutyNumber: this.applyForinfoFrom.dutyNumber,
+                        applicationAmount:
+                            this.applyForinfoFrom.applicationAmount,
+                        type: this.applyForinfoFrom.billingType,
+                        reamark: this.applyForinfoFrom.reamark,
+                        roleId: 28,
+                        userid: regionId.id,
+                        projectId: this.applyForinfoFromprojectId,
+                    }).then((res) => {
+                        if (res.data.state == 400) {
+                            this.$message.error(res.data.message);
+                        } else {
+                            this.$message.success("申请开票录入成功");
+                            this.invoiceRequest(this.applyForinfoFromprojectId);
+
+                            this.newApplyForinfo = false;
+                        }
+                    });
+                }
+            } else {
+                if (this.applyForinfoFrom.party == null) {
+                    return this.$message.warning("开票方名称不能为空");
+                } else if (this.applyForinfoFrom.dutyNumber == null) {
+                    return this.$message.warning("纳税人识别号不能为空");
+                } else if (this.applyForinfoFrom.applicationAmount == null) {
+                    return this.$message.warning("申请开票金额不能为空");
+                } else if (this.applyForinfoFrom.billingType == null) {
+                    return this.$message.warning("发票类型不能为空");
+                } else {
+                    invoiceRequestsaveOrUpdate({
+                        party: this.applyForinfoFrom.party,
+                        dutyNumber: this.applyForinfoFrom.dutyNumber,
+                        applicationAmount:
+                            this.applyForinfoFrom.applicationAmount,
+                        type: this.applyForinfoFrom.billingType,
+                        reamark: this.applyForinfoFrom.reamark,
+                        id: this.applyForinforowId,
+                        projectId: this.applyForinfoFromprojectId,
+                    }).then((res) => {
+                        if (res.data.state == 400) {
+                            this.$message.error(res.data.message);
+                            this.newApplyForinfo = false;
+                        } else {
+                            this.$message.success("修改成功");
+                            this.invoiceRequest(this.applyForinfoFromprojectId);
+
+                            this.newApplyForinfo = false;
+                        }
+                    });
+                }
+            }
+        },
+        // 市县用户删除开票请求
+        removeClickapplyForinfo(row) {
+            this.$confirm("此操作将删除该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    removeClickapplyForinfo({
+                        id: row.id,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message.success("删除成功");
+                            this.invoiceRequest(this.applyForinfoFromprojectId);
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        // 修改开票记录
+        handleEditapplyForinfo(row) {
+            console.log(row);
+            this.applyForinfoFrom.party = row.party;
+            this.applyForinfoFrom.dutyNumber = row.dutyNumber;
+            this.applyForinfoFrom.applicationAmount = row.applicationAmount;
+            this.applyForinfoFrom.billingType = row.type;
+            this.applyForinfoFrom.reamark = row.reamark;
+            this.newApplyForinfo = true;
+            this.titleApplyForInfo = "修改开票信息";
+            this.applyForinforowId = row.id;
+        },
+        // 查询开票申请任务
+        invoiceexaminelist(row) {
+            console.log(row, "123");
+            invoiceexaminelist({
+                type: "all",
+                projectId: this.applyForinfoFromprojectId,
+                invoiceId: row.id,
+            }).then((res) => {
+                this.dilongList1 = res.data.records;
+                this.TimeLineShow1 = true;
+            });
+        },
+        //
+        invoiceexaminelistzuofei(row) {
+            getinvoicecancel({
+                type: "all",
+                projectId: this.applyForinfoFromprojectId,
+                invoiceId: row.id,
+            }).then((res) => {
+                this.dilongList2 = res.data.records;
+                this.TimeLineShow2 = true;
+            });
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+::v-deep .My_el-dialog .el-dialog__body {
+    padding-top: 0;
+}
+.reference {
+    height: 100%;
+    overflow-y: auto;
+}
+.All {
+    height: 100%;
+    .addNewYewu {
+        height: 40px;
+        line-height: 40px;
+        font-size: 16px;
+        cursor: pointer;
+        color: #4ca72c;
+        background: #fff;
+        padding: 0 1%;
+        margin-bottom: 7px;
+    }
+    .condition {
+        /*  height: 82px; */
+        line-height: 40px;
+        font-size: 16px;
+        background: #fff;
+        padding: 0 1%;
+        margin-bottom: 7px;
+        .el-form {
+            width: 100%;
+            .el-form-item {
+                margin-bottom: 0;
+            }
+            ::v-deep .el-form-item__content {
+                line-height: 40px;
+            }
+        }
+    }
+    .footer-table {
+        background: #fff;
+        /*   height: calc(100% - 137px); */
+
+        .el-table {
+            overflow-y: auto;
+        }
+        .classsty {
+            height: calc(100% - 85px);
+        }
+        .footer {
+            padding: 20px;
+            border-bottom: 1px solid rgb(235, 238, 245);
+        }
+        .edit {
+            color: #337ab7;
+            cursor: pointer;
+        }
+        .submit {
+            color: #8ed65d;
+            cursor: pointer;
+        }
+        .delete {
+            color: red;
+            cursor: pointer;
+        }
+        .audit {
+            cursor: pointer;
+        }
+        .submit:hover {
+            text-decoration: underline;
+        }
+        .edit:hover {
+            text-decoration: underline;
+        }
+        .delete:hover {
+            text-decoration: underline;
+        }
+        .audit:hover {
+            text-decoration: underline;
+        }
+        ::v-deep .el-table__expanded-cell {
+            padding: 10px 24px 10px 100px;
+            line-height: 24px;
+            background: #fff;
+            position: relative;
+            top: 0px;
+        }
+        .hide {
+            width: 100%;
+            height: 20px;
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .hides {
+            display: flex;
+            flex-direction: column;
+            div {
+                height: 40px;
+            }
+        }
+        ::v-deep .el-form--inline .el-form-item {
+            margin-right: 48px;
+            color: #2788ee;
+            font-weight: 400;
+        }
+        ::v-deep .el-form-item__label {
+            color: #2788ee;
+            font-weight: bolder;
+            margin-right: -15px;
+        }
+    }
+    .all {
+        height: calc(100% - 176px);
+    }
+    .dan {
+        height: calc(100% - 130px);
+    }
+}
+.imgShow {
+    img {
+        width: 50%;
+        left: 50%;
+        position: relative;
+        transform: translate(-50%, -50%);
+        top: 50%;
+    }
+}
+.pdf {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.iframes {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+}
+.close {
+    width: 30px;
+    height: 30px;
+    background: #323639;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+}
+
+.imgShow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 66;
+    background: #0000005e;
+}
+.closer {
+    width: 30px;
+    height: 30px;
+    background: #0000005e;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+}
+/* 修改信息 */
+.editCont {
+    ::v-deep .el-input__inner {
+        height: 32px;
+        line-height: 32px;
+    }
+
+    p {
+        margin: 0;
+        .item {
+            ::v-deep.el-form-item__label {
+                padding-right: 0 !important;
+            }
+        }
+    }
+    .el-form-item {
+        padding: 0;
+        margin-bottom: 10px;
+    }
+    .st {
+        width: 100%;
+        line-height: 35px;
+        padding-left: 10px;
+        text-align: left;
+        background: rgb(231, 231, 231);
+        border: 1px solid #ddd;
+    }
+    .hang {
+        display: flex;
+    }
+    .hang1 {
+        display: flex;
+    }
+    .trrr {
+        border: 1px solid #ddd;
+        width: 100%;
+        padding: 10px;
+        border-top: none;
+    }
+
+    .tr {
+        flex: 2;
+        border: 1px solid #ddd;
+        line-height: 100px;
+        border-right: none;
+        border-bottom: none;
+        font-size: 14px;
+        color: gray;
+    }
+    .tr1 {
+        width: 142.2px;
+        border: 1px solid #ddd;
+        line-height: 50px;
+        border-right: none;
+        border-bottom: none;
+        font-size: 14px;
+        color: gray;
+    }
+    .mytr {
+        line-height: 50px;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        flex: 6;
+        padding: 0 20px;
+    }
+    .trs {
+        flex: 6;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        .el-form {
+            padding-left: 20px;
+        }
+        .el-form-item {
+            margin-bottom: 0px;
+            width: 25%;
+            ::v-deep .el-form-item__label {
+                padding-top: 3px;
+            }
+        }
+        .el-form-item__content {
+            line-height: 34px;
+        }
+        .el-select {
+            width: 100%;
+        }
+        .el-input__inner {
+            padding: 0 0 0 15px;
+        }
+    }
+}
+.fontsty {
+    color: red;
+    font-size: 15px;
+}
+.fontsty:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>

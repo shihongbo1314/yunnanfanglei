@@ -1,0 +1,1544 @@
+<template>
+    <div class="reference">
+        <div class="All">
+            <div class="condition">
+                <el-form :inline="true" :model="formInline" size='mini' class="demo-form-inline">
+                    <el-form-item label="档案编号：">
+                        <el-input v-model="formInline.number" placeholder="请填写档案编号"></el-input>
+                    </el-form-item>
+                    <!--   <el-form-item label="发票信息：">
+                        <el-input
+                            v-model="formInline.invoice"
+                            placeholder="请填写发票信息"
+                        ></el-input>
+                    </el-form-item> -->
+                    <el-form-item label="委托方名称：">
+                        <el-input v-model="formInline.company_name" placeholder="请填写委托方名称"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目名称：">
+                        <el-input v-model="formInline.project_name" placeholder="请填写项目名称"></el-input>
+                    </el-form-item>
+                    <el-form-item label="类别：">
+                        <el-select v-model="formInline.type" placeholder="请选择">
+                            <el-option label="民用" value="民用"></el-option>
+                            <el-option label="危化" value="危化"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="检测单位：">
+                        <el-input v-model="formInline.textCompany" placeholder="请填写检测单位"></el-input>
+                    </el-form-item>
+                    <el-form-item label="当前负责人：">
+                        <el-input v-model="formInline.reviewerName" placeholder="请填写负责人"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目状态：">
+                        <el-select v-model="formInline.appstatusvalue" placeholder="请选择" clearable multiple
+                            style="z-index:99">
+                            <el-option v-for="(item, index) in formInline.appstatus " :key="index" :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="项目归属：" prop="company">
+                        <el-input v-model="formInline.company" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" icon="el-icon-search" @click="onSubmit">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div class="footer-table">
+                <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" border style="width: 100%;"
+                    class="classsty" height="calc(100% - 80px)">
+                    <el-table-column type="expand" label="详细信息" width="80">
+                        <template slot-scope="props">
+                            <el-form label-position="left" inline class="demo-table-expand hide"
+                                v-if="sessionName != '审核人'">
+                                <el-form-item label="制作人：" v-if="props.row.makeUserMap">
+                                    <span>{{ props.row.makeUserMap.true_name || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="合同编号：">
+                                    <span>{{ props.row.contractNumber || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="合同金额：">
+                                    <span>{{ props.row.contractMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="支付金额：">
+                                    <span>{{ props.row.payMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="开票时间：">
+                                    <span>{{ props.row.invoiceTime || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="入账时间：">
+                                    <span>{{ props.row.arrivalTime || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="入账金额：">
+                                    <span>{{ props.row.arrivalMoney || '-' }}</span>
+                                </el-form-item>
+                            </el-form>
+                            <el-form label-position="left" inline class="demo-table-expand hide"
+                                v-if="sessionName != '审核人'">
+                                <el-form-item label="预拨时间：">
+                                    <span>{{ props.row.advanceTime || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="预拨金额：">
+                                    <span>{{ props.row.advanceMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="开票金额：">
+                                    <span>{{ props.row.invoiceMoney || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="发票号码：">
+                                    <span>{{ props.row.invoiceNumber || '-' }}</span>
+                                </el-form-item>
+                                <el-form-item label="欠款金额：">
+                                    <span>{{ props.row.arrearsMoney || '-' }}</span>
+                                </el-form-item>
+                            </el-form>
+                            <el-form label-position="left" inline class="demo-table-expand hide"
+                                v-if="sessionName == '对接人' || sessionName == '审核人' || sessionName == '终审人' || sessionName == '检测人'">
+                                <!-- <el-form-item label="检测报告下载：">
+                                    <span
+                                        @click="Download(props.row.testImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testImg!=null ? props.row.testImg: '-'}}</span>
+                                </el-form-item> -->
+                                <el-form-item label="检测报告痕迹版下载：" v-if="props.row.state != '16'">
+                                    <span @click="Download(props.row.testMarkImg)" style="cursor:pointer;">{{
+                                        props.row.testMarkImg != null ? '(' + props.row.testMarkImg.split('(')[1] : '-'
+                                    }}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告打印版下载：" v-if="props.row.state != '16'">
+                                    <span
+                                        @click="Download(props.row.testPrintImg != null ? props.row.testPrintImg.split('.')[0] + '.pdf' : '')"
+                                        style="cursor:pointer;">{{ props.row.testPrintImg != null ?
+                                            props.row.testPrintImg.split('.')[1].replaceAll('.docx', '.pdf') : '-' }}</span>
+
+                                    <span @click="lookPwdShow = !lookPwdShow"
+                                        v-if="props.row.testPrintImg != null"
+                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看' }}密码</span>
+                                    <span v-if="lookPwdShow">{{ ':' + props.row.lookPwd }}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告正式版下载：" v-if="props.row.state != '16'">
+                                    <span @click="Download(props.row.testFormalImg)" style="cursor:pointer;">{{
+                                        props.row.testFormalImg ? '(' + props.row.testFormalImg.split('(')[1] : '-'
+                                    }}</span>
+                                </el-form-item>
+                            </el-form>
+                            <el-form label-position="left" inline class="demo-table-expand hide"
+                                v-if="sessionName == '编制人' || sessionName == '备案人' || sessionName == '管理员' || sessionName == '编印人'">
+                                <!-- <el-form-item label="检测报告下载：">
+                                    <span
+                                        @click="Download(props.row.testImg)"
+                                        style="cursor:pointer;"
+                                    >{{ props.row.testImg!=null ? props.row.testImg: '-'}}</span>
+                                </el-form-item> -->
+                                <el-form-item label="检测报告痕迹版下载：">
+                                    <span @click="Download(props.row.testMarkImg)" style="cursor:pointer;">{{
+                                        props.row.testMarkImg != null ? '(' + props.row.testMarkImg.split('(')[1] : '-'
+                                    }}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告打印版下载：">
+                                    <span
+                                        @click="Download(props.row.testPrintImg != null ? props.row.testPrintImg.split('.')[0] + '.pdf' : '')"
+                                        style="cursor:pointer;">{{ props.row.testPrintImg != null ?
+                                            props.row.testPrintImg.split('.')[1].replaceAll('.docx', '.pdf') : '-' }}</span>
+                                    <span @click="lookPwdShow = !lookPwdShow"
+                                        v-if="props.row.testPrintImg != null"
+                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看' }}密码</span>
+                                    <span v-if="lookPwdShow">{{ ':' + props.row.lookPwd }}</span>
+                                </el-form-item>
+                                <el-form-item label="检测报告正式版下载：">
+                                    <span @click="Download(props.row.testFormalImg)" style="cursor:pointer;">{{
+                                        props.row.testFormalImg ? '(' + props.row.testFormalImg.split('(')[1] : '-'
+                                    }}</span>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="档案编号" align="center">
+                        <template slot-scope="scope">{{ scope.row.number }}</template>
+                    </el-table-column>
+                    <!-- <el-table-column
+                        prop="invoice"
+                        label="发票信息"
+                        align="center"
+                    >
+                    </el-table-column> -->
+                    <el-table-column label="备案人信息" align="center">
+                        <template slot-scope="scope">{{ scope.row.userMap.true_name }}</template>
+                    </el-table-column>
+                    <el-table-column label="行政区域" align="center">
+                        <template slot-scope="scope">{{ scope.row.regionMap.name }}</template>
+                    </el-table-column>
+                    <el-table-column prop="companyName" label="委托方名称" align="center">
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="项目名称" align="center">
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="原始记录" align="center">
+                        <template slot-scope="scope">
+                            <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
+                                @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
+                                v-if="scope.row.originalRecordImg != null">
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="合同" align="center"
+                        v-if="sessionName == '备案人' || sessionName == '管理员'">
+                        <template slot-scope="scope">
+                            <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg ? scope.row.contractImg : '')"
+                                @click.stop="pdfSrcShow(scope.row.contractFile)" v-if="scope.row.contractImg != null">
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="现场照片" align="center">
+                        <template slot-scope="scope">
+                            <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg ? scope.row.sceneImg : '')"
+                                @click.stop="imgShowList(scope.row.sceneImg)" v-if="scope.row.sceneImg">
+                            </el-image>
+                            <span v-else> 未上传 </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="检测报告" align="center" v-if="sessionName == '编印人'">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.testImg" @click.stop="docSrcShow(scope.row.testImg)"
+                                style="cursor: pointer;color: #2788EE"> {{ scope.row.testImg.split('.')[0] + '.pdf' }}
+                            </span>
+                            <span v-else> 未上传 </span>
+                        </template>
+
+                    </el-table-column>
+                    <el-table-column prop="projectName" label="检测报告" align="center" v-if="sessionName != '编印人'">
+                        <template slot-scope="scope">
+                            <span v-if="sessionName != '编印人' && scope.row.state == '16'"
+                                @click.stop="docSrcShow(scope.row.testMarkImg)" style="cursor: pointer;color: #2788EE">
+                                {{ scope.row.testMarkImg }}
+                            </span>
+                            <span v-else @click.stop="docSrcShow(scope.row.testImg)"
+                                style="cursor: pointer;color: #2788EE">
+                                {{ scope.row.testImg.split('.')[0] + '.pdf' }} </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="模板类型" align="center">
+                        <template slot-scope="scope">
+                            <span> {{ scope.row.multiplex | typeFilter }} </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="type" label="类别" align="center">
+                    </el-table-column>
+                    <el-table-column prop="reviewerName" label="当前负责人" align="center">
+                    </el-table-column>
+                    <el-table-column prop="textCompany" label="检测单位" align="center">
+                    </el-table-column>
+                    <el-table-column label="项目状态" align="center">
+                        <template slot-scope="scope">
+                            <el-tag :type="scope.row.state | stateFilter(scope.row.state)"
+                                @click.stop="statusCondition(scope.row.id)" style="cursor: pointer;">{{ scope.row.state
+                                    |
+                                    statusFilter(scope.row.examineTaskMap != null ? scope.row.examineTaskMap.role_id
+                                        : "") }}</el-tag>
+                            <div v-if="scope.row.state == '16'">{{ scope.row.examineTime }}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="handle" label="操作" align="center" width="180" v-if="sessionName != '审核人'">
+                        <template slot-scope="scope">
+                            <!-- <span
+                                class="edit"
+                                @click="edit(scope.row.id,scope.row.testImg)"
+                                v-if="sessionName == '编制人'  && scope.row.state == '4'&& isshow==false"
+                            >编制 |</span>
+                            <span
+                                class="submit"
+                                @click="duijie(scope.row.id)"
+                                v-if="sessionName == '编制人'&&scope.row.testImg!=null&& scope.row.state == '4'"
+                            > 提交|</span>
+                            <span
+                                class="audit"
+                                v-if="(sessionName == '备案人'&& scope.row.userMap.id == sessionNameid ) || sessionName == '管理员' || sessionName == '编制人'"
+                                @click="updateProject(scope.row)"
+                            >修改 |</span>
+                            <span
+                                class="delete"
+                                v-if="(sessionName == '备案人'&& scope.row.userMap.id == sessionNameid ) || sessionName == '管理员'"
+                                @click="removeProject(scope.row.id)"
+                            > 删除 |</span>
+                            <span
+                                class="audit"
+                                v-if="(sessionName == '备案人'&& scope.row.state == '16')"
+                                @click="reuseProject(scope.row)"
+                            > 复用</span> -->
+                            <span class="audit" v-if="(sessionName == '编印人' && scope.row.state == '16')"
+                                @click="WithDraw(scope.row.id)">撤回</span>
+                            <span class="audit" v-if="sessionName == '对接人' && scope.row.state != '16'"
+                                @click="modification(scope.row)">查询任务</span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <!--  <div class="footer">
+                    <el-button size="mini" icon="el-icon-error">清理项目</el-button>
+                    <el-button size="mini" icon='el-icon-download'>下载查询结果</el-button>
+                </div> -->
+                <Page :total="total" :pageNum="current" :pageSize="size" @pageChange="pageChange" />
+            </div>
+        </div>
+        <el-dialog title="选择对接人" :visible.sync="dialogVisible" width="20%">
+            <el-select style="width:100%" v-model="duijierenID" placeholder="选择对接人">
+                <el-option v-for="item in options" :key="item.id" @click.native="itemClick(item)" :label="item.trueName"
+                    :value="item.id">
+                </el-option>
+            </el-select>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitduijieren">确 定</el-button>
+            </span>
+        </el-dialog>
+        <div v-show="pdfShow" class="pdf">
+            <iframe :src="pdfSrc" frameborder="0" class="iframes"></iframe>
+            <div class="close" @click.stop="pdfShow = false"> × </div>
+        </div>
+        <div v-show="imgShow" class="imgShow">
+            <el-carousel :autoplay="false" height="1030px">
+                <el-carousel-item v-for="item in imgList" :key="item">
+                    <img :src="item">
+                </el-carousel-item>
+            </el-carousel>
+            <div class="closer" @click.stop="imgShow = false"> × </div>
+        </div>
+        <el-dialog title="修改信息" :visible.sync="editDilong" v-loading="loading" width="1080px">
+            <div class="editCont">
+                <el-form label-position="right" label-width="100px">
+                    <div class="cont_c_o">
+                        <div style="width: 100%;">
+                            <p>
+                                <el-form-item label="项目名称：">
+                                    <el-input placeholder="请输入内容" v-model="enquire.projectName">
+                                    </el-input>
+                                </el-form-item>
+                            </p>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="委托方名称：">
+                                        <el-input placeholder="请输入内容" v-model="enquire.companyName">
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <!--  <p>
+                                    <el-form-item label="发票信息：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="enquire.invoice"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p> -->
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同金额：">
+                                        <el-input placeholder="请输入内容" v-model="enquire.contractMoney">
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="支付金额：">
+                                        <el-input placeholder="请输入内容" v-model="enquire.payMoney">
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="类别：">
+                                        <el-select style="width:100%" v-model="enquire.type" placeholder="请选择">
+                                            <el-option label="民用" value="民用"></el-option>
+                                            <el-option label="危化" value="危化"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测单位：">
+                                        <el-input placeholder="请输入内容" v-model="enquire.textCompany">
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%" v-if="sessionName == '编制人'">
+                                <p>
+                                    <el-form-item label="检测人：">
+                                        <el-input v-model="formInline.tester" @click.native="appendClick"><template
+                                                slot="append">添加 </template></el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同编号：">
+                                        <el-input placeholder="请输入内容" v-model="enquire.contractNumber">
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 100%;display: flex;">
+                        <div style="width: 30%">
+                            <el-form-item label="合同附件：">
+                                <el-upload action="" ref="upload" accept=".pdf,doc" :limit="10" multiple
+                                    :http-request="uploadHttpRequest" :file-list="fileList">
+                                    <el-button slot="trigger" size="small" type="primary" plain>点击上传文件</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                        <div style="width: 30%">
+                            <el-form-item label="现场照片：" v-if="sessionName == '编制人'">
+                                <el-upload action="" ref="upload" accept=".jpg,.jpeg,.png" :limit="10" multiple
+                                    :http-request="uploadHttpimg" :file-list="fileList">
+                                    <el-button slot="trigger" size="small" type="primary" plain>点击上传图片</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                        <div style="width: 30%" v-if="radio == 6">
+                            <el-form-item label="模板上传：">
+                                <el-upload action="" ref="upload" accept=".doc,.docx" :limit="10" multiple
+                                    :http-request="uploadHttpdoc" :file-list="fileList">
+                                    <el-button slot="trigger" size="small" type="primary" plain>非模板类报告上传</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </div>
+                    </div>
+                    <div style="padding: 10px 20px;" v-if="sessionName == '编制人'">
+                        <el-radio-group v-model="radio">
+                            <el-radio :label="3">模板类报告</el-radio>
+                            <el-radio :label="6">非模板类报告</el-radio>
+                        </el-radio-group>
+                    </div>
+                </el-form>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDilongclick(2)" size="small">取 消</el-button>
+                <el-button type="primary" size="small" @click="editDilongclick(1)">确 定</el-button>
+            </span>
+        </el-dialog>
+        <Timeline :dilongList="dilongList" :TimeLineShow="TimeLineShow" v-on:TimeLineShowlose="TimeLineShowlose"
+            v-on:docSrcShow="docSrcShow" />
+        <el-dialog title="复用项目" :visible.sync="reuse" width="30%">
+            <el-form :model="reuseform" label-width="100px">
+                <el-form-item label="项目名称">
+                    <el-input v-model="reuseform.projectName"></el-input>
+                </el-form-item>
+                <el-form-item label="档案编号">
+                    <el-input v-model="reuseform.number"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="reuse = false">取 消</el-button>
+                <el-button type="primary" @click="multiplex">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="提示" :visible.sync="this.$store.state.app.refresh3" width="25%">
+            <span style="font-size:15px">如果没有反应，请先</span><span
+                style="color:red;font-size:15px">下载安装Office控件</span><span>，点此</span><span class="fontsty"
+                @click="Dowkongjian">下载此控件</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" size="small" @click="QueDing">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="检测人列表" :visible.sync="dialogVisibleone" width="30%">
+            <el-checkbox-group v-model="checkList" :max="3">
+                <el-checkbox :label="is.trueName" :key="is.id" v-for="is in bianzhiList">{{ is.trueName }}</el-checkbox>
+            </el-checkbox-group>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisibleone = false" size="small">取 消</el-button>
+                <el-button type="primary" @click="bianzhiQue" size="small">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="审核任务列表" :visible.sync="dialogVisibletwo" width="50%">
+            <el-table :data="TaskList" style="width: 100%">
+                <el-table-column prop="projectMap.project_name" label="项目名称">
+                </el-table-column>
+                <el-table-column prop="reviewerMap.true_name" label="审核人信息">
+                </el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button @click="Revisionpeople(scope.row)" size="small">修改{{ scope.row.roleIdInfoMap.name
+                            }}</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+        <el-dialog :title="titleList" :visible.sync="Visible" width="25%">
+            <el-select v-model="selected" placeholder="请选择" style="width:100%">
+                <el-option v-for="item in candidate" :key="item.id" :label="item.trueName" :value="item.id">
+                </el-option>
+            </el-select>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="Visible = false">取 消</el-button>
+                <el-button type="primary" @click="updateExamineReviewer">修 改</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</template>
+<script>
+// @ is an alias to /src
+import Page from "@/components/page/index.vue";
+import Addnew from "@/components/addnew/index.vue";
+import Timeline from "@/components/Timeline/Index.vue";
+import {
+    getProject,
+    selectDockUser,
+    selectProjectRecord,
+    getDockUser,
+    DockProject,
+    removeProject,
+    updateProject,
+    multiplex,
+    getDockUserbianzhi,
+    reCallProject,
+    selectDockTask,
+    updateExamineReviewer,
+} from "@/api/aviation";
+import { userinfolist } from "@/api/user";
+import * as WebCtrl from "@/assets/WebOffice.js"; //注意路径
+import {
+    initWebSocket,
+    websocketonopen,
+    websocketonerror,
+    websocketonmessage,
+    websocketsend,
+    websocketclose,
+} from "@/utils/websoket";
+export default {
+    name: "XXX",
+    data() {
+        return {
+            formInline: {
+                appstatus: [
+                    {
+                        value: "4",
+                        label: "备案审核通过",
+                    },
+                    {
+                        value: "5",
+                        label: "备案申请不通过",
+                    },
+                    {
+                        value: "6",
+                        label: "州市对接中",
+                    },
+                    {
+                        value: "7",
+                        label: "州市已对接",
+                    },
+                    {
+                        value: "8",
+                        label: "州市对接不通过",
+                    },
+                    {
+                        value: "9",
+                        label: "州市审核中",
+                    },
+                    {
+                        value: "10",
+                        label: "州市审核通过",
+                    },
+                    {
+                        value: "11",
+                        label: "州市审核不通过",
+                    },
+                    {
+                        value: "12",
+                        label: "省级对接中",
+                    },
+                    {
+                        value: "13",
+                        label: "省级已对接",
+                    },
+                    {
+                        value: "14",
+                        label: "省级对接不通过",
+                    },
+                    {
+                        value: "15",
+                        label: "省级审核中",
+                    },
+                    {
+                        value: "16",
+                        label: "通过",
+                    },
+                    {
+                        value: "17",
+                        label: "省级审核不通过",
+                    },
+                    {
+                        value: "18",
+                        label: "市级退回",
+                    },
+                    {
+                        value: "19",
+                        label: "省级退回",
+                    },
+                    {
+                        value: "20",
+                        label: "被退回在编辑",
+                    },
+                    {
+                        value: "21",
+                        label: "被退回在编辑",
+                    },
+                    {
+                        value: "22",
+                        label: "报告已编制",
+                    },
+                    {
+                        value: "23",
+                        label: "已转交",
+                    },
+                    {
+                        value: "24",
+                        label: "被转交",
+                    },
+                    {
+                        value: "25",
+                        label: "编印撤回",
+                    },
+                ] /* 审批状态 */,
+                number: "" /* 档案编号 */,
+                invoice: "" /* 发票信息 */,
+                company_name: "" /* 单位名称*/,
+                project_name: "" /* 项目名称 */,
+                type: "" /* 类型 */,
+                textCompany: "" /* 检测单位 */,
+                tester: "" /* 检测人 */,
+                appstatusvalue: [],
+                reviewerName: "" /* 当前负责人 */,
+            },
+            tableData: [],
+            TaskList: [] /* 审核任务列表 */,
+            addishow: false,
+            total: 7,
+            current: 1,
+            size: 5,
+            spans: [],
+            dialogVisible: false /* 提交对接人弹框 */,
+            Visible: false /* 修改审核人 */,
+            reuse: false /* 复用弹框 */,
+            reuseform: {
+                userid: "",
+                projectId: "",
+                number: "",
+                projectName: "",
+            },
+            id: null /* 项目id */,
+            textarea: "",
+            options: [] /* 获得市对接人 */,
+            duijierenID: "",
+            optionsID: [] /* 获得审核人 */,
+            shenherenID: [],
+            projectId: "" /* 项目ID */,
+            itemID: "",
+            input1: "",
+            input2: "",
+            input3: "",
+            inputone: "",
+            list: [] /* 备选人 */,
+            listone: [] /* 添加备选人 */,
+            list_jia: [] /* 省局备选人 */,
+            listTwojia: [] /* 省局备案人 */,
+            listyle: false,
+            pdfImg: "",
+            pdfShow: false,
+            imgShow: false,
+            pdfSrc: "",
+            imgList: [],
+            dilongList: "",
+            TimeLineShow: false,
+            isshow: false,
+            editDilong: false,
+            enquire: {
+                makeUserMap: "",
+            },
+            formData: new FormData(),
+            fileList: [],
+            userid: "" /* userid */,
+            dialogVisibleone: false,
+            dialogVisibletwo: false,
+            checkList: [],
+            bianzhiList: [],
+            trueNameId: [],
+            radio: 3,
+            loading: false,
+            roleIdMap: {
+                id: "",
+            },
+            titleList: "",
+            candidate: [] /* 备选人列表 */,
+            selected: "" /* 选中项 */,
+            row: {},
+            lookPwdShow: false
+        };
+    },
+    components: {
+        Page,
+        Addnew,
+        Timeline,
+    },
+    computed: {
+        sessionName() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.name;
+        },
+        sessionNamelevel() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.level;
+        },
+        sessionNameid() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.id;
+        },
+        regionId() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            return regionId.regionIdMap.id;
+        },
+        refresh2() {
+            return this.$store.state.app.refresh2;
+        },
+    },
+    watch: {
+        addishow(val) {
+            if (!val) {
+                this.getProject();
+            }
+        },
+        refresh2(newVal) {
+            console.log("已刷新");
+            if (newVal) {
+                location.reload();
+            }
+        },
+    },
+    created() {
+        this.formInline.number = this.$route.query.number;
+        this.getProject();
+        this.getDockUserbianzhi();
+        const regionId = JSON.parse(sessionStorage.getItem("records"));
+        this.formInline.company = regionId.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+        initWebSocket(regionId.id);
+    },
+    destroyed() {
+        websocketclose();
+    },
+    methods: {
+        getDockUserbianzhi() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            getDockUserbianzhi({
+                regionId: params.regionIdMap.id,
+                type: "检测人",
+            }).then((res) => {
+                this.bianzhiList = res.data.records;
+            });
+        },
+        getProject(current) {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            let parameter = {
+                size: this.size,
+                current: current ? current : this.current,
+                number: this.formInline.number,
+                invoice: this.formInline.invoice,
+                company_name: this.formInline.company_name,
+                type: this.formInline.type,
+                textCompany: this.formInline.textCompany,
+                project_name: this.formInline.project_name,
+                regionId: regionId.regionIdMap.id,
+                selectUserId: regionId.id,
+                roleId: regionId.roleIdMap.id,
+                company: regionId.company,
+            };
+            if (this.sessionName == "备案人") {
+                parameter.userid = regionId.id;
+            } else if (this.sessionName == "管理员") {
+                parameter = {
+                    size: this.size,
+                    current: this.current,
+                    number: this.formInline.number,
+                    invoice: this.formInline.invoice,
+                    company_name: this.formInline.company_name,
+                    type: this.formInline.type,
+                    textCompany: this.formInline.textCompany,
+                    project_name: this.formInline.project_name,
+                    regionId: regionId.regionIdMap.id,
+                    selectUserId: regionId.id,
+                    roleId: regionId.roleIdMap.id,
+                };
+            } else {
+                parameter.aboutUser = regionId.id;
+            }
+            if (current) {
+                parameter.projectState =
+                    this.formInline.appstatusvalue.toString();
+            }
+            if (
+                this.sessionName == "审核人" ||
+                this.sessionName == "终审人" ||
+                this.sessionName == "对接人" ||
+                this.sessionName == "编印人"
+            ) {
+                parameter.aboutUser = regionId.id;
+                parameter.reviewerName = this.formInline.reviewerName;
+            }
+            getProject(parameter).then((res) => {
+                this.tableData = res.data.records;
+                this.total = res.data.total;
+            });
+        },
+        appendClick() {
+            this.dialogVisibleone = true;
+        },
+        bianzhiQue() {
+            if (this.checkList.length < 1) {
+                this.$message.error("用户不能为空");
+            } else if (this.checkList.length < 2) {
+                this.$message.error("检测人员至少勾选2个");
+            } else {
+                this.formInline.tester = this.checkList.toString();
+                this.dialogVisibleone = false;
+            }
+        },
+        uploadHttpRequest(data) {
+            if (this.formData.has("file") == false) {
+                this.formData.append("file", data.file);
+            } else {
+                this.formData.set("file", data.file);
+            }
+        },
+        uploadHttpimg(data) {
+            if (this.formData.has("sceneFile") == false) {
+                this.formData.append("sceneFile", data.file);
+            } else {
+                this.formData.set("sceneFile", data.file);
+            }
+        },
+        uploadHttpdoc(data) {
+            if (this.formData.has("testFile") == false) {
+                this.formData.append("testFile", data.file);
+            } else {
+                this.formData.set("testFile", data.file);
+            }
+        },
+        imgCom(row) {
+            let arr = row.split(",");
+            if (arr.length > 0) {
+                return arr[0];
+            } else {
+                return arr;
+            }
+        },
+        addClick() {
+            this.addishow = true;
+        },
+        goback(e) {
+            this.addishow = e;
+        },
+        onSubmit() {
+            this.getProject(1);
+        },
+        pageChange(page) {
+            this.size = page._pageSize;
+            this.current = page._currentPage;
+            this.getProject();
+        },
+        /* 编制 */
+        edit(id, testImg) {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            WebCtrl.ShowPage(
+                id,
+                records.id,
+                testImg,
+                1,
+                records.id,
+                null,
+                null,
+                records.roleIdMap.id
+            );
+            setTimeout(() => {
+                this.$store.commit("app/REFRESH3", true);
+            }, 5000);
+        },
+        QueDing() {
+            this.$store.commit("app/REFRESH3", false);
+        },
+        duijie(id) {
+            this.projectId = id;
+            this.dialogVisible = true;
+            this.options = [];
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            /* 获取市局审核人 */
+            getDockUser({
+                regionId: records.regionIdMap.id,
+                type: "对接人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.options.push(item);
+                });
+            });
+        },
+        itemClick(item) {
+            this.roleIdMap.id = item.roleIdMap.id;
+        },
+        /* 提交确认 */
+        submitduijieren() {
+            selectDockUser({
+                projectId: this.projectId,
+                DockUserId: this.duijierenID /* 对接人用户Id */,
+                roleId: this.roleIdMap.id,
+            }).then((res) => {
+                if (res.data.stateStr == "成功" && res.data.state == 200) {
+                    this.$message.success("提交对接人" + res.data.stateStr);
+                    this.isshow = true;
+                    this.dialogVisible = false;
+                    this.getProject();
+                }
+            });
+        },
+        pdfSrcShow(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/Contract/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /* 原始记录 */
+        pdfSrcShow2(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        docSrcShow(file) {
+            let arr;
+            if (file.split(".")[1] == "doc") {
+                arr = file.replaceAll("doc", "pdf");
+            } else {
+                arr = file.replaceAll("docx", "pdf");
+            }
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                arr;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        Download(testImg) {
+            window.open(
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                testImg
+            );
+        },
+        Dowkongjian() {
+            window.open("http://140.249.209.176:8084/fanglei/WebOffice.zip");
+        },
+        imgShowList(row) {
+            let arr = row.split(",");
+            this.imgList = arr
+                .map((item) => {
+                    return (
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                        item
+                    );
+                })
+                .join(",")
+                .split(",");
+            setTimeout(() => {
+                this.imgShow = true;
+            }, 1500);
+        },
+        // 项目状态
+        async statusCondition(row) {
+            const { data: res } = await selectProjectRecord({
+                id: row,
+            });
+            if (res.state == 200 && res.stateStr == "成功") {
+                this.dilongList = res.records;
+                this.TimeLineShow = true;
+            }
+        },
+        /* 删除项目 */
+        removeProject(id) {
+            this.$confirm("此操作将删除该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    removeProject({ projectId: id }).then((res) => {
+                        this.$message({
+                            type: "success",
+                            message: "删除成功!",
+                        });
+                        this.getProject();
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+        /* 撤回 */
+        WithDraw(id) {
+            this.$confirm("此操作将撤回该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    reCallProject({ projectId: id }).then((res) => {
+                        this.$message({
+                            type: "success",
+                            message: "撤回成功!",
+                        });
+                        this.getProject();
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消撤回",
+                    });
+                });
+        },
+        /* 修改项目 */
+        updateProject(row) {
+            this.userid = row.userMap.id;
+            this.editDilong = true;
+            this.enquire = row;
+        },
+        /* 复用项目 */
+        reuseProject(row) {
+            this.reuse = true;
+            this.reuseform.projectName = row.projectName;
+            this.reuseform.userid = row.userMap.id;
+            this.reuseform.projectId = row.id;
+            this.reuseform.number = row.number;
+        },
+        /* 复用项目确认 */
+        multiplex() {
+            if (this.reuseform.projectId == "") {
+                this.$message("项目编号不能为空");
+            } else {
+                multiplex({
+                    userid: this.reuseform.userid,
+                    projectId: this.reuseform.projectId,
+                    number: this.reuseform.number,
+                }).then((res) => {
+                    if (res.data.state == 200) {
+                        this.$message.success("复用成功");
+                        this.reuse = false;
+                        this.getProject();
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                });
+            }
+        },
+        editDilongclick(re) {
+            if (
+                this.formInline.tester != undefined &&
+                this.formInline.tester != ""
+            ) {
+                this.trueNameId = [];
+                this.checkList.map((it) => {
+                    this.bianzhiList.map((item) => {
+                        if (it == item.trueName) {
+                            this.trueNameId.push(item.id);
+                        }
+                    });
+                });
+                if (
+                    this.radio == 3 &&
+                    this.sessionName == "编制人" &&
+                    this.formData.has("multiplex") == false
+                ) {
+                    this.formData.append("multiplex", 0); /* 正常模板 */
+                } else if (this.sessionName == "编制人") {
+                    this.formData.append("multiplex", 2); /* 非模板项目 */
+                }
+                this.formData.set("userid", this.userid);
+                this.formData.set("number", this.enquire.number);
+                this.formData.set("invoice", this.enquire.invoice);
+                this.formData.set("companyName", this.enquire.companyName);
+                this.formData.set("projectName", this.enquire.projectName);
+                this.formData.set("contractMoney", this.enquire.contractMoney);
+                this.formData.set("payMoney", this.enquire.payMoney);
+                this.formData.set("type", this.enquire.type);
+                this.formData.set("textCompany", this.enquire.textCompany);
+                this.formData.set("remark", this.enquire.remark);
+                this.formData.set("contractTime", this.enquire.contractTime);
+                this.formData.set(
+                    "contractNumber",
+                    this.enquire.contractNumber
+                );
+                this.formData.set("id", this.enquire.id);
+                if (
+                    this.checkList.length == 1 &&
+                    this.sessionName == "编制人" &&
+                    this.formData.has("makeUserId" == false)
+                ) {
+                    this.formData.append(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                } else if (this.sessionName == "编制人") {
+                    this.formData.set(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                }
+                if (
+                    this.checkList.length == 2 &&
+                    this.sessionName == "编制人" &&
+                    this.formData.has("makeUserId" == false) &&
+                    this.formData.has("makeUserId1" == false)
+                ) {
+                    this.formData.append(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                    this.formData.append(
+                        "makeUserId1",
+                        this.trueNameId.toString().split(",")[1]
+                    );
+                } else if (this.sessionName == "编制人") {
+                    this.formData.set(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                    this.formData.set(
+                        "makeUserId1",
+                        this.trueNameId.toString().split(",")[1]
+                    );
+                }
+                if (
+                    this.checkList.length == 3 &&
+                    this.sessionName == "编制人" &&
+                    this.formData.has("makeUserId" == false) &&
+                    this.formData.has("makeUserId1" == false) &&
+                    this.formData.has("makeUserId2" == false)
+                ) {
+                    alert(6);
+                    this.formData.append(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                    this.formData.append(
+                        "makeUserId1",
+                        this.trueNameId.toString().split(",")[1]
+                    );
+                    this.formData.append(
+                        "makeUserId2",
+                        this.trueNameId.toString().split(",")[2]
+                    );
+                } else if (
+                    this.sessionName == "编制人" &&
+                    this.checkList.length == 3
+                ) {
+                    this.formData.set(
+                        "makeUserId",
+                        this.trueNameId.toString().split(",")[0]
+                    );
+                    this.formData.set(
+                        "makeUserId1",
+                        this.trueNameId.toString().split(",")[1]
+                    );
+                    this.formData.set(
+                        "makeUserId2",
+                        this.trueNameId.toString().split(",")[2]
+                    );
+                }
+                this.loading = true;
+                if (re == 1) {
+                    updateProject(this.formData).then((res) => {
+                        if (
+                            res.data.state == 200 &&
+                            res.data.stateStr == "成功"
+                        ) {
+                            this.$message.success("修改成功");
+                            this.getProject();
+                            this.loading = false;
+                            this.editDilong = false;
+                        } else {
+                            this.$message.error("修改失败");
+                            this.loading = false;
+                            this.editDilong = false;
+                        }
+                    });
+                } else {
+                    this.editDilong = false;
+                    this.loading = false;
+                }
+            } else {
+                this.$message.error("检测人不能为空");
+            }
+        },
+        TimeLineShowlose(val) {
+            this.TimeLineShow = val;
+        },
+        /* 查询审核任务 */
+        modification(row) {
+            this.row = row;
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            selectDockTask({
+                projectId: row.id,
+                userId: records.id,
+            }).then((res) => {
+                if (res.data.state == 204) {
+                    this.$message.warning("项目尚未对接无法修改");
+                } else {
+                    this.TaskList = res.data.records;
+                    this.dialogVisibletwo = true;
+                }
+            });
+        },
+        /* 修改审核人 */
+        Revisionpeople(row) {
+            this.Visible = true;
+            this.titleList = "修改" + row.roleIdInfoMap.name + "列表";
+            this.projectIdshenhe = row.id;
+            this.selected = row.reviewerMap.true_name;
+            userinfolist({
+                regionId: row.region_id,
+                roleId: row.roleIdInfoMap.id,
+            }).then((res) => {
+                this.candidate = res.data.records;
+            });
+        },
+        /* 修改审核人确认*/
+        updateExamineReviewer() {
+            updateExamineReviewer({
+                examineIds: this.projectIdshenhe,
+                reviewerIds: this.selected,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message.success("修改成功");
+                    this.Visible = false;
+                    this.modification(this.row);
+                } else {
+                    this.$message.success("修改失败");
+                    this.Visible = false;
+                }
+            });
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+.reference {
+    height: 100%;
+}
+
+.All {
+    height: 100%;
+    overflow: auto;
+
+    .addNewYewu {
+        height: 40px;
+        line-height: 40px;
+        font-size: 16px;
+        cursor: pointer;
+        color: #4ca72c;
+        background: #fff;
+        padding: 0 1%;
+        margin-bottom: 7px;
+    }
+
+    .condition {
+        height: 82px;
+        line-height: 40px;
+        font-size: 16px;
+        background: #fff;
+        padding: 0 1%;
+        margin-bottom: 7px;
+
+        .el-form {
+            width: 90%;
+
+            .el-form-item {
+                margin-bottom: 0;
+            }
+
+            ::v-deep .el-form-item:nth-child(7) {
+                padding-left: 13px;
+            }
+
+            ::v-deep .el-form-item__content {
+                line-height: 40px;
+            }
+        }
+    }
+
+    .footer-table {
+        background: #fff;
+
+        height: calc(100% - 89px);
+
+        .el-table {
+            overflow-y: auto;
+        }
+
+        .classsty {
+            height: calc(100% - 80px);
+        }
+
+        .footer {
+            padding: 20px;
+            border-bottom: 1px solid rgb(235, 238, 245);
+        }
+
+        .edit {
+            color: #337ab7;
+            cursor: pointer;
+        }
+
+        .submit {
+            color: #8ed65d;
+            cursor: pointer;
+        }
+
+        .delete {
+            color: red;
+            cursor: pointer;
+        }
+
+        .audit {
+            cursor: pointer;
+        }
+
+        .submit:hover {
+            text-decoration: underline;
+        }
+
+        .edit:hover {
+            text-decoration: underline;
+        }
+
+        .delete:hover {
+            text-decoration: underline;
+        }
+
+        .audit:hover {
+            text-decoration: underline;
+        }
+
+        ::v-deep .el-table__expanded-cell {
+            padding: 10px 24px 10px 100px;
+            line-height: 24px;
+            background: #fff;
+            position: relative;
+            top: 0px;
+        }
+
+        .hide {
+            width: 100%;
+            height: 20px;
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        ::v-deep .el-form--inline .el-form-item {
+            margin-right: 48px;
+            color: #2788ee;
+            font-weight: 400;
+        }
+
+        ::v-deep .el-form-item__label {
+            color: #2788ee;
+            font-weight: bolder;
+            margin-right: -15px;
+        }
+    }
+}
+
+.imgShow {
+    img {
+        width: 50%;
+        left: 50%;
+        position: relative;
+        transform: translate(-50%, -50%);
+        top: 50%;
+    }
+}
+
+.pdf {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.iframes {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+}
+
+.close {
+    width: 30px;
+    height: 30px;
+    background: #323639;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+}
+
+.imgShow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 66;
+    background: #0000005e;
+}
+
+.closer {
+    width: 30px;
+    height: 30px;
+    background: #0000005e;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+}
+
+/* 修改信息 */
+.editCont {
+    ::v-deep .el-input__inner {
+        height: 32px;
+        line-height: 32px;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .el-form-item {
+        padding: 0;
+        margin-bottom: 10px;
+    }
+}
+
+.fontsty {
+    color: red;
+    font-size: 15px;
+}
+
+.fontsty:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.el-dialog {
+    .item_box {
+        width: 50%;
+        margin: auto;
+
+        .item_header {
+            height: 20px;
+            border-radius: 5px 5px 0 0;
+            background: rgb(214, 111, 14);
+            line-height: 20px;
+            color: #fff;
+            font-size: 12px;
+            padding-left: 10px;
+
+            .el-icon-close {
+                position: relative;
+                left: 60%;
+                cursor: pointer;
+            }
+        }
+
+        .item_footer {
+            position: relative;
+
+            ::v-deep.el-input__inner {
+                border-radius: 0 !important;
+            }
+
+            .el-divider--vertical {
+                display: inline-block;
+                width: 2px;
+                height: 1.5em;
+                margin: 0 85px;
+                position: relative;
+            }
+
+            .iconstyle {
+                width: 30px;
+                height: 30px;
+                margin: auto;
+                cursor: pointer;
+                background: rgb(48, 114, 201);
+                border-radius: 50%;
+                color: #fff;
+
+                i {
+                    line-height: 30px;
+                    padding: 0 6px;
+                    width: 30px;
+                    font-size: 18px;
+                }
+            }
+
+            ::v-deep.el-popover {
+                left: 180px;
+                top: 0px;
+            }
+        }
+    }
+}
+
+::v-deep.cur:hover {
+    background: aliceblue;
+    cursor: pointer;
+}
+
+::v-deep.isSelect:hover {
+    background: aliceblue;
+    cursor: not-allowed;
+}
+</style>

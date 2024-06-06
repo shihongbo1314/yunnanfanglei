@@ -1,0 +1,792 @@
+<template>
+    <div>
+        <el-dialog
+            title="审核记录"
+            :visible.sync="curTimeLineShow"
+            @close='closeDialog'
+        >
+            <div style="height: 650px;overflow-y: scroll;">
+                <el-timeline>
+                    <div
+                        v-for="(item, index) in (mydilongList ? mydilongList :'')"
+                        :key="index"
+                        class="card"
+                    >
+                        <el-popover
+                            placement="left"
+                            width="300"
+                            trigger="hover"
+                        >
+                            <div class="card_bot">
+                                <div class="left">
+                                    <p> <span> 项目名称： </span>{{ item.projectMap.project_name || '-' }} </p>
+                                    <p
+                                        v-if="item.fileName"
+                                        @click.stop="curDetail(item.fileName)"
+                                        style="cursor: pointer;"
+                                    > <span> 检测报告： </span> <span style="color:#2788EE">{{ item.fileName || '-' }}</span> </p>
+                                    <p> <span> 备注： </span>{{ item.remarks || '-' }} </p>
+                                </div>
+                                <!-- <div class="right" v-if="item.fileName">
+                                        <span @click.stop="curDetail(item.fileName)"> 详细信息 </span>
+                                    </div> -->
+                            </div>
+
+                            <div
+                                class="card_top"
+                                slot="reference"
+                            >
+                                <div class="card_text">
+                                    <span v-if="['4','20','21','22'].includes(item.state)"> {{ item.auditeeMap.user_name }} <span>{{item.roleIdInfoMap!=null ? '(' + item.roleIdInfoMap.other+')':""}}</span></span>
+                                    <span v-else> {{ item.reviewerMap!=null ? item.reviewerMap.user_name :'-' }} <span>{{item.roleIdInfoMap!=null ? '(' + item.roleIdInfoMap.other+')':""}}</span></span>
+                                </div>
+                                <div class="card_filter">
+                                    <svg-icon
+                                        icon-class="tuihui"
+                                        v-if="['18','19','32','33'].includes(item.state)"
+                                    />
+                                    <svg-icon
+                                        icon-class="bianji"
+                                        v-if="['20'].includes(item.state)"
+                                    />
+                                    <svg-icon
+                                        icon-class="weitongguo"
+                                        v-if="['5','8','11','14','17','25'].includes(item.state)"
+                                    />
+                                    <svg-icon
+                                        icon-class="tixing"
+                                        v-if="['6','9','12','15','24','26','29'].includes(item.state)"
+                                    />
+                                    <svg-icon
+                                        icon-class="tongguo"
+                                        v-if="['4','7','10','13','16','22','21','23','27','34'].includes(item.state)"
+                                    />
+                                    <span v-if="['32','33','26','27','28','29','31','34'].includes(item.state)">{{ item.state | statusFilterNew}}</span>
+                                    <span v-else>{{ item.state | statusFilter(item.roleIdInfoMap!=null ? item.roleIdInfoMap.name :"")}}</span>
+                                    
+                                </div>
+                                <div class="card_time">
+                                    <span> {{item.examineTime || '-'}} </span>
+                                </div>
+                                <div class="card_message">
+                                    <i
+                                        class="el-icon-chat-dot-round"
+                                        @click="BtnClick(item)"
+                                        :class="barge == item.id ? 'active':''"
+                                    />
+                                </div>
+                            </div>
+                        </el-popover>
+                    </div>
+                </el-timeline>
+            </div>
+        </el-dialog>
+
+        <div
+            v-drag
+            class="jiaBoxs"
+            v-if="BoxIShow"
+        >
+            <div
+                class="jiaBoxTop"
+                v-if="jiaishow"
+            >
+                <div class="jiaBoxTop-header">选择留言人：<i
+                        class="el-icon-close"
+                        @click="close"
+                    ></i></div>
+                <el-radio-group
+                    v-model="radio"
+                    @change="changeBox"
+                >
+                    <el-radio
+                        :label="item.id"
+                        v-for="item in mess_list"
+                    >{{item.trueName}}</el-radio>
+                </el-radio-group>
+            </div>
+            <div
+                class="jiaBox"
+                v-if="ishow"
+            >
+                <div class="header">留言栏</div>
+                <div
+                    class="messbox"
+                    ref="messbox"
+                >
+                    <div
+                        class="boxs"
+                        v-for="send in senderUserList"
+                    >
+                        <div
+                            class="leftbox"
+                            v-if="send.senderUserMap.id != regionId.id"
+                        >
+                            <span>{{send.senderUserMap.userName}}</span>
+                            <span style="display:block">{{send.saveTime}}</span>
+                            <div class="mess_box">
+                                {{send.content}}
+                            </div>
+                        </div>
+                        <div
+                            class="rightbox"
+                            v-else
+                        >
+                            <span>{{send.senderUserMap.userName}}</span>
+                            <span style="display:block">{{send.saveTime}}</span>
+                            <div class="mess_box">
+                                {{send.content}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="leaveMess">
+                    <el-input
+                        v-model="textarea"
+                        size='small'
+                        placeholder="请输入内容"
+                    ></el-input>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        @click="postMessList"
+                    >发送</el-button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</template>
+
+<script>
+import { getMessList, postMessList, getCommunicationUser } from "@/api/user";
+export default {
+    name: "XXX",
+    filters: {
+        statusFilter(status, arr) {
+            if (arr != "" && arr == "编印人") {
+                if (status == "15") {
+                    return "省级编印中";
+                } else if (status == "16") {
+                    return "通过";
+                } else {
+                    switch (status) {
+                        case "3":
+                            return "备案待通过";
+                            break;
+                        case "4":
+                            return "备案审核通过";
+                            break;
+                        case "5":
+                            return "备案申请不通过";
+                            break;
+                        case "6":
+                            return "州市对接中";
+                            break;
+                        case "7":
+                            return "州市已对接";
+                            break;
+                        case "8":
+                            return "州市对接不通过";
+                            break;
+                        case "9":
+                            return "州市审核中";
+                            break;
+                        case "10":
+                            return "州市审核通过";
+                            break;
+                        case "11":
+                            return "州市审核不通过";
+                            break;
+                        case "12":
+                            return "省级对接中";
+                            break;
+                        case "13":
+                            return "省级已对接";
+                            break;
+                        case "14":
+                            return "省级对接不通过";
+                            break;
+                        case "15":
+                            return "省级审核中";
+                            break;
+                        case "16":
+                            return "省级已审核";
+                            break;
+                        case "17":
+                            return "省级审核不通过";
+                            break;
+                        case "18":
+                            return "市级退回";
+                            break;
+                        case "19":
+                            return "省级退回";
+                            break;
+                        case "20":
+                            return "被退回在编辑";
+                            break;
+                        case "21":
+                            return "再编辑已提交";
+                            break;
+                        case "22":
+                            return "报告已编制";
+                            break;
+                        case "23":
+                            return "已转交";
+                            break;
+                        case "24":
+                            return "被转交";
+                            break;
+                        case "25":
+                            return "编印撤回";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } else {
+                switch (status) {
+                    case "3":
+                        return "备案待通过";
+                        break;
+                    case "4":
+                        return "备案审核通过";
+                        break;
+                    case "5":
+                        return "备案申请不通过";
+                        break;
+                    case "6":
+                        return "州市对接中";
+                        break;
+                    case "7":
+                        return "州市已对接";
+                        break;
+                    case "8":
+                        return "州市对接不通过";
+                        break;
+                    case "9":
+                        return "州市审核中";
+                        break;
+                    case "10":
+                        return "州市审核通过";
+                        break;
+                    case "11":
+                        return "州市审核不通过";
+                        break;
+                    case "12":
+                        return "省级对接中";
+                        break;
+                    case "13":
+                        return "省级已对接";
+                        break;
+                    case "14":
+                        return "省级对接不通过";
+                        break;
+                    case "15":
+                        return "省级审核中";
+                        break;
+                    case "16":
+                        return "省级已审核";
+                        break;
+                    case "17":
+                        return "省级审核不通过";
+                        break;
+                    case "18":
+                        return "市级退回";
+                        break;
+                    case "19":
+                        return "省级退回";
+                        break;
+                    case "20":
+                        return "被退回在编辑";
+                        break;
+                    case "21":
+                        return "再编辑已提交";
+                        break;
+                    case "22":
+                        return "报告已编制";
+                        break;
+                    case "23":
+                        return "已转交";
+                        break;
+                    case "24":
+                        return "被转交";
+                        break;
+                    case "25":
+                        return "编印撤回";
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+    },
+    data() {
+        return {
+            curTimeLineShow: false,
+            textarea: "",
+            mydilongList: "",
+            regionId: null,
+            senderUserList: [],
+            renwu: "",
+            receiveUserid: "",
+            senderUserid: "",
+            BoxIShow: false,
+            jiaishow: false,
+            ishow: false,
+            radio: "",
+            mess_list: [],
+            barge: null,
+        };
+    },
+    props: ["dilongList", "TimeLineShow"],
+    watch: {
+        TimeLineShow(val) {
+            this.curTimeLineShow = val;
+        },
+        dilongList(val) {
+            this.mydilongList = val;
+            this.mydilongList = Array.prototype.reverse.call(
+                this.mydilongList.province
+            );
+        },
+        curTimeLineShow(val) {
+            if (!val) {
+                this.$emit("TimeLineShowlose", val);
+            }
+        },
+    },
+    mounted() {
+        this.regionId = JSON.parse(sessionStorage.getItem("records"));
+    },
+    methods: {
+        imgCom(row) {
+            let arr = row.split(",");
+            if (arr.length > 0) {
+                return arr[0];
+            } else {
+                return arr;
+            }
+        },
+        curDetail(row) {
+            this.$emit("docSrcShow", row);
+        },
+        getMessList(renwu, receiveUserid, id) {
+            this.receiveUserid = receiveUserid;
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            getMessList({
+                examineId: renwu,
+                receiveUserid: this.receiveUserid,
+                senderUserid: regionId.id,
+            }).then((res) => {
+                if (res.data.state == 200 && res.data.records != null) {
+                    this.senderUserList = res.data.records;
+                } else {
+                    this.senderUserList = [];
+                }
+                if (this.$refs.messbox != undefined) {
+                    setTimeout(() => {
+                        this.$refs.messbox.scrollTop =
+                            this.$refs.messbox.scrollHeight;
+                    }, 500);
+                }
+            });
+        },
+        postMessList() {
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            const strAll = {
+                senderUserid: regionId.id,
+                examineId: this.renwu,
+                content: this.textarea,
+                receiveUserid: this.receiveUserid,
+            };
+            postMessList(strAll).then((res) => {
+                if (res.data.state == 200) {
+                    this.getMessList(
+                        this.renwu,
+                        this.receiveUserid,
+                        regionId.id
+                    );
+                    this.textarea = "";
+                }
+            });
+        },
+        BtnClick(item) {
+            this.barge = item.id;
+            if (["4", "20", "21", "22"].includes(item.state)) {
+                this.receiveUserid = item.auditeeMap.id;
+            } else {
+                this.receiveUserid = item.reviewerMap.id;
+            }
+            this.renwu = item.id;
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            if (regionId.id == this.receiveUserid) {
+                getCommunicationUser({
+                    examineId: item.id,
+                    receiveUserid: this.receiveUserid,
+                }).then((res) => {
+                    if (res.data.state == 204 || res.data.records == null) {
+                        this.$message.error("没有用户留言");
+                        this.mess_list = [];
+                        this.BoxIShow = false;
+                    } else {
+                        this.BoxIShow = true;
+                        this.jiaishow = true;
+                        this.mess_list = res.data.records;
+                    }
+                });
+            } else {
+                this.BoxIShow = true;
+                this.jiaishow = false;
+                this.ishow = true;
+                this.getMessList(this.renwu, this.receiveUserid, regionId.id);
+            }
+        },
+        close() {
+            this.BoxIShow = false;
+            this.ishow = false;
+            this.jiaishow = false;
+            this.barge = null;
+            this.mess_list = [];
+            this.radio = ''
+        },
+        changeBox() {
+            this.ishow = true;
+            this.getMessList(this.renwu, this.radio, this.senderUserid);
+            /*  setTimeout(() => {
+                this.$refs.messbox.scrollTop = this.$refs.messbox.scrollHeight;
+            }, 500); */
+        },
+        closeDialog() {
+            this.close();
+        },
+    },
+    // 自定义之令
+    directives: {
+        clickoutside: {
+            bind(el, binding, vnode) {
+                /*  console.log(el, binding); */
+                function documentHandler(e) {
+                    if (el.contains(e.target)) {
+                        return false;
+                    }
+                    if (binding.expression) {
+                        binding.value(e);
+                    }
+                }
+
+                function KeyUp(e) {
+                    if (e.keyCode == 27) {
+                        if (binding.expression) {
+                            binding.value(e);
+                        }
+                    }
+                }
+                el.__vueClickOutSize__ = documentHandler;
+                el.__vueKeyup__ = KeyUp;
+
+                document.addEventListener("keyup", KeyUp);
+                document.addEventListener("click", documentHandler);
+            },
+            unbind(el, binding) {
+                document.removeEventListener("click", el.__vueClickOutSize__);
+                delete el.__vueClickOutSize__;
+
+                document.removeEventListener("keyup", el.__vueKeyup__);
+                delete el.__vueKeyup__;
+            },
+        },
+        //拖拽div
+        drag(el, bindings) {
+            el.onmousedown = function (e) {
+                var disx = e.pageX - el.offsetLeft;
+                var disy = e.pageY - el.offsetTop;
+                document.onmousemove = function (e) {
+                    el.style.left = e.pageX - disx + "px";
+                    el.style.top = e.pageY - disy + "px";
+                };
+                document.onmouseup = function () {
+                    document.onmousemove = document.onmouseup = null;
+                };
+            };
+        },
+    },
+};
+</script>
+<style lang="scss">
+.el-popover.messageBox {
+    margin-left: 50px;
+    background-color: #f7f7f7;
+}
+.messbox {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    height: 370px;
+    overflow: auto;
+    .boxs {
+        margin-top: 10px;
+        .leftbox {
+            width: 50%;
+            .mess_box {
+                width: 100%;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                padding: 5px;
+                background-color: #feffff;
+                min-height: 40px;
+            }
+        }
+
+        .rightbox:nth-child(1) {
+            margin-top: 0px;
+        }
+        .rightbox {
+            width: 50%;
+            margin-top: 20px;
+            margin-left: 160px;
+
+            .mess_box {
+                width: 100%;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                padding: 5px;
+                background-color: #feffff;
+                background: rgb(164, 240, 118);
+                min-height: 40px;
+            }
+        }
+    }
+    div:nth-child(1) {
+        margin-top: 0px;
+    }
+}
+.leaveMess {
+    display: flex;
+}
+.jiaBoxTop {
+    text-align: justify;
+    font-size: 16px;
+    background-color: #f7f7f7;
+    width: 100%;
+    word-break: break-all;
+    transform-origin: left center;
+    z-index: 2019;
+    border-radius: 5px;
+    .jiaBoxTop-header {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        .el-icon-close {
+            font-weight: 900;
+            cursor: pointer;
+        }
+    }
+    .el-radio-group {
+        padding: 20px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+}
+.jiaBoxs {
+    position: absolute;
+    top: 250px;
+    right: 70px;
+    padding: 12px;
+    text-align: justify;
+    font-size: 14px;
+    background-color: #f7f7f7;
+    width: 400px;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+    border: 1px solid #ebeef5;
+    word-break: break-all;
+    transform-origin: left center;
+    z-index: 9999;
+    border-radius: 5px;
+}
+.jiaBox {
+    text-align: justify;
+    font-size: 14px;
+    background-color: #f7f7f7;
+    word-break: break-all;
+    transform-origin: left center;
+    z-index: 9999;
+    border-radius: 5px;
+    .header {
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+}
+.active {
+    color: red;
+}
+</style>
+<style scoped  lang="scss">
+.dialong {
+    background: #fff;
+    .el-dialog {
+        width: 1080px;
+        .dialong_c {
+            display: flex;
+            margin-top: 24px;
+            .left {
+                width: 228px;
+                height: 48px;
+                background: #f4f9fd;
+                border: 1px solid #dddddd;
+                text-align: right;
+                line-height: 45px;
+                span {
+                    margin-right: 16px;
+                }
+            }
+            .right {
+                width: 805px;
+                height: 48px;
+                background: #ffffff;
+                border: 1px solid #dddddd;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                div {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    img {
+                        margin: 0 10px 0 19px;
+                    }
+                    span {
+                        font-size: 14px;
+                        color: #888888;
+                        font-weight: 400;
+                        margin-right: 24px;
+                    }
+                }
+            }
+        }
+    }
+    .dialong_c:first-child {
+        margin-top: 0;
+    }
+}
+
+.card {
+    width: 100%;
+    line-height: 50px;
+    background: #fff;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 16px;
+    .card_top {
+        width: 100%;
+        display: flex;
+        .card_text {
+            width: 30%;
+            /*  padding-right: 24px; */
+            text-align: center;
+            margin-right: 1%;
+            border: 1px solid #f2f2ff;
+            border-radius: 5px;
+            box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+            background: lavender;
+            color: #000;
+        }
+        .card_filter {
+            width: 40%;
+            padding-left: 24px;
+            border: 1px solid #e1dbdb;
+            border-radius: 5px;
+            box-shadow: 0 ​2px 0px 0 rgb(0 0 0 / 10%);
+            display: flex;
+            align-items: center;
+            border-right: none;
+        }
+        .svg-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 16px;
+        }
+        .card_time {
+            width: 25%;
+            text-align: right;
+            padding-right: 24px;
+            box-shadow: 0px ​2px 0px 0 rgb(0 0 0 / 10%);
+            border: 1px solid #e1dbdb;
+            font-size: 14px;
+            border-left: none;
+            border-right: none;
+        }
+        .card_message {
+            width: 5%;
+            padding-right: 14px;
+            font-size: 20px;
+            text-align: center;
+            border: 1px solid #e1dbdb;
+            border-left: none;
+            ::v-deep.messBox {
+                margin: 20px 10px 10px 10px;
+                border: 1px solid #000;
+            }
+        }
+
+        .card_message:hover {
+            color: red;
+            cursor: pointer;
+        }
+        .card_state {
+            margin-left: 10px;
+            align-items: center;
+            display: flex;
+            .svg-icon {
+                width: 24px;
+                height: 24px;
+                margin-right: 16px;
+            }
+        }
+    }
+}
+.card_bot {
+    width: 100%;
+    font-size: 12px;
+    color: #888888;
+    color: #000;
+    justify-content: space-between;
+    .left {
+        p {
+            span {
+                font-weight: bolder;
+                font-size: 13px;
+            }
+        }
+    }
+    .right {
+        span {
+            color: #2788ee;
+            cursor: pointer;
+        }
+    }
+}
+.card:first-child {
+    margin-top: 0;
+}
+/* 设置滚动条的样式 */
+::-webkit-scrollbar {
+    width: 0;
+    margin-left: 5px;
+}
+/* 滚动槽 */
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.5);
+}
+</style>

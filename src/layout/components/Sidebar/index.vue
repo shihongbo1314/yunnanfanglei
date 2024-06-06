@@ -1,0 +1,461 @@
+<template>
+    <div
+        :class="{'has-logo':showLogo}"
+        v-if="this.$store.state.app.trunoff"
+    >
+        <logo
+            v-if="showLogo"
+            :collapse="isCollapse"
+        />
+        <el-scrollbar wrap-class="scrollbar-wrapper">
+            <el-menu
+                :default-active="activeMenu"
+                :collapse="isCollapse"
+                :background-color="variables.menuBg"
+                :text-color="variables.menuText"
+                :unique-opened="false"
+                :active-text-color="variables.menuActiveText"
+                :collapse-transition="false"
+                mode="vertical"
+            >
+                <sidebar-item
+                    v-for="route in menuList"
+                    :key="route.path"
+                    :item="route"
+                    :base-path="route.path"
+                />
+            </el-menu>
+        </el-scrollbar>
+    </div>
+</template>
+
+<script>
+import { mapGetters } from "vuex";
+import Logo from "./Logo";
+import SidebarItem from "./SidebarItem";
+import variables from "@/styles/variables.scss";
+import Layout from "@/layout";
+
+export default {
+    components: { SidebarItem, Logo },
+    data() {
+        return {
+            menuList: [
+                {
+                    path: "/login",
+                    component: () => import("@/views/login/index"),
+                    hidden: true,
+                },
+
+                {
+                    path: "/404",
+                    component: () => import("@/views/404"),
+                    hidden: true,
+                },
+                {
+                    path: "/",
+                    redirect: "/login",
+                    hidden: true,
+                },
+                {
+                    path: "/HomePage",
+                    component: Layout,
+                    children: [
+                        {
+                            path: "/HomePage",
+                            name: "我的地盘",
+                            component: () => import("@/views/HomePage/index"),
+                            meta: { title: "我的地盘", icon: "el-icon-user" },
+                        },
+                    ],
+                },
+                {
+                    path: "/details",
+                    component: Layout,
+                    children: [
+                        {
+                            path: "/details/:userId?",
+                            name: "details",
+                            component: () =>
+                                import("@/views/HomePage/children/index"),
+                        },
+                    ],
+                },
+                {
+                    path: "/personal",
+                    component: Layout,
+                    children: [
+                        {
+                            path: "/personal",
+                            name: "personal",
+                            component: () => import("@/views/personal/index"),
+                        },
+                    ],
+                },
+                {
+                    path: "/aviation",
+                    component: Layout,
+                    name: "项目管理",
+                    meta: {
+                        title: "项目管理",
+                        icon: "el-icon-document-copy",
+                    },
+                    children: [
+                        {
+                            path: "authorized",
+                            name: "编制",
+                            component: () =>
+                                import("@/views/aviation/authorized/index"),
+                        },
+                        {
+                            path: "personal",
+                            name: "personal",
+                            component: () => import("@/views/personal/index"),
+                        },
+                    ],
+                },
+
+                {
+                    path: "/dataquery",
+                    component: Layout,
+                    meta: { title: "系统管理", icon: "el-icon-setting" },
+                    children: [
+                        {
+                            path: "personal",
+                            name: "personal",
+                            component: () => import("@/views/personal/index"),
+                        },
+                    ],
+                },
+            ],
+        };
+    },
+    computed: {
+        ...mapGetters(["sidebar"]),
+        routes() {
+            return this.$router.options.routes;
+        },
+        activeMenu() {
+            const route = this.$route;
+            const { meta, path } = route;
+            // if set path, the sidebar will highlight the path you set
+            if (meta.activeMenu) {
+                return meta.activeMenu;
+            }
+            return path;
+        },
+        showLogo() {
+            return this.$store.state.settings.sidebarLogo;
+        },
+        variables() {
+            return variables;
+        },
+        isCollapse() {
+            return !this.sidebar.opened;
+        },
+    },
+    mounted() {
+        const records = JSON.parse(sessionStorage.getItem("records"));
+        if (records.roleIdMap.name == "管理员") {
+            this.menuList[6].children.push(
+                {
+                    path: "reference",
+                    name: "项目信息查看",
+                    component: () => import("@/views/aviation/reference/index"),
+                    meta: { title: "项目信息查看", icon: "el-icon-document" },
+                },
+
+                /*  {
+                    path: "ReportSta",
+                    name: "报告情况统计",
+                    component: () => import("@/views/aviation/ReportSta/index"),
+                    meta: { title: "报告情况统计", icon: "el-icon-document" },
+                }, */
+                {
+                    path: "usagetype",
+                    name: "usagetype",
+                    component: () => import("@/views/usage/index.vue"),
+                    meta: {
+                        title: "报告签名记录",
+                        icon: "el-icon-coordinate",
+                    },
+                },
+                {
+                    path: "record",
+                    name: "备案信息统计",
+                    component: () => import("@/views/aviation/record/index"),
+                    meta: { title: "备案信息统计", icon: "el-icon-document" },
+                },
+                {
+                    path: "summary",
+                    name: "备案信息汇总",
+                    component: () => import("@/views/aviation/summary/index"),
+                    meta: { title: "备案信息汇总", icon: "el-icon-document" },
+                },
+                {
+                    path: "offerstatistics",
+                    name: "offerstatistics",
+                    component: () =>
+                        import("@/views/aviation/offerstatistics/index.vue"),
+                    meta: { title: "项目报价统计表", icon: "el-icon-document" },
+                },
+            );
+            this.menuList[7].children.push(
+                {
+                    path: "user",
+                    name: "用户管理",
+                    component: () => import("@/views/user/index"),
+                    meta: {
+                        title: "用户管理",
+                        icon: "user",
+                        roles: ["guanliyuan"],
+                    },
+                },
+                {
+                    path: "cement",
+                    name: "cement",
+                    component: () => import("@/views/cement/Index.vue"),
+                    meta: {
+                        title: "公告管理",
+                        icon: "el-icon-tickets",
+                    },
+                },
+                {
+                    path: "peoplestatistics",
+                    name: "人员统计表",
+                    component: () =>
+                        import("@/views/peoplestatistics/index.vue"),
+                    meta: {
+                        title: "人员统计表",
+                        icon: "el-icon-s-custom",
+                    },
+                },
+                {
+                    path: "facilitystatistics",
+                    name: "设备统计表",
+                    component: () =>
+                        import("@/views/peoplestatistics/index.vue"),
+                    meta: {
+                        title: "设备统计表",
+                        icon: "el-icon-cpu",
+                    },
+                }
+            );
+        }
+        if (records.roleIdMap.name == "对接人") {
+            this.menuList[6].children.push(
+                {
+                    path: "information",
+                    name: "项目信息",
+                    component: () =>
+                        import("@/views/aviation/information/index"),
+                    meta: { title: "项目信息", icon: "el-icon-document" },
+                },
+                {
+                    path: "ReportSta",
+                    name: "报告情况统计",
+                    component: () => import("@/views/aviation/ReportSta/index"),
+                    meta: { title: "报告情况统计", icon: "el-icon-document" },
+                }
+            );
+        }
+        if (records.roleIdMap.name == "审核人") {
+            this.menuList[6].children.push({
+                path: "information",
+                name: "项目信息",
+                component: () => import("@/views/aviation/information/index"),
+                meta: { title: "项目信息", icon: "el-icon-document" },
+            });
+        }
+        if (records.roleIdMap.name == "终审人") {
+            this.menuList[6].children.push({
+                path: "information",
+                name: "项目信息",
+                component: () => import("@/views/aviation/information/index"),
+                meta: { title: "项目信息", icon: "el-icon-document" },
+            });
+        }
+        if (records.roleIdMap.name == "编制人") {
+            this.menuList[6].children.push(
+                {
+                    path: "reference",
+                    name: "报告编制",
+                    component: () => import("@/views/aviation/reference/index"),
+                    meta: { title: "报告编制", icon: "el-icon-document" },
+                },
+                {
+                    path: "information",
+                    name: "项目信息",
+                    component: () =>
+                        import("@/views/aviation/information/index"),
+                    meta: { title: "项目信息", icon: "el-icon-document" },
+                }
+            );
+        }
+        if (records.roleIdMap.name == "业务员") {
+            this.menuList[6].children.push(
+                {
+                    path: "quotation",
+                    name: "报价单",
+                    component: () => import("@/views/aviation/quotation/index"),
+                    meta: { title: "报价单", icon: "el-icon-document" },
+                },
+                {
+                    path: "handling",
+                    name: "投标资料",
+                    component: () => import("@/views/aviation/handling/index"),
+                    meta: { title: "投标资料", icon: "el-icon-document" },
+                }
+            );
+        }
+        if (records.roleIdMap.name == "备案审核员") {
+            this.menuList[6].children.push({
+                path: "reference",
+                name: "备案信息录入",
+                component: () => import("@/views/aviation/reference/index"),
+                meta: { title: "备案信息录入", icon: "el-icon-document" },
+            });
+        }
+        if (records.roleIdMap.name == "检测人") {
+            this.menuList[6].children.push(
+                {
+                    path: "reference",
+                    name: "报告编制",
+                    component: () => import("@/views/aviation/reference/index"),
+                    meta: { title: "报告编制", icon: "el-icon-document" },
+                },
+                {
+                    path: "information",
+                    name: "项目信息",
+                    component: () =>
+                        import("@/views/aviation/information/index"),
+                    meta: { title: "项目信息", icon: "el-icon-document" },
+                }
+            );
+        }
+        if (records.roleIdMap.name == "编印人") {
+            this.menuList[6].children.push({
+                path: "information",
+                name: "项目信息",
+                component: () => import("@/views/aviation/information/index"),
+                meta: { title: "项目信息", icon: "el-icon-document" },
+            });
+        }
+        if (
+            records.roleIdMap.name == "管理员" &&
+            records.regionIdMap.id == 2841
+        ) {
+            this.menuList[6].children.push(
+                {
+                    path: "refundledger",
+                    name: "refundledger",
+                    component: () =>
+                        import("@/views/aviation/refundledger/index.vue"),
+                    meta: { title: "项目返款台账表", icon: "el-icon-document" },
+                },
+                {
+                    path: "handling",
+                    name: "投标资料",
+                    component: () => import("@/views/aviation/handling/index"),
+                    meta: { title: "投标资料", icon: "el-icon-document" },
+                },
+                {
+                    path: "monthlystatistical",
+                    name: "monthlystatistical",
+                    component: () =>
+                        import("@/views/aviation/monthlystatistical/index.vue"),
+                    meta: { title: "月统计报告生成", icon: "el-icon-document" },
+                }
+            );
+            this.menuList[7].children.push(
+                {
+                    path: "usage",
+                    name: "usage",
+                    component: () => import("@/views/usage/index.vue"),
+                    meta: { title: "用章登记", icon: "el-icon-coordinate" },
+                },
+                {
+                    path: "stamp",
+                    name: "stamp",
+                    component: () => import("@/views/stamp/index.vue"),
+                    meta: {
+                        title: "公章管理",
+                        icon: "el-icon-coordinate",
+                    },
+                },
+                {
+                    path: "configuration",
+                    name: "configuration",
+                    component: () => import("@/views/configuration/index.vue"),
+                    meta: {
+                        title: "环节配置",
+                        icon: "el-icon-setting",
+                    },
+                }
+            );
+        }
+        if (
+            records.roleIdMap.name == "备案人" &&
+            records.regionIdMap.id == 2841
+        ) {
+            this.menuList[6].children.push(
+                {
+                    path: "reference",
+                    name: "备案信息录入",
+                    component: () => import("@/views/aviation/reference/index"),
+                    meta: { title: "备案信息录入", icon: "el-icon-document" },
+                },
+                {
+                    path: "record",
+                    name: "备案信息统计",
+                    component: () => import("@/views/aviation/record/index"),
+                    meta: { title: "备案信息统计", icon: "el-icon-document" },
+                },
+                {
+                    path: "summary",
+                    name: "备案信息汇总",
+                    component: () => import("@/views/aviation/summary/index"),
+                    meta: { title: "备案信息汇总", icon: "el-icon-document" },
+                },
+                {
+                    path: "refundledger",
+                    name: "refundledger",
+                    component: () =>
+                        import("@/views/aviation/refundledger/index.vue"),
+                    meta: { title: "项目返款台账表", icon: "el-icon-document" },
+                },
+                {
+                    path: "cement",
+                    name: "cement",
+                    component: () => import("@/views/cement/Index.vue"),
+                    meta: {
+                        title: "公告管理",
+                        icon: "el-icon-tickets",
+                    },
+                }
+            );
+        } else if (records.roleIdMap.name == "备案人") {
+            this.menuList[6].children.push(
+                {
+                    path: "reference",
+                    name: "备案信息录入",
+                    component: () => import("@/views/aviation/reference/index"),
+                    meta: { title: "备案信息录入", icon: "el-icon-document" },
+                },
+                {
+                    path: "record",
+                    name: "备案信息统计",
+                    component: () => import("@/views/aviation/record/index"),
+                    meta: { title: "备案信息统计", icon: "el-icon-document" },
+                },
+                {
+                    path: "summary",
+                    name: "备案信息汇总",
+                    component: () => import("@/views/aviation/summary/index"),
+                    meta: { title: "备案信息汇总", icon: "el-icon-document" },
+                }
+            );
+        }
+    },
+};
+</script>

@@ -1,0 +1,1217 @@
+<template>
+    <div>
+        <table width=100% bgcolor=#cccccc cellpadding=1 cellspacing=1>
+            <tr>
+                <td valign=top width=80 bgcolor=white align=center>
+                    <table id="tablebut">
+                        <tr>
+                            <td valign="top">
+                                [<b style="color:green">打开保存</b>]<br>
+
+                                <!-- <input
+                                    type=button
+                                    class="button"
+                                    value="打开本地文件"
+                                    @click="WebOpenLocal()"
+                                ></input><br> -->
+                                <input type=button class="button" value="存为本地文件" @click="WebSaveLocal()"></input><br>
+                                <input type=button class="button" value="指定页保存" @click="WebSavePage()"></input><br>
+
+                                <input type=button class="button" value="删除文件" @click="WebDelFile()"></input><br>
+                                [<b style="color:green">文档转换</b>]<br>
+
+                                <input type=button class="button" value="保存本地PDF" @click="WebSaveLocalPdf()"></input><br>
+                                <input type=button class="button" value="保存本地HTML" @click="WebSaveLocalHTML()"></input><br>
+
+                                [<b style="color:green">打印控制</b>]<br>
+                                <input type=button class="button" value="打印预览" @click="WebDocPrintPreView()"></input><br>
+                                <input type=button class="button" value="设置后打印一" @click="WebDocPrint()"></input><br>
+                                <input type=button class="button" value="设置后打印二" @click="WebDocPrint2()"></input><br>
+                                <input type=button class="button" value="直接打印" @click="WebPrintDirc()"></input><br>
+                                [<b style="color:green">窗口设置</b>]<br>
+                                <!--  <input
+                                    type=button
+                                    class="button"
+                                    value="关闭标题栏"
+                                    @click="WebTitlebar(false)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打开标题栏"
+                                    @click="WebTitlebar(true)"
+                                ></input><br> -->
+                                <input type=button class="button" value="关闭菜单栏" @click="WebMenubar(false)"></input><br>
+                                <input type=button class="button" value="打开菜单栏" @click="WebMenubar(true)"></input><br>
+                                <input type=button class="button" value="关闭工具栏" @click="WebToolbar(false)"></input><br>
+                                <input type=button class="button" value="打开工具栏" @click="WebToolbar(true)"></input><br>
+
+                                [<b style="color:green">文档视图</b>]<br>
+                                <input type=button class="button" value="普通视图" @click="WebShowView(1)"></input><br>
+                                <input type=button class="button" value="大纲视图" @click="WebShowView(2)"></input><br>
+                                <input type=button class="button" value="页面视图" @click="WebShowView(3)"></input><br>
+                                <input type=button class="button" value="打印预览" @click="WebShowView(4)"></input><br>
+                                <input type=button class="button" value="主控视图" @click="WebShowView(5)"></input><br>
+                                <input type=button class="button" value="WEB视图" @click="WebShowView(6)"></input><br>
+                                <input type=button class="button" value="阅读视图" @click="WebShowView(7)"></input><br>
+
+                            </td>
+                            <td valign="top">
+                            </td>
+                            <td valign="top">
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+                <td valign="top" bgcolor="white">
+                    <div id="WebOCX"><object classid="clsid:FF09E4FA-BFAA-486E-ACB4-86EB0AE875D5"
+                            codebase="http://www.officectrl.com/weboffice/WebOffice.ocx#Version=2018,1,6,2" id="WebOffice"
+                            width="80%" height="900">
+                            <param name="BorderStyle" value="1">
+                            <param name="Menubar" value="1">
+                            <param name="Titlebar" value="1">
+                            <param name="Toolbars" value="1">
+                        </object></div>
+                </td>
+                <td valign=top width=180 bgcolor=white align=center>
+                    <table id="tablebut">
+                        <tr>
+                            <td valign="top">
+                                <b style="color:green;" v-if="back != -1 && back1 != 1">处理意见</b><br>
+                                <div class="borderBoxs" ref="borderBoxs">
+                                    <div class="borderBox" :class="index === borderBoxs.length - 1 ? 'col' : ''"
+                                        v-for="(item, index) in borderBoxs" :key="index">
+                                        <span style="font-size:12px">角色：{{ item.roleIdInfoMap != null ?
+                                            item.roleIdInfoMap.other : "-" }}</span><br>
+                                        <span style="font-size:12px"
+                                            v-if="['4', '20', '21', '22'].includes(item.state)">操作人：{{ item.auditeeMap != null ?
+                                                item.auditeeMap.true_name : "-" }}</span>
+                                        <span style="font-size:12px" v-else>操作人：{{ item.reviewerMap != null ?
+                                            item.reviewerMap.true_name : "-" }}</span><br>
+                                        <span style="font-size:12px">备注：{{ item.remarks != null ? item.remarks : "-" }}</span>
+                                    </div>
+                                </div>
+                                <el-input type="textarea" :rows="6" placeholder="备注" v-model="textarea" show-word-limit
+                                    style="margin-bottom:10px;margin-top:10px">
+                                </el-input><br>
+                                <div :class="tanFlog ? 'operation' : ''">
+                                    <transition name="fade">
+                                        <div class="classsty" v-if="ishowtrue">
+                                            <label style="color:green;margin:5px 0;display:block"
+                                                v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">公章列表</label>
+                                            <el-button v-for="(item, index) in commonList" :key="index" size="mini" round
+                                                @click="commonChange('http://140.249.209.176:8084/LightningDetection/Seal/' + item.filename)"
+                                                v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{ item.title }}
+                                            </el-button>
+                                            <label style="color:green;margin:5px 0;display:block"
+                                                v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">检测人列表</label>
+                                            <div v-if="['2', '3', '5'].includes(multiplex) && ishowtrue" class="footer">
+                                                <el-button v-for="(item, index) in inspectorList" :key="item.id" size="mini"
+                                                    @click="inspectorChange('http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath)">{{ item.userName }}
+                                                </el-button>
+                                            </div>
+
+                                            <label style="color:green;margin:5px 0;display:block">审核人列表</label>
+                                            <el-checkbox-group v-model="auditor.ladder" @change="personChange">
+                                                <el-checkbox v-for="(item, index) in auditorList" :key="item.id"
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                            </el-checkbox-group>
+                                            <label style="color:green;margin:5px 0;display:block">负责人列表</label>
+                                            <el-checkbox-group v-model="principal.ladder" @change="principalChange">
+                                                <el-checkbox v-for="(item, index) in principalList" :key="item.id"
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                            </el-checkbox-group>
+                                            <span class="footer">
+                                                <el-button @click="ishowtrue = false" size="small" style="flex:1">取
+                                                    消</el-button>
+                                                <el-button type="primary" size="small" style="flex:1"
+                                                    @click="ExamineClick">确 定</el-button>
+                                            </span>
+                                        </div>
+                                    </transition>
+                                    <transition name="fade">
+                                        <div class="classsty" v-if="isback">
+                                            <label style="color:green;margin:5px 0;display:block">退回人列表</label>
+                                            <el-checkbox-group v-model="goBack.ladder" @change="ladderChange">
+                                                <el-checkbox v-for="(item, index) in goBackList" :key="item.id"
+                                                    :label="item.id + ',' + item.roleId">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                            </el-checkbox-group>
+                                            <span class="footer">
+                                                <el-button @click="isback = false" size="small" style="flex:1">取
+                                                    消</el-button>
+                                                <el-button type="primary" size="small" style="flex:1" @click="GoBackClick">确
+                                                    定</el-button>
+                                            </span>
+                                        </div>
+                                    </transition>
+                                    <div v-if="back != -1 && back1 != 1 && back2 != -3">
+                                        <div style="display:flex;margin-top:5px">
+                                            <el-button type="success" @click="Examine(1)" size="mini"
+                                                style="flex:1">通过</el-button>
+                                            <el-button type="info" v-if="ID == '1' || back == '2'" @click="giveIt" size="mini"
+                                                style="flex:1">转交</el-button>
+                                        </div>
+                                        <div style="display:flex;margin-top:5px">
+                                            <el-button type="warning" size="mini" @click="Back()"
+                                                style="flex:1">退回</el-button>
+                                            <!-- <el-button
+                                                type="danger"
+                                                size="mini"
+                                                @click="Examine(2)"
+                                                style="flex:1"
+                                            >终止</el-button> -->
+                                        </div>
+                                        <div style="display:flex;margin-top:5px">
+                                            <el-button type="primary" size="mini" @click="working()"
+                                                style="flex:1">暂存</el-button>
+                                        </div>
+                                        <div style="display:flex;margin-top:5px">
+                                            <el-button type="info" size="mini" @click="existingProblem()"
+                                                style="flex:1">存在问题报告</el-button>
+                                        </div>
+                                        <div style="display:flex;margin-top:5px">
+                                            <el-button type="primary" size="mini" @click="Saveversion()" style="flex:1"
+                                                v-if="(this.multiplex == '2' || this.multiplex == '3' || this.multiplex == '5') && xianyin">保存正式版</el-button>
+                                        </div>
+                                    </div>
+                                    <transition name="fade">
+                                        <div v-if="classsty" class="classsty"> <label
+                                                style="color:green;margin:5px 0;display:block">转交用户列表</label>
+                                            <el-checkbox-group v-model="lessonForm.ladder" @change="ladderChange">
+                                                <el-checkbox v-for="(item, index) in ladderList" :key="item.id"
+                                                    :label="item.id">{{ item.userName }}</el-checkbox>
+                                            </el-checkbox-group>
+                                            <span class="footer">
+                                                <el-button @click="classsty = false" size="small" style="flex:1">取
+                                                    消</el-button>
+                                                <el-button type="primary" size="small" style="flex:1" @click="giveItClick">确
+                                                    定</el-button>
+                                            </span>
+                                        </div>
+                                    </transition>
+                                </div>
+
+                                <b style="color:green;" v-if="back != -1 && back1 != 1 && back != 2 && back2 != -3">保存</b><br>
+                                <input type=button class="button" value="保存" v-if="back != -1 && back != 2 && back2 != -3"
+                                    @click="WebSaveC()"><br>
+                                <input type=button class="button" value="再次提交" v-if="back1 != 1 && back != 2"
+                                    @click="Examine(1)"><br>
+                                <input type="button" class="button" value="暂存" style="margin-top:5px;" @click="working()"
+                                    v-if="back1 != 1 && back != 2">
+                                <br>
+                                <input type=button class="button" value="退回" v-if="back1 != 1 && back != 2 && back2 != -3"
+                                    @click="Back()"><br>
+                                <br>
+
+                            </td>
+                            <td valign="top">
+                            </td>
+                            <td valign="top">
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+<script>
+import * as WebCtrl from "@/assets/WebOffice.js?v=1"; //注意路径
+import {
+    sendMsg,
+    TransferProject,
+    getDockUser,
+    getProjectExamineUser,
+    getProjectTestUser,
+    updateExamineRemarks,
+    getLastExamineInfo,
+    selectProjectRecord,
+    getProjectInfoById,
+    postBiaoji,
+} from "@/api/aviation";
+import { queryStamp } from "@/api/user";
+let strUrl = "";
+let doctype = "";
+export default {
+    data() {
+        return {
+            testvalue: "",
+            textarea: "",
+
+            back: "",
+            back1: "",
+            back2: "",
+            ID: null,
+            lessonForm: {
+                ladder: [],
+            },
+            ladderList: [],
+            classsty: false,
+            commonList: [
+                {
+                    filename: "gongsi-feimoban",
+                    title: "行政章",
+                },
+                {
+                    filename: "jiance-feimoban",
+                    title: "检测章",
+                },
+            ],
+            common: {
+                ladder: [],
+            },
+            inspectorList: [],
+            inspector: {
+                ladder: [],
+            },
+            auditor: {
+                ladder: [],
+            },
+            auditorList: [],
+            principal: {
+                ladder: [],
+            },
+            principalList: [],
+            ishow: null,
+            ishowtrue: false,
+            isback: false,
+            goBack: {
+                ladder: [],
+            },
+            goBackList: [],
+            signatureAll: [
+                "OfficialSeal",
+                "contactuser",
+                "contactmobile",
+                "OfficialSeal1",
+                "LiableUser",
+                "Reviewer",
+                "Tester",
+                "Tester1",
+                "tester2",
+            ] /* 所有签名 */,
+            Flag: false,
+            isFlag: false,
+            multiplex: "" /* 模板非模板 */,
+            xianyin: false,
+            ReturnOpinion: "",
+            superior: {
+                true_name: "",
+                other: "",
+                config: false,
+            },
+            borderBoxs: [],
+            variable: false,
+            variabletwo: false,
+            tanFlog: false,
+            messageQm: null,
+        };
+    },
+    created() {
+        this.$store.commit("app/TRUNOFF", false);
+        var Division = window.location.hash
+            .split("?")[1]
+            .split("&")[6]
+            .split("=")[1];
+        var identity = window.location.hash
+            .split("?")[1]
+            .split("&")[7]
+            .split("=")[1];
+        if (Division != "null" && identity != "null") {
+            this.user_info();
+        }
+        var projectId = window.location.hash
+            .split("?")[1]
+            .split("&")[8]
+            .split("=")[1];
+        if (projectId == null) {
+        } else {
+            this.getProjectExamineUser();
+            this.getProjectTestUser();
+        }
+        this.sendMsgClick();
+        /*  this.queryStamp(); */
+        var ID = window.location.hash.split("=")[1];
+        if (ID.indexOf("&") != -1) {
+            ID = ID.split("&")[0];
+        }
+        if (ID == "null") {
+        } else {
+            /*  this.getLastExamineInfo(); */
+        }
+    },
+    mounted() {
+        this.$nextTick(function () {
+            WebCtrl.LoadCtrl(WebOCX);
+            var fileName = window.location.hash
+                .split("?")[1]
+                .split("&")[2]
+                .split("=")[1];
+            var back = window.location.hash
+                .split("?")[1]
+                .split("&")[3]
+                .split("=")[1];
+            this.ID = window.location.hash
+                .split("?")[1]
+                .split("&")[5]
+                .split("=")[1];
+            this.ishow = window.location.hash
+                .split("?")[1]
+                .split("&")[9]
+                .split("=")[1];
+            let remarks = window.location.hash
+                .split("?")[1]
+                .split("&")[10]
+                .split("=")[1];
+            let multiplex = window.location.hash
+                .split("?")[1]
+                .split("&")[11]
+                .split("=")[1];
+            let category = window.location.hash
+                .split("?")[1]
+                .split("&")[12]
+                .split("=")[1];
+            let company = window.location.hash
+                .split("?")[1]
+                .split("&")[13]
+                .split("=")[1];
+            this.multiplex = multiplex;
+            if (remarks == "null" || remarks == "undefined") {
+                this.textarea = "";
+            } else {
+                this.textarea = decodeURI(remarks);
+            }
+            if (back == "-1" || back == "2") {
+                this.back = back;
+            } else if (back == "1") {
+                this.back1 = back;
+            } else if (back == "2") {
+                this.back2 = back;
+            } else if (back == "-3") {
+                this.back2 = back;
+            }
+            if (this.ishow == "true") {
+                this.xianyin = true;
+            }
+            if (
+                this.ishow == "true" &&
+                (this.multiplex == "2" ||
+                    this.multiplex == "3" ||
+                    this.multiplex == "5")
+            ) {
+                this.tanFlog = true;
+                this.$message({
+                    /*  showClose: true, */
+                    message: "非模板项目需要先保存正式版",
+                    /* duration:0 */
+                    type: "error",
+                });
+            } else {
+                this.tanFlog = false;
+            }
+            if (fileName != "null" || back == "-1") {
+                strUrl = `http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/${fileName}`;
+            } else if (category != "null" && company != '2') {
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempTextNew.doc";
+            } else if (company == '2') {
+                strUrl = "http://140.249.209.176:9080/fanglei/Qi_TestTempText.doc";
+            } else {
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempText.doc";
+            }
+            //通过对象WebOffice的Open方法打开个一个服务器文档
+            WebOffice.UserName = "杞人气象科技服务(北京)有限公司";
+            WebOffice.Authorizer = "www.officectrl.com";
+            doctype = "doc";
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                WebOffice.Open(strUrl, true, doctype);
+                if (
+                    this.multiplex == "2" ||
+                    this.multiplex == "3" ||
+                    this.multiplex == "5"
+                ) {
+                    this.isFlag = true;
+                } else if (
+                    this.multiplex == "0" ||
+                    this.multiplex == "4" ||
+                    this.multiplex == "1"
+                ) {
+                    this.getAllMark();
+                }
+            }, 1500);
+            this.WebTitlebar(false);
+            this.selectProjectRecord();
+        });
+    },
+    methods: {
+        sendMsgClick() {
+            var sessionID = window.location.hash.split("&")[1].split("=")[1];
+            let msg = {
+                sendType: 1,
+                acceptUserIds: sessionID,
+                messageStr: "3",
+            };
+            sendMsg(msg).then((res) => { });
+        },
+        /* 转交用户列表*/
+        user_info() {
+            var ID = window.location.hash.split("=")[2];
+            if (ID.indexOf("&") != -1) {
+                ID = ID.split("&")[0];
+            }
+            var Division = window.location.hash
+                .split("?")[1]
+                .split("&")[6]
+                .split("=")[1];
+            var identity = window.location.hash
+                .split("?")[1]
+                .split("&")[7]
+                .split("=")[1];
+            getDockUser({
+                regionId: Division,
+                roleId: identity,
+                userId: ID,
+            }).then((res) => {
+                this.ladderList = res.data.records;
+            });
+        },
+        personChange() {
+            this.setJpg(
+                "审核人签名",
+                this.auditor.ladder.toString().split("&")[0]
+            );
+            if (this.auditor.ladder.length > 1) {
+                this.auditor.ladder.shift();
+            }
+            /* alert(this.auditor.ladder.toString()); */
+            if (this.auditor.ladder.toString().split("+")[1] == "null") {
+                this.$message.error("审核人签名未上传");
+                this.variable = true;
+            } else {
+                this.variable = false;
+            }
+        },
+        principalChange() {
+            this.setJpg(
+                "负责人签名",
+                this.principal.ladder.toString().split("&")[0]
+            );
+            if (this.principal.ladder.length > 1) {
+                this.principal.ladder.shift();
+            }
+            if (this.principal.ladder.toString().split("+")[1] == "null") {
+                this.$message.error("负责人签名未上传");
+                this.variabletwo = true;
+            } else {
+                this.variabletwo = false;
+            }
+        },
+        ladderChange() {
+            if (this.lessonForm.ladder.length > 1) {
+                this.lessonForm.ladder.shift();
+            }
+
+            if (this.principal.ladder.length > 1) {
+                this.principal.ladder.shift();
+            }
+            if (this.goBack.ladder.length > 1) {
+                this.goBack.ladder.shift();
+            }
+        },
+        /* 添加检测人签名 */
+        inspectorChange(item) {
+            this.setJpg("签名", item);
+        },
+        getAllMark() {
+            return new Promise((resolve, reject) => {
+                var WebOffice = document.getElementById("WebOffice");
+                var iCount = WebOffice.ActiveDocument.BookMarks.count;
+                var list = [];
+                for (let i = 1; i <= iCount; i++) {
+                    /*  alert(WebOffice.ActiveDocument.BookMarks.item(i).Name); */
+                    list.push(
+                        WebOffice.ActiveDocument.BookMarks.item(
+                            i
+                        ).Name.toUpperCase()
+                    );
+                }
+                var xiangtong = this.signatureAll.filter((val) => {
+                    return list.indexOf(val.toUpperCase()) > -1;
+                });
+                let result = [];
+                for (let i = 0; i < this.signatureAll.length; i++) {
+                    let isExist = false;
+                    for (let j = 0; j < list.length; j++) {
+                        if (
+                            this.signatureAll[i].toUpperCase() ==
+                            list[j].toUpperCase()
+                        ) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if (!isExist) {
+                        result.push(this.signatureAll[i]);
+                    }
+                }
+                this.messageQm = result.toString();
+                if (xiangtong.length == this.signatureAll.length) {
+                    this.Flag = true;
+                    resolve(this.Flag);
+                } else {
+                    this.Flag = false;
+                    resolve(this.Flag);
+                }
+            });
+        },
+        /* 添加公章图片 */
+        commonChange(item) {
+            this.setJpg("公章", item);
+        },
+        /* 查询项目的审核人员 */
+        getProjectExamineUser() {
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[8]
+                .split("=")[1];
+            /* 审核人 */
+            getProjectExamineUser({
+                projectId: projectId,
+                type: 1,
+            }).then((res) => {
+                this.auditorList = res.data.records;
+            });
+            /* 负责人 */
+            getProjectExamineUser({
+                projectId: projectId,
+                type: 2,
+            }).then((res) => {
+                this.principalList = res.data.records;
+            });
+            /* 退回人列表 */
+            getProjectExamineUser({
+                projectId: projectId,
+                type: 3,
+            }).then((res) => {
+                this.goBackList = res.data.records;
+            });
+        },
+        /* 查询这个项目的所有检测人列表及详细信息 */
+        getProjectTestUser() {
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[8]
+                .split("=")[1];
+            getProjectTestUser({
+                projectId: projectId,
+            }).then((res) => {
+                this.inspectorList = res.data.records;
+            });
+        },
+        /* 查询公章图片 */
+        /*  queryStamp() {
+            queryStamp({
+                size: 10,
+                current: 1,
+            }).then((res) => {
+                this.commonList = res.data.records;
+            });
+        }, */
+        /* 获得当前审核任务的前一个任务的详细信息 */
+        getLastExamineInfo() {
+            var ID = window.location.hash.split("=")[1];
+            if (ID.indexOf("&") != -1) {
+                ID = ID.split("&")[0];
+            }
+            getLastExamineInfo({
+                examineId: ID,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    /*  this.superior.true_name =
+                        res.data.records.reviewerMap.true_name;
+                    this.superior.other = res.data.records.roleIdInfoMap.other;
+                    this.ReturnOpinion = res.data.records.remarks; */
+                } else {
+                    this.config = true;
+                }
+            });
+        },
+        /* 获取全部流程备注 */
+        selectProjectRecord() {
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[8]
+                .split("=")[1];
+            selectProjectRecord({
+                id: projectId,
+                index: 1,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.borderBoxs = res.data.records.province;
+                    setTimeout(() => {
+                        this.$refs.borderBoxs.scrollTop =
+                            this.$refs.borderBoxs.scrollHeight;
+                    }, 500);
+                }
+            });
+        },
+        NoCopyIt: function (e) {
+            WebCtrl.isNotCopy(e);
+        },
+        WebSignature: function (e) {
+            var strpic;
+            if (e == 1) strpic = "001.gif";
+            if (e == 2) strpic = "002.gif";
+            if (e == 3) strpic = "003.gif";
+            WebCtrl.WebSignature(
+                "http://www.officectrl.com/weboffice/images/" + strpic
+            );
+        },
+        WebSave: function () {
+            WebOffice.Save(
+                "http://www.officectrl.com/officecs/uploadedit.aspx?oper=edit&flsid=4167975720113410419&flag=1"
+            ); //uploadedit.aspx是表单一个文件上传的后二进制接收器
+        },
+        WebHttpSave: function () {
+            WebOffice.HttpInit();
+            WebOffice.HttpAddPostString("filename", "4167975720113410419.doc");
+            WebOffice.HttpAddPostCurrFile("docfile", "");
+            var strResults = WebOffice.HttpPost(
+                "http://www.officectrl.com/officecs/postsave.aspx"
+            ); //postsave.aspx是表单一个文件上传的后二进制接收器
+            if (strResults == "ok") alert("保存成功！");
+        },
+        WebDocReload: function () {
+            location.reload();
+        },
+        WebOpen1: function () {
+            WebOffice.WebLoadFile(
+                "http://www.officectrl.com/weboffice/temp/%E6%95%B0%E6%8D%AE%E6%99%BA%E8%83%BD%E8%AF%86%E5%88%AB%E4%B8%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE%E7%AE%97%E6%B3%95%2Edocx",
+                "Word.Document"
+            );
+        },
+        WebOpen2: function () {
+            WebOffice.Close();
+            WebOffice.WebOpen(
+                "http://www.officectrl.com/weboffice/temp/file1.doc",
+                "doc"
+            );
+        },
+        WebOpen3: function () {
+            WebOffice.WebLoadFile(
+                "http://www.officectrl.com/weboffice/temp/file1.doc",
+                null
+            );
+        },
+        CreateXLS: function () {
+            WebOffice.WebLoadFile("", "xls");
+        },
+        CreateDoc: function () {
+            WebOffice.WebLoadFile("", "doc");
+        },
+        CreatePpt: function () {
+            WebOffice.WebLoadFile("", "ppt");
+        },
+        /* 暂存 */
+        async working() {
+            var adm = await this.getAllMark();
+            if (adm || this.isFlag) {
+                var ID = window.location.hash.split("=")[1];
+                var makeUserid = window.location.hash
+                    .split("?")[1]
+                    .split("&")[4]
+                    .split("=")[1];
+                if (ID.indexOf("&") != -1) {
+                    ID = ID.split("&")[0];
+                }
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/record-temporary/save?examineId=${ID}&remarks=${this.textarea}`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "暂存成功,需要关闭页面以提高文件正确性。"
+                    );
+                    sendMsg({
+                        sendType: 1,
+                        acceptUserIds: makeUserid,
+                        messageStr: "2",
+                    }).then((res) => {
+                        /*  alert(res.data.state); */
+                    });
+                    window.close();
+                } else {
+                    this.$message.error("暂存失败");
+                }
+            } else {
+                alert(`${this.messageQm}书签未获取到`);
+            }
+        },
+        /* 存在问题报告 */
+        existingProblem() {
+            var ID = window.location.hash.split("=")[1];
+            if (ID.indexOf("&") != -1) {
+                ID = ID.split("&")[0];
+            }
+            postBiaoji({
+                examineId: ID,
+            }).then((res) => {
+                //alert(res.data.state)
+                if (res.data.state == "200") {
+                    this.$message.success("标记成功");
+                } else {
+                    this.$message.error("标记失败");
+                }
+            });
+        },
+        /* 保存正式版 */
+        Saveversion() {
+            var ID = window.location.hash.split("=")[1];
+            if (ID.indexOf("&") != -1) {
+                ID = ID.split("&")[0];
+            }
+            const re = WebOffice.Save(
+                `http://140.249.209.176:8084/LightningDetection/record-examine/saveFormalFile?examineId=${ID}`
+            );
+            const res = re.substring(0, 3);
+            if (res == "200") {
+                this.$message.success("保存成功");
+            } else {
+                this.$message.error("保存失败");
+            }
+        },
+        /* 保存在服务器*/
+        async WebSaveC() {
+            var adm = await this.getAllMark();
+            if (adm || this.isFlag) {
+                var ID = window.location.hash.split("=")[1];
+                if (ID.indexOf("&") != -1) {
+                    ID = ID.split("&")[0];
+                }
+                var makeUserid = window.location.hash
+                    .split("?")[1]
+                    .split("&")[4]
+                    .split("=")[1];
+                var roleIdMap = window.location.hash
+                    .split("?")[1]
+                    .split("&")[7]
+                    .split("=")[1];
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/project-record/updateTestImg?projectId=${ID}&makeUserid=${makeUserid}&roleId=${roleIdMap}&remarks=${this.textarea}`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "保存成功,需要关闭页面以提高文件正确性。"
+                    );
+                    sendMsg({
+                        sendType: 1,
+                        acceptUserIds: makeUserid,
+                        messageStr: "2",
+                    }).then((res) => {
+                        /*  alert(res.data.state); */
+                    });
+                    window.close();
+                } else {
+                    this.$message.error("保存失败");
+                }
+            } else {
+                alert(`${this.messageQm}书签未获取到`);
+            }
+        },
+        /* 转交 */
+        giveIt() {
+            this.classsty = !this.classsty;
+        },
+        /* 转交确认 */
+        giveItClick() {
+            var id = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var identity = window.location.hash
+                .split("?")[1]
+                .split("&")[7]
+                .split("=")[1];
+            var sessionID = window.location.hash.split("&")[1].split("=")[1];
+            if (this.lessonForm.ladder.length == 0) {
+                this.$message("请先选择转交用户");
+            } else {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/record-examine/TransferProject?transferUser=${this.lessonForm.ladder.toString()}&id=${id}&roleId=${identity}`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "转交成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "1",
+                    };
+                    sendMsg(msg).then((res) => { });
+                    updateExamineRemarks({
+                        id: id,
+                        remarks: this.textarea,
+                    }).then((res) => { });
+                    window.close();
+                } else {
+                    this.$message.error("转交失败");
+                }
+            }
+        },
+        /* 通过 */
+        async Examine(num) {
+            var adm = await this.getAllMark();
+            if (adm || this.isFlag) {
+                var sessionID = window.location.hash
+                    .split("&")[1]
+                    .split("=")[1];
+                var id = window.location.hash
+                    .split("?")[1]
+                    .split("&")[0]
+                    .split("=")[1];
+                if (this.ishow == "true" && num == 1) {
+                    this.ishowtrue = true;
+                    this.$message("请先选择审核人和负责人");
+                } else {
+                    const re = WebOffice.Save(
+                        `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}`
+                    );
+                    const res = re.substring(0, 3);
+                    if (res == "200") {
+                        let msg = {
+                            sendType: 1,
+                            acceptUserIds: sessionID,
+                            messageStr: "1",
+                        };
+                        sendMsg(msg).then((res) => { });
+                        updateExamineRemarks({
+                            id: id,
+                            remarks: this.textarea,
+                        }).then((res) => { });
+                        if (num == 2) {
+                            this.$message.success(
+                                "终止成功,需要关闭页面以提高文件正确性。"
+                            );
+                            window.close();
+                        } else if (num == 3) {
+                            this.$message.success(
+                                "审核完成,需要关闭页面以提高文件正确性。"
+                            );
+                            window.close();
+                        } else {
+                            this.$message.success(
+                                "审核完成,需要关闭页面以提高文件正确性。"
+                            );
+                            window.close();
+                        }
+                    } else {
+                        this.$message.error("审核失败");
+                    }
+                }
+            } else {
+                alert(`${this.messageQm}书签未获取到`);
+            }
+        },
+        Back() {
+            this.isback = true;
+        },
+        /* 退回确认 */
+        GoBackClick() {
+            var num = 3;
+            var sessionID = window.location.hash.split("&")[1].split("=")[1];
+            var id = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            if (this.goBack.ladder.length == 0) {
+                this.$message("请先选择退回人");
+            } else {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.goBack.ladder.toString().split(",")[0]
+                    }&roleId=${this.goBack.ladder.toString().split(",")[1]}`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "退回成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "1",
+                    };
+                    sendMsg(msg).then((res) => { });
+                    updateExamineRemarks({
+                        id: id,
+                        remarks: this.textarea,
+                    }).then((res) => { });
+                    window.close();
+                } else {
+                    this.$message.error("退回失败");
+                }
+            }
+        },
+        /* 审核确认 */
+        async ExamineClick() {
+            let testFormalImg = await this.getProjectInfoById();
+            if (this.variable) {
+                return this.$message.error("审核人签名未上传");
+            } else if (this.variabletwo) {
+                return this.$message.error("负责人签名未上传");
+            } else if (testFormalImg == null && this.tanFlog == true) {
+                return this.$message.error(
+                    "非模板项目编印通过前请手动保存正式版报告（无印章无签名）"
+                );
+            } else {
+                var num = 1;
+                var sessionID = window.location.hash
+                    .split("&")[1]
+                    .split("=")[1];
+                var id = window.location.hash
+                    .split("?")[1]
+                    .split("&")[0]
+                    .split("=")[1];
+                if (
+                    this.auditor.ladder.length == 0 ||
+                    this.principal.ladder.length == 0
+                ) {
+                    this.$message("请先选择审核人和负责人");
+                } else {
+                    let re;
+                    if (["2", "3", "5"].includes(this.multiplex)) {
+                        re = WebOffice.Save(
+                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder
+                                .toString()
+                                .split("-")[1]
+                                .split("+")[0]
+                            }&LiableUser=${this.principal.ladder
+                                .toString()
+                                .split("-")[1]
+                                .split("+")[0]
+                            }`
+                        );
+                    } else {
+                        re = WebOffice.Save(
+                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder.toString().split("+")[0]
+                            }&LiableUser=${this.principal.ladder.toString().split("+")[0]
+                            }`
+                        );
+                    }
+                    const res = re.substring(0, 3);
+                    if (res == "200") {
+                        this.$message.success(
+                            "审核完成,需要关闭页面以提高文件正确性。"
+                        );
+                        let msg = {
+                            sendType: 1,
+                            acceptUserIds: sessionID,
+                            messageStr: "1",
+                        };
+                        sendMsg(msg).then((res) => { });
+                        updateExamineRemarks({
+                            id: id,
+                            remarks: this.textarea,
+                        }).then((res) => { });
+                        window.close();
+                    } else {
+                        this.$message.error("审核失败");
+                    }
+                }
+            }
+        },
+        async getProjectInfoById() {
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[8]
+                .split("=")[1];
+            return new Promise((resolve, reject) => {
+                getProjectInfoById({
+                    projectId: projectId,
+                }).then((res) => {
+                    if (res.data.state != 204) {
+                        resolve(res.data.records.testFormalImg);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        },
+        /* 添加书签 */
+        addMark(markname, markvalue) {
+            try {
+                var WebOffice = document.getElementById("WebOffice");
+                WebOffice.SetFieldValue(markname, markvalue, "::ADDMARK::");
+            } catch (e) {
+                alert(
+                    "信息提示：\r\n出错内容:" +
+                    e +
+                    "\r\n错误代码:" +
+                    e.number +
+                    "\r\n错误描述:" +
+                    e.description
+                );
+            }
+        },
+        /* 书签插入 */
+        setJpg(markname, strPath) {
+            this.addMark("公章", "");
+            try {
+                var WebOffice = document.getElementById("WebOffice");
+                var strFile = WebOffice.WebSignTempFile;
+                WebOffice.DownloadFile(strPath, strFile);
+                WebOffice.SetFieldValue(markname, "", "::ADDMARK::");
+                WebOffice.SetFieldValue(markname, strFile, "::JPG::");
+                WebOffice.WebSignTempFileDel();
+            } catch (e) {
+                alert(
+                    "信息提示：\r\n出错内容:" +
+                    e +
+                    "\r\n错误代码:" +
+                    e.number +
+                    "\r\n错误描述:" +
+                    e.description
+                );
+            }
+        },
+        WebSaveLocal: function () {
+            WebOffice.showdialog(3);
+        },
+        WebSavePage: function () {
+            WebOffice.SetPageAs("c:\\b.doc", 1, 0);
+            alert("已将文档第1页的内容另存为c盘根目录下的b.doc文件");
+        },
+        WebDelFile: function () {
+            WebOffice.DeleteLocalFile("c:\\a.doc");
+            alert("已将c盘根目a.doc删除");
+        },
+        WebSaveLocalPdf: function () {
+            var pdfile = "c:\\a.pdf";
+            var WebOffice = document.getElementById("WebOffice");
+            WebOffice.ActiveDocument.ExportAsFixedFormat(pdfile, 17);
+            alert(
+                "已在C盘根目录下生成" +
+                pdfile +
+                "，请到你本地电脑的C盘目录查看！"
+            );
+        },
+        WebSaveLocalHTML: function () {
+            var htmlfullpath = "c:\\a.html";
+            WebOffice.ActiveDocument.saveas(htmlfullpath, 8);
+            alert(
+                "已在C盘根目录下生成" +
+                htmlfullpath +
+                "，请到你本地电脑的C盘目录查看！"
+            );
+        },
+        WebGetUser: function () {
+            var app = WebOffice.GetApplication;
+            alert("用Application对象取得当前WORD文档用户名是：" + app.username);
+        },
+        WebActive: function () {
+            WebOffice.WebDialogs(129);
+        },
+        WebTempPath: function () {
+            var a = WebOffice.TempFilePath;
+            alert(a);
+        },
+        WebDocPrintPreView: function () {
+            WebOffice.ActiveDocument.Application.PrintPreview = 1;
+        },
+        WebDocPrint: function () {
+            WebOffice.printout(true);
+        },
+        WebDocPrint2: function () {
+            WebOffice.ActiveDocument.Application.Dialogs(88).Show();
+        },
+        WebPrintDirc: function () {
+            WebOffice.ActiveDocument.PrintOut();
+        },
+        WebTitlebar: function (e) {
+            WebOffice.Titlebar = e;
+        },
+        WebMenubar: function (e) {
+            WebOffice.MenuBars = e;
+        },
+        WebToolbar: function (e) {
+            WebOffice.Toolbars = e;
+        },
+        WebShowView: function (e) {
+            WebOffice.ShowView(e);
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+body,
+a {
+    font-size: 12px;
+}
+
+.button {
+    height: 25px;
+    width: 80px;
+    flex: 1;
+    background-color: #c6d7ef;
+    color: #000080;
+    line-height: 9pt;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    cursor: hand;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 9pt;
+}
+
+.classsty {
+    box-shadow: 2px 2px 3px #888888;
+    border: 1px solid #c6d7ef;
+    padding: 10px;
+
+    .footer {
+        margin-top: 10px;
+        display: flex;
+    }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+    {
+    transition: opacity 0.5s;
+}
+
+.borderBoxs {
+    height: 30vh;
+    overflow-y: auto;
+
+    .borderBox {
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .col {
+        color: #008cdb;
+        border: 1px solid #008cdb;
+    }
+}
+
+.operation {
+    height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+</style>

@@ -1,0 +1,4163 @@
+<template>
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-left">
+                <div class="header-left-top">
+                    项目统计
+                </div>
+                <div class="header-left-bottom">
+                    <div class="panel panel-success">
+                        <div
+                            class="panel-heading"
+                            style="padding: 6%; text-align: center;cursor: pointer;"
+                            @click="Clickjump(1)"
+                        >
+                            已完成<br> <span id="end">{{already}}</span>个
+                        </div>
+                    </div>
+                    <div class="panel panel-warning">
+                        <div
+                            class="panel-heading"
+                            style="padding: 6%; text-align: center;cursor: pointer;"
+                            @click="Clickjump(2)"
+                        >
+                            进行中<br> <span id="noEnd">{{conduct}}</span>个
+                        </div>
+                    </div>
+                    <div class="panel panel-danger">
+                        <div
+                            class="panel-heading"
+                            style="padding: 6%; text-align: center;cursor: pointer;"
+                            @click="Clickjump(3)"
+                        >
+                            未开始<br> <span id="noStart">{{unread}}</span>个
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-right-top">
+                    <div>公告</div>
+                </div>
+                <div class="header-right-bottom">
+                    <el-tabs
+                        v-model="activeName"
+                        type="card"
+                    >
+                        <el-tab-pane
+                            label="管理类"
+                            name="first"
+                        >
+                            <el-table
+                                :data="MBAData"
+                                style="width: 100%"
+                                :show-header='false'
+                                empty-text='暂无公告'
+                                v-loading="loadingMBA"
+                            >
+                                <el-table-column
+                                    prop="title"
+                                    label="标题"
+                                    align="center"
+                                >
+                                    <template slot-scope="scope">
+                                        <span
+                                            style="width: 100%;display: inline-block;"
+                                            v-html="scope.row.title"
+                                            @click="Gonggao(scope.row.content)"
+                                        />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+                        <el-tab-pane
+                            label="业务类"
+                            name="second"
+                        >
+                            <el-table
+                                :data="TOSData"
+                                style="width: 100%"
+                                :show-header='false'
+                                empty-text='暂无公告'
+                                v-loading="loadingTOS"
+                            >
+                                <el-table-column
+                                    prop="title"
+                                    label="标题"
+                                    align="center"
+                                >
+                                    <template slot-scope="scope">
+                                        <span
+                                            style="width: 100%;display: inline-block;"
+                                            v-html="scope.row.title"
+                                            @click="Gonggao(scope.row.content)"
+                                        />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+
+                    </el-tabs>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-left">
+                <div class="footer-left-header">
+                    <div>我参与的项目</div>
+                </div>
+                <div class="footer-left-bottom">
+                    <el-table
+                        :data="tableData"
+                        border
+                        style="width: 100%;;overflow-y: auto;"
+                        height="527px"
+                    >
+                        <el-table-column
+                            prop="id"
+                            label="编号"
+                            width="70"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="number"
+                            label="档案编号"
+                            width="180"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="projectName"
+                            label="项目名称"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="companyName"
+                            label="委托方名称"
+                            align="center"
+                            width="250"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="updateTime"
+                            label="项目更新时间"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="type"
+                            label="类别"
+                            align="center"
+                        >
+                        </el-table-column>
+                        <!-- <el-table-column
+                            prop="tester"
+                            label="检测人"
+                            align="center"
+                        >
+                        </el-table-column> -->
+                        <el-table-column
+                            label="项目状态"
+                            align="center"
+                        >
+                            <template slot-scope="scope">
+                                <span>
+                                    <el-tag
+                                        type="success"
+                                        @click.stop="statusCondition(scope.row.id)"
+                                        style="cursor: pointer;"
+                                    >{{ scope.row.state | statusFilter(scope.row.examineTaskMap!=null ? scope.row.examineTaskMap.role_id :"") }}</el-tag>
+                                </span>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="footer-right">
+                <div class="footer-right-top">
+                    <div class="footer-right-top-header">
+                        <div>我的任务</div>
+                    </div>
+                    <el-tabs style="padding: 0px 10px; height: calc(100% - 40px);">
+                        <!-- <el-tab-pane v-if="sessionName=='管理员'">
+                            <span slot="label">备案待审核<el-badge
+                                    :value="projectList.length"
+                                    v-if="projectList.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <div>
+                                    <li v-for="item in projectList">
+                                        <div class="hang">
+                                            <span @click="ItemDetails(item.projectMap)">{{item.projectMap!=null ? item.projectMap.project_name : ""}}</span>
+                                            <div v-if="sessionName=='管理员'">
+                                                <el-button
+                                                    size="small"
+                                                    @click="Audit(item)"
+                                                >处理</el-button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </div>
+
+                                <div slot="empty">
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane> -->
+                        <el-tab-pane v-if="sessionName=='备案人'&& regionId==2841">
+                            <span slot="label">开票任务<el-badge
+                                    :value="MyprojectList.length"
+                                    :max="9"
+                                    v-if="MyprojectList.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in MyprojectList">
+                                    <div class="hang">
+                                        <span style="width:50%">{{item.auditeeMap.userName}}</span>
+                                        <!-- <span>{{item.saveTime}}</span> -->
+                                        <el-button
+                                            size="small"
+                                            @click="makeOut(item)"
+                                            v-if="item.state!='4'"
+                                        >开票</el-button>
+                                        <el-button
+                                            size="small"
+                                            v-if="item.state!='4'"
+                                            @click="sendBack(item)"
+                                        >退回</el-button>
+                                        <el-button
+                                            size="small"
+                                            v-if="item.state=='4'"
+                                            :disabled="item.state=='4'"
+                                        >已读</el-button>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="MyprojectList.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='备案人'&& regionId==2841">
+                            <span slot="label">待作废<el-badge
+                                    :value="MyprojectListzuofei.length"
+                                    :max="9"
+                                    v-if="MyprojectListzuofei.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in MyprojectListzuofei">
+                                    <div class="hang">
+                                        <span style="width:50%">{{item.auditeeMap.userName}}</span>
+
+                                        <el-button
+                                            size="small"
+                                            @click="cancellation(item)"
+                                        >作废</el-button>
+                                        <el-button
+                                            size="small"
+                                            @click="cancellationapproved(item)"
+                                        >退回</el-button>
+
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="MyprojectListzuofei.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='备案人'&& regionId!=2841">
+                            <span slot="label">开票被退回<el-badge
+                                    :value="MyprojectListtuihui.length"
+                                    :max="9"
+                                    v-if="MyprojectListtuihui.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in MyprojectListtuihui">
+                                    <div class="hang">
+                                        <span style="width:50%">{{item.auditeeMap.userName}}</span>
+                                        <el-button
+                                            size="small"
+                                            @click="modification(item)"
+                                            v-if="item.state!='4'"
+                                        >修改</el-button>
+
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="MyprojectList.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='备案人'&& regionId!=2841">
+                            <span slot="label">废除被退回<el-badge
+                                    :value="MyprojectListfeichutuihui.length"
+                                    :max="9"
+                                    v-if="MyprojectListfeichutuihui.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in MyprojectListfeichutuihui">
+                                    <div class="hang">
+                                        <span style="width:50%">{{item.auditeeMap.userName}}</span>
+                                        <el-button
+                                            size="small"
+                                            @click="feichumodification(item)"
+                                            v-if="item.state!='4'"
+                                        >再次提交</el-button>
+
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="MyprojectListfeichutuihui.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='审核人' || sessionName=='终审人' || sessionName=='编印人'">
+                            <span slot="label">{{sessionName=='审核人' || sessionName=='终审人' || sessionName=='编印人'?'待处理':'待审核'}}<el-badge
+                                    :value="GuoLv"
+                                    :max="9"
+                                    v-if="ReviewprojectList.length!=0 || ReviewprojectListsheng.length!=0 || finalList.length!=0 || publishList.length!=0 || recordsList.length!=0"
+                                ></el-badge></span>
+                            <ol v-if="regionId!=2841 && sessionName=='审核人'">
+                                <li v-for="item in ReviewprojectList">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            style="flex:1"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='审核人'">
+                                            <el-button
+                                                size="small"
+                                                @click="Auditshi(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.ReviewprojectList.length==0 && regionId!=2841 && sessionName=='审核人'"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                            <ol v-if="regionId==2841 && sessionName=='审核人'">
+                                <li v-for="item in ReviewprojectListsheng">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='审核人'">
+                                            <el-button
+                                                size="small"
+                                                @click="Auditshi(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.ReviewprojectListsheng.length==0 && regionId==2841 && sessionName=='审核人'"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                            <ol v-if="sessionName=='终审人'">
+                                <li v-for="item in finalList">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='终审人'">
+                                            <el-button
+                                                size="small"
+                                                @click="Auditshi(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.finalList.length==0 && sessionName=='终审人'"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                            <ol v-if="sessionName=='编印人'">
+                                <li v-for="item in publishList">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='编印人'">
+                                            <el-button
+                                                size="small"
+                                                @click="Auditshi(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.publishList == 0 && sessionName=='编印人'"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                            <ol v-if="regionId==2841 && sessionName=='备案人'">
+                                <li v-for="item in recordsList">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='备案人'">
+                                            <el-button
+                                                size="small"
+                                                @click="Auditshi(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.recordsList.length == 0 && regionId==2841 && sessionName=='备案人'"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='对接人'">
+                            <span slot="label">待对接<el-badge
+                                    :max="9"
+                                    :value="regionId==2841 ? DKprojectListshi.length:DKprojectList.length "
+                                    v-if="DKprojectList.length!=0 || DKprojectListshi.length!=0"
+                                ></el-badge></span>
+                            <ol v-if="regionId!=2841">
+                                <li v-for="item in DKprojectList">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap ? item.projectMap.number :""}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div v-if="sessionName=='对接人'">
+                                            <el-button
+                                                size="small"
+                                                @click="butting(item)"
+                                            >对接</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.DKprojectList.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                            <ol v-if="regionId==2841">
+                                <li v-for="item in DKprojectListshi">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap ? item.projectMap.number :""}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent=='1'"
+                                        />
+                                        <div v-if="sessionName=='对接人'">
+                                            <el-button
+                                                size="small"
+                                                @click="butting(item)"
+                                            >对接</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.DKprojectListshi.length == 0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName=='管理员'">
+                            <span slot="label">待审核<el-badge
+                                    :value="completed.length"
+                                    v-if="completed.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in completed">
+                                    <div class="hang">
+                                        <span @click="Details(item)">{{item.quotationInfo.number}}</span>
+                                        <span
+                                            class="fintStyle"
+                                            v-if="item.state == '24'"
+                                        >被转交</span>
+                                        <div>
+                                            <el-button
+                                                size="small"
+                                                @click="check(item)"
+                                            >审核</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName == '编制人' || sessionName == '审核人' || sessionName == '终审人'">
+                            <span slot="label">报告被退回<el-badge
+                                    :value="returned.length"
+                                    :max="9"
+                                    v-if="returned.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in returned">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        /><!-- {{item.saveTime}} -->
+                                        <div>
+                                            <el-button
+                                                size="small"
+                                                @click="edit(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.returned.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName == '编制人' && completedIshow">
+                            <span slot="label">报价单被退回<el-badge
+                                    :value="completed.length"
+                                    :max="9"
+                                    v-if="completed.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in completed">
+                                    <div class="hang">
+                                        <span
+                                            @click="Details(item)"
+                                            class="font-sty"
+                                        >{{item.quotationInfo.number}}</span>
+                                        <div>
+                                            <el-button
+                                                size="small"
+                                                @click="checktwo(item)"
+                                            >编制</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.completed.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                        <el-tab-pane v-if="sessionName == '审核人' || sessionName == '终审人' || sessionName == '编印人'">
+                            <span slot="label">被转交<el-badge
+                                    :value="Turnedover.length"
+                                    :max="9"
+                                    v-if="Turnedover.length!=0"
+                                ></el-badge></span>
+                            <ol>
+                                <li v-for="item in Turnedover">
+                                    <div class="hang">
+                                        <span
+                                            @click="ItemDetails(item)"
+                                            class="font-sty"
+                                        >{{item.projectMap.number}}</span>
+                                        <svg-icon
+                                            icon-class="jiaji"
+                                            v-if="item.projectMap.urgent == '1'"
+                                        />
+                                        <div>
+                                            <el-button
+                                                size="small"
+                                                @click="editzhuanjiao(item)"
+                                            >处理</el-button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <div
+                                    slot="empty"
+                                    v-if="this.Turnedover.length==0"
+                                >
+                                    <div style="text-align: center;margin:36%">
+                                        <img
+                                            src="@/assets/zanwu.png"
+                                            alt="暂无数据"
+                                            width="100"
+                                            height="100"
+                                        />
+                                        <p style="color:#CCC">暂无数据</p>
+                                    </div>
+
+                                </div>
+                            </ol>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+            </div>
+        </div>
+        <el-dialog
+            title="选择审核人"
+            :visible.sync="Visible"
+            width="20%"
+            v-loading="loading"
+        >
+            <div v-if="regionId!=2841">
+                <div
+                    class="item_box"
+                    v-for="(item,index)  in itemList"
+                >
+                    <div class="item_header"><i class="el-icon-user-solid" />{{item.name}}<i
+                            :class="item.icon"
+                            @click="deleteicon(index)"
+                        /></div>
+                    <div class="item_footer">
+                        <div class="block">
+                            <el-input
+                                placeholder="市级别审核人"
+                                suffix-icon="el-icon-arrow-right"
+                                autocomplete="new-password"
+                                type="text"
+                                v-model="item.input"
+                                @focus="item.isShowPopover = true"
+                                @blur="item.isShowPopover = false"
+                            ></el-input>
+                            <el-popover
+                                v-model="item.isShowPopover"
+                                placement="right-start"
+                                title="备选人"
+                                width="140"
+                                trigger="click"
+                            >
+                                <li
+                                    :class="li.select ? 'isSelect' : ''"
+                                    v-for="li in list"
+                                    @click="BtnClick(index,li)"
+                                    class="cur"
+                                    style="list-style: none;padding: 0 10px;margin:5px 0px;"
+                                >{{li.userName}}</li>
+                            </el-popover>
+
+                            <el-divider direction="vertical"></el-divider>
+                            <div
+                                class="iconstyle"
+                                @click="addBtn"
+                            ><i class="el-icon-plus"></i></div>
+                            <el-divider direction="vertical"></el-divider>
+                        </div>
+                    </div>
+                </div>
+                <div class="item_box">
+                    <div class="item_header"><i class="el-icon-user-solid" />对接人</div>
+                    <div class="item_footer">
+                        <div class="block">
+                            <el-input
+                                placeholder="省局对接人"
+                                autocomplete="new-password"
+                                type="text"
+                                suffix-icon="el-icon-arrow-right"
+                                v-model="input2"
+                                v-popover:popoverTwo
+                            >
+                            </el-input>
+                            <el-popover
+                                ref="popoverTwo"
+                                placement="right-start"
+                                title="备选人"
+                                width="140"
+                                trigger="click"
+                                v-model="show"
+                            >
+                                <li
+                                    v-for="(li,index) in listTwo"
+                                    @click="BtnClickTwo(index,li)"
+                                    class="cur"
+                                    style="list-style: none;padding: 0 10px;margin:5px 0px;"
+                                >{{li.userName}}</li>
+                            </el-popover>
+                            <!--   <el-divider direction="vertical"></el-divider>
+                            <div class="iconstyle"><i class="el-icon-plus"></i></div>
+                            <el-divider direction="vertical"></el-divider> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="regionId==2841">
+                <!-- 省局情况下 -->
+                <div
+                    class="item_box"
+                    v-for="(item,index)  in itemList"
+                >
+                    <div class="item_header"><i class="el-icon-user-solid" />{{item.name}}<i
+                            :class="item.icon"
+                            @click="deleteicon(index)"
+                        /></div>
+                    <div class="item_footer">
+                        <div class="block">
+                            <el-input
+                                placeholder="省局审核人"
+                                autocomplete="new-password"
+                                type="text"
+                                suffix-icon="el-icon-arrow-right"
+                                v-model="item.input"
+                                @focus="item.isShowPopover = true"
+                                @blur="item.isShowPopover = false"
+                            ></el-input>
+                            <el-popover
+                                v-model="item.isShowPopover"
+                                placement="right-start"
+                                title="备选人"
+                                width="140"
+                                trigger="click"
+                            >
+                                <li
+                                    v-for="li in listone"
+                                    :class="li.select ? 'isSelect' : ''"
+                                    @click="BtnClick(index,li)"
+                                    class="cur"
+                                    style="list-style: none;padding: 0 10px;margin:5px 0px;"
+                                >{{li.userName}}</li>
+                            </el-popover>
+
+                            <el-divider direction="vertical"></el-divider>
+                            <div
+                                class="iconstyle"
+                                @click="addBtn"
+                            ><i class="el-icon-plus"></i></div>
+                            <el-divider direction="vertical"></el-divider>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="item_box"
+                    v-for="(item,index)  in itemListone"
+                >
+                    <div class="item_header"><i class="el-icon-user-solid" />{{item.name}}<i
+                            :class="item.icon"
+                            @click="deleteiconsheng(index)"
+                        /></div>
+                    <div class="item_footer">
+                        <div class="block">
+                            <el-input
+                                placeholder="省局终审人"
+                                autocomplete="new-password"
+                                type="text"
+                                suffix-icon="el-icon-arrow-right"
+                                v-model="item.input"
+                                @focus="item.isShowPopover = true"
+                                @blur="item.isShowPopover = false"
+                            >
+                            </el-input>
+                            <el-popover
+                                v-model="item.isShowPopover"
+                                placement="right-start"
+                                title="备选人"
+                                width="140"
+                                trigger="click"
+                            >
+                                <li
+                                    v-for="li in list_jia"
+                                    :class="li.select ? 'isSelect' : ''"
+                                    @click="BtnClickJia(index,li)"
+                                    class="cur"
+                                    style="list-style: none;padding: 0 10px;margin:5px 0px;"
+                                >{{li.userName}}</li>
+                            </el-popover>
+                            <el-divider direction="vertical"></el-divider>
+                            <div
+                                class="iconstyle"
+                                @click="addBtnone"
+                            ><i class="el-icon-plus"></i></div>
+                            <el-divider direction="vertical"></el-divider>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="item_box"
+                    v-for="(item,index)  in itemListtwo"
+                >
+                    <div class="item_header"><i class="el-icon-user-solid" />{{item.name}}</div>
+                    <div class="item_footer">
+                        <div class="block">
+                            <el-input
+                                placeholder="省局编印人"
+                                autocomplete="new-password"
+                                type="text"
+                                suffix-icon="el-icon-arrow-right"
+                                v-model="item.input"
+                                @focus="item.isShowPopover = true"
+                                @blur="item.isShowPopover = false"
+                            >
+                            </el-input>
+                            <el-popover
+                                v-model="item.isShowPopover"
+                                placement="right-start"
+                                title="备选人"
+                                width="140"
+                                trigger="click"
+                            >
+                                <li
+                                    v-for="(li,index) in listTwojia"
+                                    :class="li.select ? 'isSelect' : ''"
+                                    @click="BtnClickTwojia(index,li)"
+                                    class="cur"
+                                    style="list-style: none;padding: 0 10px;margin:5px 0px;"
+                                >{{li.userName}}</li>
+                            </el-popover>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button @click="DockProject(2)">拒绝</el-button>
+                <el-button
+                    type="primary"
+                    @click="DockProject(1)"
+                >通过</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="备案审核"
+            :visible.sync="Visibleone"
+            width="20%"
+        >
+            <el-input
+                type="textarea"
+                :rows="4"
+                placeholder="备注"
+                v-model="textarea"
+            >
+            </el-input>
+
+            <span
+                slot="footer"
+                class="dialog-footer"
+            >
+                <el-button @click="Examine(2)">拒绝</el-button>
+                <el-button
+                    type="primary"
+                    @click="Examine(1)"
+                >通过</el-button>
+            </span>
+        </el-dialog>
+        <Timeline
+            :dilongList="dilongList"
+            :TimeLineShow="TimeLineShow || TimeLineShowone"
+            v-on:TimeLineShowlose="TimeLineShowlose"
+            v-on:docSrcShow="docSrcShow"
+        />
+        <el-dialog
+            title="公告详情"
+            :visible.sync="VisibleGong"
+            width="40%"
+            custom-class='gonggao'
+            center
+        >
+            <span
+                v-if="AnnounceList.content!=null"
+                v-html="AnnounceList.content"
+            ></span>
+        </el-dialog>
+        <div
+            v-show="pdfShow"
+            class="pdf"
+        >
+            <iframe
+                :src="pdfSrc"
+                frameborder="0"
+                class="iframes"
+            ></iframe>
+            <div
+                class="close"
+                @click.stop="pdfShow = false"
+            > × </div>
+        </div>
+        <div
+            v-show="imgShow"
+            class="imgShow"
+        >
+            <el-carousel
+                :autoplay="false"
+                height="1030px"
+            >
+                <el-carousel-item
+                    v-for="item in imgList"
+                    :key="item"
+                >
+                    <img :src="item">
+                </el-carousel-item>
+            </el-carousel>
+            <div
+                class="closer"
+                @click.stop="imgShow = false"
+            > × </div>
+        </div>
+        <el-dialog
+            title="详细信息"
+            :visible.sync="editDilongone"
+            width="1080px"
+        >
+            <div class="editCont">
+                <el-form
+                    label-position="right"
+                    label-width="100px"
+                >
+                    <div class="cont_c_o">
+                        <div style="width: 100%;">
+                            <p>
+                                <el-form-item label="项目名称：">
+                                    <el-input
+                                        placeholder="请输入内容"
+                                        v-model="itemDetails.project_name"
+                                    >
+                                    </el-input>
+                                </el-form-item>
+                            </p>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="委托方名称：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.company_name"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <!-- <div style="width: 50%">
+                                 <p>
+                                    <el-form-item label="发票信息：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.invoice"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div> -->
+                            <div
+                                style="width: 50%"
+                                v-if="sessionName == '审核人'"
+                            >
+                                <p>
+                                    <el-form-item label="负责人电话：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.liable_user_phone"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.contract_money"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="支付金额：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.pay_money"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="类别：">
+                                        <el-select
+                                            style="width:100%"
+                                            v-model="itemDetails.type"
+                                            placeholder="请选择"
+                                        >
+                                            <el-option
+                                                label="民用"
+                                                value="民用"
+                                            ></el-option>
+                                            <el-option
+                                                label="危化"
+                                                value="危化"
+                                            ></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="检测单位：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.text_company"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div
+                                style="width: 50%"
+                                v-if="itemDetails.state == 19"
+                            >
+                                <p>
+                                    <el-form-item label="退回备注：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            type="textarea"
+                                            :rows="1"
+                                            v-model="itemDetails.remarks"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div
+                                style="width: 50%"
+                                v-if="itemDetails.state == 24"
+                            >
+                                <p>
+                                    <el-form-item label="转交备注：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            type="textarea"
+                                            :rows="1"
+                                            v-model="itemDetails.remarks"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                            <div style="width: 50%">
+                                <p>
+                                    <el-form-item label="合同编号：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetails.contract_number"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <el-form-item
+                        label="合同附件："
+                        v-if="sessionName == '备案人' ||sessionName == '管理员'"
+                    >
+                        <el-image
+                            style="width: 50px;height:50px;cursor: pointer;"
+                            fit="cover"
+                            v-if="itemDetails.contract_img!=null"
+                            :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetails.contract_img)"
+                            @click.stop="pdfSrcShow(itemDetails.contract_file)"
+                        >
+                        </el-image>
+                        <span v-else>未录入</span>
+                    </el-form-item>
+                    <div style="width: 100%;display: flex;">
+                        <el-form-item
+                            label="现场照片："
+                            style="width:50%"
+                        >
+                            <el-image
+                                v-if="itemDetails.scene_img!=null"
+                                style="width: 50px;height:50px;cursor: pointer;"
+                                fit="cover"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.scene_img)"
+                                @click.stop="imgShowList(itemDetails.scene_img)"
+                            >
+                            </el-image>
+                            <span v-else>未录入</span>
+                        </el-form-item>
+                        <el-form-item
+                            label="模板类型："
+                            style="width:50%"
+                        >
+                            <el-input
+                                :value="multiplexList(itemDetails.multiplex)"
+                                type="text"
+                            >
+                            </el-input>
+                        </el-form-item>
+                    </div>
+                    <el-form-item label="原始记录：">
+                        <el-image
+                            style="width: 50px;height:50px;cursor: pointer;"
+                            fit="cover"
+                            :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.original_record_img ? itemDetails.original_record_img:'')"
+                            @click.stop="pdfSrcShow2(itemDetails.original_record_path)"
+                            v-if="itemDetails.original_record_img!=null"
+                        >
+                        </el-image>
+                        <span v-else>未录入</span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-dialog>
+        <el-dialog
+            title="详细信息"
+            :visible.sync="editDilongtwo"
+            width="30%"
+        >
+            <div class="editCont">
+                <el-form
+                    label-position="right"
+                    label-width="100px"
+                >
+                    <div class="cont_c_o">
+                        <div style="width: 100%;">
+                            <p>
+                                <el-form-item label="项目名称：">
+                                    <el-input
+                                        placeholder="请输入内容"
+                                        v-model="itemDetailstwo.number"
+                                    >
+                                    </el-input>
+                                </el-form-item>
+                            </p>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 100%">
+                                <p>
+                                    <el-form-item label="报价：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetailstwo.money"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 100%">
+                                <p>
+                                    <el-form-item label="联系人：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetailstwo.contacts"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+
+                        </div>
+                        <div style="width: 100%;display: flex;">
+                            <div style="width: 100%">
+                                <p>
+                                    <el-form-item label="联系人电话：">
+                                        <el-input
+                                            placeholder="请输入内容"
+                                            v-model="itemDetailstwo.phone"
+                                        >
+                                        </el-input>
+                                    </el-form-item>
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <el-form-item label="报价单：">
+                        <el-image
+                            style="width: 50px;height:50px;cursor: pointer;"
+                            fit="cover"
+                            :src="'http://140.249.209.176:8084/LightningDetection/quotation/' + imgCom(itemDetailstwo.pngName)"
+                            @click.stop="pdfSrcShowTwo(itemDetailstwo.fileName)"
+                            v-if="itemDetailstwo.fileName!=null"
+                        >
+                        </el-image>
+                        <span v-else> 未上传 </span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-dialog>
+        <el-dialog
+            :title="titleApplyForInfo"
+            :visible.sync="newApplyForinfo"
+            width="750px"
+            top="5vh"
+        >
+            <div class="editCont">
+                <table style="width:100%">
+                    <tr class="hang">
+                        <th class="tr">开票信息</th>
+                        <th class="tr">
+                            <div class="mytr">
+                                开票方名称
+
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                纳税人识别号
+                            </div>
+                        </th>
+                        <th class="trs">
+                            <div class="mytr">
+                                <el-input v-model="applyForinfoFrom.party"></el-input>
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                <el-input v-model="applyForinfoFrom.dutyNumber"></el-input>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">申请开票金额</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-input v-model="applyForinfoFrom.applicationAmount"></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">发票类型</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.billingType"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="(item,index) in kaiType"
+                                    :key="index"
+                                    :label="item"
+                                    :value="item"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang1"
+                        v-if="titleApplyForInfo == '申请开票'"
+                    >
+                        <th class="tr1">选择审核人</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.auditor"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="item in applyForinfoFromauditorList"
+                                    :key="item.id"
+                                    :label="item.userName"
+                                    :value="item.id"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.reamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">申请开票项目</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <span
+                                class="projectMap"
+                                @click="routerGo(applyForinfoFrom.projectMap.contractNumber)"
+                            >{{applyForinfoFrom.projectMap.contractNumber}}</span>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">合同备案金额</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            {{applyForinfoFrom.projectMap.contractMoney}}
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">合同扫描件</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <span
+                                class="projectMap"
+                                @click="pdfSrcShow(applyForinfoFrom.projectMap.contractFile)"
+                            >{{applyForinfoFrom.projectMap.contractFile}}</span>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">开票信息录入</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <span
+                                class="projectMap"
+                                @click="routerGo1(applyForinfoFrom.projectMap.contractNumber)"
+                            >财务信息录入</span>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang1"
+                        v-if="!applyForinfoFrom.flag"
+                    >
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;line-height: 200px;"
+                        >新增财务信息</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: 1px solid #ddd;"
+                        >
+                            <el-form
+                                label-position="right"
+                                label-width="100px"
+                            >
+                                <div class="cont_c_o">
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item
+                                                    label="发票号码："
+                                                    style="width:100%"
+                                                >
+                                                    <el-input v-model="invoiceinfo.invoiceNumber"></el-input>
+                                                </el-form-item>
+                                            </p>
+
+                                        </div>
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="入账金额：">
+                                                    <el-input
+                                                        v-model="invoiceinfo.arrivalMoney"
+                                                        type="number"
+                                                    ></el-input>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票日期：">
+                                                    <el-date-picker
+                                                        v-model="invoiceinfo.invoiceTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+
+                                            <p>
+                                                <el-form-item label="入账时间：">
+                                                    <el-date-picker
+                                                        v-model="invoiceinfo.arrivalTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex">
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票类型：">
+                                                    <el-select
+                                                        v-model="invoiceinfo.billingType"
+                                                        placeholder="请选择"
+                                                        style="width:100%"
+                                                        clearable
+                                                    >
+                                                        <el-option
+                                                            v-for="(item,index) in kaiType"
+                                                            :key="index"
+                                                            :label="item"
+                                                            :value="item"
+                                                        >
+                                                        </el-option>
+                                                    </el-select>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+                                            <div>
+                                                <p>
+                                                    <el-form-item label="开票金额：">
+                                                        <el-input
+                                                            v-model="invoiceinfo.invoiceMoney"
+                                                            type="number"
+                                                        ></el-input>
+                                                    </el-form-item>
+                                                </p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-form>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang"
+                        v-if="!applyForinfoFrom.flag"
+                    >
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="ProjectinfoClick()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="newApplyForinfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang1"
+                        v-if="applyForinfoFrom.flag"
+                    >
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;"
+                        >退回备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.tuihuireamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang"
+                        v-if="applyForinfoFrom.flag"
+                    >
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="invoiceRequestsaveOrUpdate()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="newApplyForinfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+
+        </el-dialog>
+        <el-dialog
+            :title="titleApplyForInfoxiugai"
+            :visible.sync="newApplyForinfoxiugai"
+            width="750px"
+        >
+            <div class="editCont">
+                <table style="width:100%">
+                    <tr class="hang">
+                        <th class="tr">开票信息</th>
+                        <th class="tr">
+                            <div class="mytr">
+                                开票方名称
+
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                纳税人识别号
+                            </div>
+                        </th>
+                        <th class="trs">
+                            <div class="mytr">
+                                <el-input v-model="applyForinfoFrom.party"></el-input>
+                            </div>
+                            <div
+                                class="mytr"
+                                style="border-bottom: none;"
+                            >
+                                <el-input v-model="applyForinfoFrom.dutyNumber"></el-input>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">申请开票金额</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-input v-model="applyForinfoFrom.applicationAmount"></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th class="tr1">发票类型</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.billingType"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="(item,index) in kaiType"
+                                    :key="index"
+                                    :label="item"
+                                    :value="item"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang1"
+                        v-if="titleApplyForInfo == '申请开票'"
+                    >
+                        <th class="tr1">选择审核人</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom: none;"
+                        >
+                            <el-select
+                                v-model="applyForinfoFrom.auditor"
+                                placeholder="请选择"
+                                style="width:100%"
+                                clearable
+                            >
+                                <el-option
+                                    v-for="item in applyForinfoFromauditorList"
+                                    :key="item.id"
+                                    :label="item.userName"
+                                    :value="item.id"
+                                >
+                                </el-option>
+                            </el-select>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;"
+                        >备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.reamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr class="hang">
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="sendBackAgain()"
+                            >再次提交</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="newApplyForinfoxiugai = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+
+        </el-dialog>
+        <el-dialog
+            title="财务信息"
+            :visible.sync="Projectinfozuofei"
+            width="1080px"
+            custom-class='My_el-dialog'
+        >
+            <el-table
+                :data="financialInfo"
+                style="width: 100%"
+                border
+            >
+                <el-table-column
+                    prop="invoiceNumber"
+                    label="发票号码"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="arrivalMoney"
+                    label="入账金额"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="invoiceTime"
+                    label="开票日期"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="arrivalTime"
+                    label="入账时间"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="billingType"
+                    label="开票类型"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="invoiceMoney"
+                    label="开票金额"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    label="状态"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <el-tag
+                            :type="scope.row.state | stateFilter(scope.row.state)"
+                            style="cursor: pointer;"
+                            @click.stop="invoiceexaminelistzuofei(scope.row)"
+                        >{{ scope.row.state  | applyForinfoFilterzuofei}}</el-tag>
+
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="操作"
+                    align="center"
+                    width="150"
+                >
+                    <template slot-scope="scope">
+                        <div style="display:flex;justify-content: space-around">
+
+                            <el-button
+                                type="danger"
+                                size="mini"
+                                v-if="scope.row.buttonFlag == '1'"
+                                @click="removeClick()"
+                            >作 废</el-button>
+                        </div>
+
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+        <ApplyForToo
+            :dilongList2="dilongList2"
+            :TimeLineShow2="TimeLineShow2"
+            @TimeLineShowlose2="TimeLineShowlose2"
+        />
+        <el-dialog
+            :title="tuihuititleApplyForInfo"
+            :visible.sync="tuihuiApplyForInfo"
+            width="750px"
+        >
+            <div class="editCont">
+                <table style="width:100%">
+                    <tr
+                        class="hang1"
+                        v-if="!applyForinfoFrom.flag"
+                    >
+                        <th
+                            class="tr1"
+                            style="line-height: 200px;"
+                        >财务信息</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;border-bottom:none;"
+                        >
+                            <el-form
+                                label-position="right"
+                                label-width="100px"
+                            >
+                                <div class="cont_c_o">
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item
+                                                    label="发票号码："
+                                                    style="width:100%"
+                                                >
+                                                    <el-input
+                                                        v-model="invoiceinfo.invoiceNumber"
+                                                        disabled
+                                                    ></el-input>
+                                                </el-form-item>
+                                            </p>
+
+                                        </div>
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="入账金额：">
+                                                    <el-input
+                                                        v-model="invoiceinfo.arrivalMoney"
+                                                        type="number"
+                                                        disabled
+                                                    ></el-input>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                    </div>
+                                    <div style="width: 100%;display: flex;">
+
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票日期：">
+                                                    <el-date-picker
+                                                        disabled
+                                                        v-model="invoiceinfo.invoiceTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+
+                                            <p>
+                                                <el-form-item label="入账时间：">
+                                                    <el-date-picker
+                                                        disabled
+                                                        v-model="invoiceinfo.arrivalTime"
+                                                        type="date"
+                                                        placeholder="选择日期"
+                                                        value-format="yyyy-MM-dd"
+                                                        style="width:100%"
+                                                    >
+                                                    </el-date-picker>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%;display: flex">
+                                        <div style="width: 50%">
+                                            <p>
+                                                <el-form-item label="开票类型：">
+                                                    <el-select
+                                                        v-model="invoiceinfo.billingType"
+                                                        placeholder="请选择"
+                                                        style="width:100%"
+                                                        clearable
+                                                        disabled
+                                                    >
+                                                        <el-option
+                                                            v-for="(item,index) in kaiType"
+                                                            :key="index"
+                                                            :label="item"
+                                                            :value="item"
+                                                        >
+                                                        </el-option>
+                                                    </el-select>
+                                                </el-form-item>
+                                            </p>
+                                        </div>
+                                        <div style="width: 50%">
+                                            <div>
+                                                <p>
+                                                    <el-form-item label="开票金额：">
+                                                        <el-input
+                                                            v-model="invoiceinfo.invoiceMoney"
+                                                            type="number"
+                                                            disabled
+                                                        ></el-input>
+                                                    </el-form-item>
+                                                </p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-form>
+                        </th>
+                    </tr>
+                    <tr class="hang1">
+                        <th
+                            class="tr1"
+                            style="border-bottom: 1px solid #ddd;"
+                        >备注</th>
+                        <th
+                            class="mytr"
+                            style="border-left: 1px solid #ddd;border-top: 1px solid #ddd;border-right: 1px solid #ddd;"
+                        >
+                            <el-input
+                                v-model="applyForinfoFrom.reamark"
+                                type="textarea"
+                            ></el-input>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang"
+                        v-if="!applyForinfoFrom.flag && tuihuititleApplyForInfo != '再次提交'"
+                    >
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="tuihuiProjectinfoClick()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="tuihuiApplyForInfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                    <tr
+                        class="hang"
+                        v-if="tuihuititleApplyForInfo == '再次提交'"
+                    >
+                        <th class="trrr">
+                            <el-button
+                                type="success"
+                                size="medium"
+                                @click="zaicitijiaoProjectinfoClick()"
+                            >保存</el-button>
+                            <el-button
+                                type="info"
+                                size="medium"
+                                @click="tuihuiApplyForInfo = false"
+                            >返回</el-button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+import { mapGetters } from "vuex";
+import Timeline from "@/components/Timeline/Index.vue";
+import ApplyForToo from "@/components/ApplyForToo/index.vue";
+import {
+    ExaminePage,
+    Examine,
+    getDockUser,
+    DockProject,
+    getCount,
+    getProject,
+    selectProjectRecord,
+    myProject,
+    temporarylist,
+    getProjectInfoById,
+    quotationExaminelist,
+    invoiceexaminelist,
+    getinvoicecancel,
+    invoiceexamineExamine,
+    ProjectinfoClick,
+    invoiceRequestsaveOrUpdate,
+    feichuinvoicecancel,
+    getprojectAlllist,
+} from "@/api/aviation";
+import { selectCement, projectmsg, getMsgCount, getMessList } from "@/api/user";
+import * as WebCtrl from "@/assets/WebOffice.js"; //注意路径
+import * as WebCtrlTwo from "@/assets/quotationList/WebOffice.js"; //注意路径
+import { initWebSocket, websocketclose } from "@/utils/websoket";
+export default {
+    name: "Dashboard",
+    computed: {
+        ...mapGetters(["name"]),
+        sessionName() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.name;
+        },
+        regionId() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            return regionId.regionIdMap.id;
+        },
+        GuoLv() {
+            if (this.sessionName == "审核人" && this.regionId != 2841) {
+                return this.ReviewprojectList.length;
+            } else if (this.sessionName == "审核人" && this.regionId == 2841) {
+                return this.ReviewprojectListsheng.length;
+            } else if (this.sessionName == "终审人") {
+                return this.finalList.length;
+            } else if (this.sessionName == "编印人") {
+                return this.publishList.length;
+            } else if (this.sessionName == "备案人" && this.regionId == 2841) {
+                return this.recordsList.length;
+            }
+        },
+        refresh() {
+            return this.$store.state.app.refresh;
+        },
+        refresh4() {
+            return this.$store.state.app.refresh4;
+        },
+    },
+    watch: {
+        refresh(newVal) {
+            if (newVal) {
+                location.reload();
+            }
+        },
+        refresh4(newVal) {
+            if (newVal) {
+                /* location.reload(); */
+                this.quotationExaminelist();
+            }
+        },
+    },
+    destroyed() {
+        websocketclose();
+    },
+    data() {
+        return {
+            tableData: [],
+            size: 10,
+            current: 1,
+            MyprojectList: [] /* 开票申请任务 */,
+            MyprojectListzuofei: [] /* 待作废任务 */,
+            MyprojectListtuihui: [] /* 开票被退回任务 */,
+            MyprojectListfeichutuihui:[],/* 废除被退回任务 */
+            projectList: [] /* 待审核项目 */,
+            DKprojectList: [] /* 带对接项目 */,
+            ReviewprojectList: [] /* 待审核项目 */,
+            DKprojectListshi: [] /* 省待对接项目 */,
+            ReviewprojectListsheng: [] /* 省待审核项目 */,
+            Visible: false /* 对接弹框 */,
+            Visibleone: false /* 备案审核 */,
+            itemList: [{ name: "审核人", input: "", id: "" }],
+            itemListone: [{ name: "终审人", input: "", id: "" }],
+            itemListtwo: [{ name: "编印人", input: "", id: "" }],
+            projectID: "" /* 待对接任务ID */,
+            flag: false,
+            flag1: false,
+            flag2: false,
+            input1: "",
+            input2: "",
+            input3: "",
+            list: [] /* 市局审核 */,
+            listone: [] /* 省局审核 */,
+            listTwo: [] /* 省局对接 */,
+            listTwojia: [] /* 省局编印 */,
+            list_jia: [] /* 省局终审 */,
+            listThree: [] /*省局备案 */,
+            finalList: [] /* 终审项目 */,
+            publishList: [] /* 编印项目 */,
+            recordsList: [] /* 备案项目 */,
+            completed: [] /* 待审核项目 */,
+            completedIshow: null,
+            returned: [] /* 已退回任务 */,
+            Turnedover: [] /* 被转交任务 */,
+            id: null,
+            already: "" /* 已完成任务数 */,
+            conduct: "" /* 进行中任务数 */,
+            unread: "" /* 未开始任务数 */,
+            textarea: "" /* 备注信息 */,
+            beianId: "" /*备案ID  */,
+            show: false,
+            dilongList: "",
+            TimeLineShow: false,
+            TimeLineShowone: false,
+            AnnounceList: [] /* 公告列表 */,
+            MBAData: [] /* 管理类 */,
+            TOSData: [] /* 业务类 */,
+            VisibleGong: false,
+            pdfSrc: "",
+            pdfShow: false,
+            imgShow: false,
+            editDilongone: false,
+            editDilongtwo: false,
+            enquire: {
+                makeUserMap: "",
+            },
+            itemDetails: {},
+            itemDetailstwo: {},
+            imgList: [],
+            shuaID: "" /* 刷新id */,
+            shuastate: "" /* 刷新状态 */,
+            websock: null,
+            messageList: [],
+            storedList: "" /* 存储记录 */,
+            remarks: "" /* 存储备注 */,
+            loading: false,
+            loadingMBA: false,
+            loadingTOS: false,
+            activeName: "first",
+            kaiType: ["专用发票", "电子普通发票", "普通发票"],
+            newApplyForinfo: false, // 开票详情
+            newApplyForinfoxiugai: false, // 修改开票详情
+            titleApplyForInfoxiugai: null, //修改开票信息
+            titleApplyForInfo: null,
+            applyForinfoFrom: {
+                party: null, // 开票方名称
+                dutyNumber: null, // 纳税人识别号
+                applicationAmount: null, //申请开票金额
+                billingType: null, // 发票类型
+                auditor: null, // 审核人,
+                projectMap: {}, // 项目信息
+                reamark: null, // 再次提交备注
+                flag: false, //
+                tuihuireamark: null, // 退回备注
+                invoiceRequestinfo: {},
+            },
+            invoiceinfo: {
+                billingType: "",
+                invoiceNumber: "",
+                invoiceMoney: "",
+                invoiceTime: "",
+                arrivalMoney: "",
+                arrivalTime: "",
+                id: "",
+            },
+            Projectinfozuofei: false,
+            ProjectinfozuofeiId: null,
+            financialInfo: [],
+            dilongList2: "",
+            TimeLineShow2: false,
+            tuihuiApplyForInfo: false,
+            tuihuititleApplyForInfo: "",
+        };
+    },
+    components: {
+        Timeline,
+        ApplyForToo,
+    },
+    created() {
+        const regionId = JSON.parse(sessionStorage.getItem("records"));
+        this.ExaminePage();
+        this.getCount(16, regionId);
+        var cor = "5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,22,23,24,25";
+        this.getCount(cor, regionId);
+        this.getCount(4, regionId);
+        this.getProject();
+        this.getProjecttuihui();
+        this.getProjectfeichutuihui();
+        this.getProjectzuofei();
+        this.myProject();
+        this.selectCement();
+        initWebSocket(regionId.id);
+        this.projectmsg(regionId);
+        this.getMsgCount(regionId);
+        this.getMessListread();
+        this.quotationExaminelist(regionId);
+    },
+    methods: {
+        multiplexList(val) {
+            switch (val) {
+                case "0":
+                    return "正常项目";
+                    break;
+                case "1":
+                    return "复用正常项目";
+                    break;
+                case "2":
+                    return "非模板项目";
+                    break;
+                case "3":
+                    return "复用非模板项目";
+                    break;
+                case "4":
+                    return "模板项目创建的子项目";
+                    break;
+                case "5":
+                    return "非模板项目创建的子项目";
+                    break;
+
+                default:
+                    break;
+            }
+        },
+        /* 获得不同状态项目总数 */
+        getCount(count, regionId) {
+            let ary = {
+                projectState: count,
+                regionId: regionId.regionIdMap.id,
+                aboutUser: regionId.id,
+                roleId: regionId.roleIdMap.id,
+            };
+            if (this.sessionName == "管理员") {
+                ary = {
+                    projectState: count,
+                    regionId: regionId.regionIdMap.id,
+                    roleId: regionId.roleIdMap.id,
+                };
+            }
+            getCount(ary).then((res) => {
+                if (count == 16) {
+                    this.already = res.data.records;
+                } else if (count == 4) {
+                    this.unread = res.data.records;
+                } else {
+                    this.conduct = res.data.records;
+                }
+            });
+        },
+        // 项目状态
+        async statusCondition(row) {
+            const { data: res } = await selectProjectRecord({
+                id: row,
+            });
+            if (res.state == 200 && res.stateStr == "成功") {
+                this.dilongList = res.records;
+                /*  console.log(this.dilongList); */
+                this.TimeLineShowone = true;
+            }
+        },
+        /* 获得公告 */
+        selectCement() {
+            const regionId = JSON.parse(sessionStorage.getItem("records"));
+            this.loadingMBA = true;
+            this.loadingTOS = true;
+            selectCement({
+                current: this.current,
+                size: this.size,
+                enable: 1,
+                regionId: regionId.regionIdMap.id,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.MBAData = res.data.records.filter(
+                        (item) => item.msgType == "1"
+                    );
+                    this.loadingMBA = false;
+                    this.TOSData = res.data.records.filter(
+                        (item) => item.msgType == "2"
+                    );
+                    this.loadingTOS = false;
+                } else {
+                    this.$message.error("获取公告失败");
+                }
+            });
+        },
+        /* 开票任务查询 */
+        getProject() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            invoiceexaminelist({
+                type: "examine",
+                reviewer: regionId.id,
+            }).then((res) => {
+                if (res.data.state != 204) {
+                    this.MyprojectList = res.data.records;
+                } else {
+                    this.MyprojectList = [];
+                }
+            });
+        },
+        /* 发票被退回任务查询 */
+        getProjecttuihui() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            invoiceexaminelist({
+                type: "examine",
+                state: "3",
+                reviewer: regionId.id,
+            }).then((res) => {
+                if (res.data.state != 204) {
+                    this.MyprojectListtuihui = res.data.records;
+                } else {
+                    this.MyprojectListtuihui = [];
+                }
+            });
+        },
+        /* 废除被退回任务查询 */
+        getProjectfeichutuihui() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            getinvoicecancel({
+                type: "examine",
+                state: "3",
+                reviewer: regionId.id,
+            }).then((res) => {
+                if (res.data.state != 204) {
+                    this.MyprojectListfeichutuihui = res.data.records;
+                } else {
+                    this.MyprojectListfeichutuihui = [];
+                }
+            });
+        },
+        /* 省级管理查看待处理的废除申请 */
+        getProjectzuofei() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            getinvoicecancel({
+                type: "examine",
+                state: "1",
+                reviewer: regionId.id,
+            }).then((res) => {
+                if (res.data.state != 204) {
+                    this.MyprojectListzuofei = res.data.records;
+                } else {
+                    this.MyprojectListzuofei = [];
+                }
+            });
+        },
+        /* 开票 */
+        makeOut(item) {
+            this.applyForinfoFrom.flag = false;
+            this.titleApplyForInfo = "开票详情";
+            this.applyForinfoFrom.party = item.invoiceRequestinfo.party;
+            this.applyForinfoFrom.dutyNumber =
+                item.invoiceRequestinfo.dutyNumber;
+            this.applyForinfoFrom.applicationAmount =
+                item.invoiceRequestinfo.applicationAmount;
+            this.applyForinfoFrom.billingType = item.invoiceRequestinfo.type;
+            this.applyForinfoFrom.reamark = item.invoiceRequestinfo.reamark;
+            this.newApplyForinfo = true;
+            this.applyForinfoFrom.projectMap.contractNumber =
+                item.projectMap.contractNumber;
+            this.applyForinfoFrom.projectMap.contractMoney =
+                item.projectMap.contractMoney;
+            this.applyForinfoFrom.projectMap.contractFile =
+                item.projectMap.contractFile;
+            this.applyForinfoFrom.projectMap.projectId = item.projectMap.id;
+            this.applyForinfoFrom.id = item.id;
+        },
+        /* 开票确定 */
+        ProjectinfoClick() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            let parameter = {
+                billingType: this.invoiceinfo.billingType,
+                invoiceNumber: this.invoiceinfo.invoiceNumber,
+                invoiceMoney: this.invoiceinfo.invoiceMoney,
+                invoiceTime: this.invoiceinfo.invoiceTime,
+                arrivalMoney: this.invoiceinfo.arrivalMoney,
+                arrivalTime: this.invoiceinfo.arrivalTime,
+                projectId: this.applyForinfoFrom.projectMap.projectId,
+            };
+            ProjectinfoClick(parameter).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message.success("新增成功");
+                    this.newApplyForinfo = false;
+                } else {
+                    this.$message.error("新增失败");
+                }
+            });
+            invoiceexamineExamine({
+                state: "3",
+                examineId: this.applyForinfoFrom.id,
+                reviewer: regionId.id,
+                roleId: regionId.roleIdMap.id,
+            }).then((res) => {
+                this.getProject();
+            });
+        },
+        /* 退回 */
+        sendBack(item) {
+            console.log(item);
+            this.applyForinfoFrom.flag = true;
+            this.titleApplyForInfo = "开票详情";
+            this.applyForinfoFrom.party = item.invoiceRequestinfo.party;
+            this.applyForinfoFrom.dutyNumber =
+                item.invoiceRequestinfo.dutyNumber;
+            this.applyForinfoFrom.applicationAmount =
+                item.invoiceRequestinfo.applicationAmount;
+            this.applyForinfoFrom.billingType = item.invoiceRequestinfo.type;
+            this.applyForinfoFrom.reamark = item.invoiceRequestinfo.reamark;
+            this.newApplyForinfo = true;
+            this.applyForinfoFrom.projectMap.contractNumber =
+                item.projectMap.contractNumber;
+            this.applyForinfoFrom.projectMap.contractMoney =
+                item.projectMap.contractMoney;
+            this.applyForinfoFrom.projectMap.contractFile =
+                item.projectMap.contractFile;
+            this.applyForinfoFrom.invoiceRequestinfo.id = item.id;
+        },
+        /* 退回保存 */
+        invoiceRequestsaveOrUpdate() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            this.$confirm("确定退回该任务吗, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    invoiceexamineExamine({
+                        state: "2",
+                        examineId: this.applyForinfoFrom.invoiceRequestinfo.id,
+                        reviewer: regionId.id,
+                        roleId: regionId.roleIdMap.id,
+                        remarks: this.applyForinfoFrom.tuihuireamark,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message({
+                                type: "success",
+                                message: "退回成功!",
+                            });
+                            this.newApplyForinfo = false;
+                            this.getProject()
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: "退回失败!",
+                            });
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消",
+                    });
+                });
+        },
+        /* 已读 */
+        /*   MarkRead(item) {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            if (item.state == "4") {
+                return;
+            } else {
+                invoiceexamineExamine({
+                    state: "3",
+                    examineId: item.id,
+                    reviewer: regionId.id,
+                    roleId: regionId.roleIdMap.id,
+                }).then((res) => {
+                    this.getProject()
+                });
+            }
+        }, */
+        /* 开票修改 */
+        modification(item) {
+            this.applyForinfoFrom.party = item.invoiceRequestinfo.party;
+            this.applyForinfoFrom.dutyNumber =
+                item.invoiceRequestinfo.dutyNumber;
+            this.applyForinfoFrom.applicationAmount =
+                item.invoiceRequestinfo.applicationAmount;
+            this.applyForinfoFrom.billingType = item.invoiceRequestinfo.type;
+            this.applyForinfoFrom.reamark = item.invoiceRequestinfo.reamark;
+            this.newApplyForinfoxiugai = true;
+            this.applyForinforowId = item.invoiceRequestinfo.id;
+            this.titleApplyForInfoxiugai = "修改开票信息";
+            this.applyForinfoFrom.invoiceRequestinfo.id = item.id;
+        },
+        /* 再次提交 */
+        sendBackAgain() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            invoiceRequestsaveOrUpdate({
+                party: this.applyForinfoFrom.party,
+                dutyNumber: this.applyForinfoFrom.dutyNumber,
+                applicationAmount: this.applyForinfoFrom.applicationAmount,
+                type: this.applyForinfoFrom.billingType,
+                reamark: this.applyForinfoFrom.reamark,
+                id: this.applyForinforowId,
+            }).then((res) => {
+                if (res.data.state == 400) {
+                    this.$message.error(res.data.message);
+                    this.newApplyForinfoxiugai = false;
+                } else {
+                    this.newApplyForinfoxiugai = false;
+                }
+            });
+            invoiceexamineExamine({
+                state: "1",
+                examineId: this.applyForinfoFrom.invoiceRequestinfo.id,
+                reviewer: regionId.id,
+                roleId: regionId.roleIdMap.id,
+                remarks: this.applyForinfoFrom.reamark,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message({
+                        type: "success",
+                        message: "再次提交成功!",
+                    });
+                    this.getProjecttuihui();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "再次提交失败!",
+                    });
+                }
+            });
+        },
+        /* 废除被退回再次提交 */
+        feichumodification(item){
+            console.log(item)
+            this.ProjectinfozuofeiId = item.id;
+            this.tuihuiApplyForInfo = true;
+            this.invoiceinfo = item.projectInvoiceInfo;
+            this.tuihuititleApplyForInfo = "再次提交";
+        },
+        /* 废除被退回再次提交确定 */
+        zaicitijiaoProjectinfoClick(){
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+              feichuinvoicecancel({
+                state: "1",
+                examineId: this.ProjectinfozuofeiId,
+                reviewer: regionId.id,
+                roleId: regionId.roleIdMap.id,
+                remarks: this.applyForinfoFrom.reamark,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message({
+                        type: "success",
+                        message: "再次提交成功!",
+                    });
+                    this.tuihuiApplyForInfo = false;
+                    this.getProjectfeichutuihui();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "再次提交失败!",
+                    });
+                }
+            });
+        },
+        /* 开票路由跳转 */
+        routerGo(contractNumber) {
+            this.$router.push({
+                path: "/aviation/reference",
+                query: {
+                    contractNumber: contractNumber,
+                },
+            });
+        },
+        routerGo1(contractNumber) {
+            this.$router.push({
+                path: "/aviation/reference",
+                query: {
+                    contractNumber: contractNumber,
+                    flag: true,
+                },
+            });
+        },
+        /* 作废 */
+        cancellation(item) {
+            console.log(item);
+            this.ProjectinfozuofeiId = item.id;
+            this.financialInfo = [];
+            getprojectAlllist({
+                projectId: item.projectMap.id,
+            }).then((res) => {
+                this.financialInfo = res.data.records;
+                this.financialInfo.map((it) => {
+                    if (item.projectInvoiceInfo.id == it.id) {
+                        it.buttonFlag = "1";
+                    }
+                });
+                console.log(this.financialInfo);
+            });
+
+            /*  this.financialInfo.push(item.projectInvoiceInfo); */
+            this.Projectinfozuofei = true;
+        },
+        /* 作废确定 */
+        removeClick() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            this.$confirm("此操作将废除该项目, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    feichuinvoicecancel({
+                        state: "3",
+                        reviewer: regionId.id,
+                        roleId: regionId.roleIdMap.id,
+                        examineId: this.ProjectinfozuofeiId,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message.success("作废成功");
+                            this.Projectinfozuofei = false;
+                            this.getProjectzuofei();
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消废除",
+                    });
+                });
+        },
+        /* 退回 */
+        cancellationapproved(item) {
+            console.log(item);
+            this.ProjectinfozuofeiId = item.id;
+            this.invoiceinfo = item.projectInvoiceInfo;
+            this.tuihuititleApplyForInfo = "退回详细";
+            this.tuihuiApplyForInfo = true;
+        },
+        /* 退回确定 */
+        tuihuiProjectinfoClick() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            feichuinvoicecancel({
+                state: "2",
+                reviewer: regionId.id,
+                roleId: regionId.roleIdMap.id,
+                examineId: this.ProjectinfozuofeiId,
+                remarks:this.applyForinfoFrom.reamark
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.$message.success("退回成功");
+                    this.tuihuiApplyForInfo = false;
+                    this.getProjectzuofei();
+                }
+            });
+        },
+        TimeLineShowlose2(val) {
+            this.TimeLineShow2 = val;
+        },
+        /* 流程查询 */
+        invoiceexaminelistzuofei(row) {
+            getinvoicecancel({
+                type: "all",
+                projectId: this.applyForinfoFromprojectId,
+                invoiceId: row.id,
+            }).then((res) => {
+                this.dilongList2 = res.data.records;
+                this.TimeLineShow2 = true;
+            });
+        },
+        /* 我参与的项目 */
+        myProject() {
+            let regionId = JSON.parse(sessionStorage.getItem("records"));
+            myProject({
+                size: this.size,
+                current: this.current,
+                aboutUser: regionId.id,
+                roleId: regionId.roleIdMap.id,
+            }).then((res) => {
+                this.tableData = res.data.records;
+            });
+        },
+        Clickjump(id) {
+            this.$router.push({ path: "/details", query: { userId: id } });
+        },
+        /* 查询备案审核任务 */
+        ExaminePage() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            if (
+                records.roleIdMap.name == "管理员" &&
+                (records.regionIdMap.level == "1" ||
+                    records.regionIdMap.level == "2" ||
+                    records.regionIdMap.level == "3")
+            ) {
+                this.projectList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    regionId: records.regionIdMap.id,
+                    type: 2,
+                    stateStr: 3,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.projectList.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "对接人" &&
+                records.regionIdMap.level == "2"
+            ) {
+                this.DKprojectList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 6,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.DKprojectList.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "审核人" &&
+                records.regionIdMap.level == "2"
+            ) {
+                this.ReviewprojectList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 9,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.ReviewprojectList.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.returned = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    auditee: records.id,
+                    stateStr: 20,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.returned.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.Turnedover = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 24,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.Turnedover.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "对接人" &&
+                records.regionIdMap.id == 2841
+            ) {
+                this.DKprojectListshi = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 12,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.projectMap != null) {
+                                if (
+                                    item.id == item.projectMap.examine_task_id
+                                ) {
+                                    this.DKprojectListshi.push(item);
+                                } else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "审核人" &&
+                records.regionIdMap.id == 2841
+            ) {
+                this.ReviewprojectListsheng = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 15,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.ReviewprojectListsheng.push(item);
+                                /* console.log(this.ReviewprojectListsheng) */
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.Turnedover = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 24,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.Turnedover.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.returned = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    auditee: records.id,
+                    stateStr: 20,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.returned.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "终审人" &&
+                records.regionIdMap.id == 2841
+            ) {
+                this.finalList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 15,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.finalList.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.Turnedover = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 24,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.Turnedover.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+                this.returned = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    auditee: records.id,
+                    stateStr: 20,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.returned.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "编印人" &&
+                records.regionIdMap.id == 2841
+            ) {
+                this.publishList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: "15,25",
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    res.data.records.map((item) => {
+                        if (item.id == item.projectMap.examine_task_id) {
+                            this.publishList.push(item);
+                        } else {
+                            return;
+                        }
+                    });
+                });
+                this.Turnedover = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 24,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.Turnedover.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "备案人" &&
+                records.regionIdMap.id == 2841
+            ) {
+                this.recordsList = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    reviewer: records.id,
+                    stateStr: 15,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.recordsList.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            } else if (
+                records.roleIdMap.name == "编制人" ||
+                records.roleIdMap.name == "审核人" ||
+                records.roleIdMap.name == "终审人"
+            ) {
+                this.returned = [];
+                ExaminePage({
+                    size: this.size,
+                    current: this.current,
+                    auditee: records.id,
+                    stateStr: 20,
+                    roleId: records.roleIdMap.id,
+                }).then((res) => {
+                    if (res.data.records != null) {
+                        res.data.records.map((item) => {
+                            if (item.id == item.projectMap.examine_task_id) {
+                                this.returned.push(item);
+                            } else {
+                                return;
+                            }
+                        });
+                    }
+                });
+            }
+        },
+        Audit(item) {
+            this.beianId = item.id;
+            this.Visibleone = true;
+        },
+        Examine(age) {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            Examine({
+                id: this.beianId,
+                state: age,
+                remarks: this.textarea,
+                reviewer: records.id,
+            }).then((res) => {
+                if (res.data == 200) {
+                    this.$message.success("审核通过");
+                    this.Visibleone = false;
+                    this.ExaminePage();
+                    this.textarea = "";
+                } else {
+                    this.$message.error("审核失败");
+                    this.Visibleone = false;
+                    this.textarea = "";
+                }
+            });
+        },
+        /* 处理 */
+        async Auditshi(row) {
+            /*  console.log(row); */
+            if (row.id == row.projectMap.examine_task_id) {
+                let fileName;
+                let remarks;
+                await this.temporarylist(row.id);
+                if (this.storedList != "") {
+                    fileName = this.storedList;
+                    remarks = this.remarks;
+                    this.webofficeClick(row, fileName, remarks);
+                } else {
+                    if (row.state == "25") {
+                        if (
+                            row.projectMap.multiplex == "2" ||
+                            row.projectMap.multiplex == "3" ||
+                            row.projectMap.multiplex == "5"
+                        ) {
+                            this.getProjectInfoById(row, remarks);
+                        } else {
+                            fileName =
+                                row.lastExamineInfoMap.file_name.replaceAll(
+                                    "打印版",
+                                    "正式版"
+                                );
+                            this.webofficeClick(row, fileName, remarks);
+                        }
+                    } else {
+                        fileName = row.lastExamineInfoMap.file_name;
+                        this.webofficeClick(row, fileName, remarks);
+                    }
+                }
+            } else {
+                this.$message.error("请等待前序审核后再进行操作");
+            }
+        },
+        getProjectInfoById(row, remarks) {
+            getProjectInfoById({
+                projectId: row.projectMap.id,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.webofficeClick(
+                        row,
+                        res.data.records.testFormalImg,
+                        remarks
+                    );
+                }
+            });
+        },
+        webofficeClick(row, fileName, remarks) {
+            let sessionID = JSON.parse(sessionStorage.getItem("records"));
+            this.id = row.id;
+            var back1 = 2;
+            var ID =
+                sessionID.roleIdMap.name == "审核人" ||
+                sessionID.roleIdMap.name == "终审人" ||
+                sessionID.roleIdMap.name == "编印人"
+                    ? 1
+                    : 2;
+            var ishow = sessionID.roleIdMap.name == "编印人" ? true : false;
+            var projectId = row.projectMap.id;
+            WebCtrl.ShowPage(
+                row.id,
+                sessionID.id,
+                fileName,
+                back1,
+                null,
+                ID,
+                sessionID.regionIdMap.id,
+                sessionID.roleIdMap.id,
+                projectId,
+                ishow,
+                remarks,
+                row.projectMap.multiplex
+            );
+        },
+        /* 对接 */
+        butting(item) {
+            this.projectID = item.id;
+            this.Visible = true;
+            this.list = [];
+            this.listone = [];
+            this.listTwo = [];
+            this.listThree = [];
+            this.list_jia = [];
+            this.listTwojia = [];
+            let sessionID = JSON.parse(sessionStorage.getItem("records"));
+            /* 获取市局审核人 */
+            getDockUser({
+                regionId: sessionID.regionIdMap.id,
+                type: "审核人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.list.push(item);
+                });
+            });
+            /* 获取省局审核 */
+            getDockUser({
+                regionId: 2841,
+                type: "审核人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.listone.push(item);
+                });
+            });
+            /* 获取省局对接 */
+            getDockUser({
+                regionId: 2841,
+                type: "对接人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.listTwo.push(item);
+                });
+            });
+            /* 获取省局备案 */
+            getDockUser({
+                regionId: 2841,
+                type: "备案人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.listThree.push(item);
+                });
+            });
+            /* 获取省局终审 */
+            getDockUser({
+                regionId: 2841,
+                type: "终审人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.list_jia.push(item);
+                });
+            });
+            /* 获取省局编印 */
+            getDockUser({
+                regionId: 2841,
+                type: "编印人",
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.listTwojia.push(item);
+                });
+            });
+        },
+        /* 退回编制 */
+        async edit(row) {
+            let fileName;
+            let remarks;
+            await this.temporarylist(row.id);
+            if (this.storedList != "") {
+                fileName = this.storedList;
+                remarks = this.remarks;
+            } else {
+                fileName = row.lastExamineInfoMap.file_name;
+            }
+            let sessionID = JSON.parse(sessionStorage.getItem("records"));
+            var back = sessionID.roleIdMap.name == "编制人" ? -3 : -1;
+            WebCtrl.ShowPage(
+                row.id,
+                sessionID.id,
+                fileName,
+                back,
+                null,
+                null,
+                null,
+                null,
+                row.projectMap.id,
+                null,
+                remarks,
+                row.projectMap.multiplex
+            );
+        },
+        /* 转交编制 */
+        async editzhuanjiao(row) {
+            let fileName;
+            let remarks;
+            await this.temporarylist(row.id);
+            if (this.storedList != "") {
+                fileName = this.storedList;
+                remarks = this.remarks;
+            } else {
+                fileName = row.lastExamineInfoMap.file_name;
+            }
+            let sessionID = JSON.parse(sessionStorage.getItem("records"));
+            var back = 2;
+            var projectId = row.projectMap.id;
+            var ishow = true;
+            if (row.roleIdInfoMap.id != 13) {
+                ishow = false;
+            }
+            WebCtrl.ShowPage(
+                row.id,
+                sessionID.id,
+                fileName,
+                back,
+                null,
+                null,
+                sessionID.regionIdMap.id,
+                sessionID.roleIdMap.id,
+                projectId,
+                ishow,
+                remarks,
+                row.projectMap.multiplex
+            );
+        },
+        /* 管理员审核 */
+        check(item) {
+            /* console.log(item) */
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            WebCtrlTwo.ShowPage(
+                item.id,
+                item.quotationInfo.fileName,
+                1,
+                item.regionId,
+                records.id,
+                item.quotationInfo.id
+            );
+        },
+        /* 编制人再次提交 */
+        checktwo(item) {
+            /*  console.log(item) */
+            var ishowAlgin = true;
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            WebCtrlTwo.ShowPage(
+                item.id,
+                item.quotationInfo.fileName,
+                1,
+                item.regionId,
+                records.id,
+                item.quotationInfo.id,
+                ishowAlgin
+            );
+        },
+        /* 获取检测报告临时存储记录 */
+        async temporarylist(ID) {
+            return new Promise((resolve, reject) => {
+                temporarylist({
+                    examineId: ID,
+                }).then((res) => {
+                    if (res.data.state != 204) {
+                        this.storedList = res.data.records[0].fileName;
+                        if (res.data.records[0].remarks != null) {
+                            this.remarks = res.data.records[0].remarks;
+                        }
+                        resolve(this.storedList);
+                    } else {
+                        this.storedList = "";
+                        resolve(this.storedList);
+                    }
+                });
+            });
+        },
+        addBtn() {
+            this.itemList.push({
+                name: "审核人",
+                input: "",
+                icon: "el-icon-close",
+            });
+        },
+        deleteicon(index) {
+            this.itemList.splice(index, 1);
+        },
+        deleteiconsheng(index) {
+            this.itemListone.splice(index, 1);
+        },
+        addBtnone() {
+            this.itemListone.push({
+                name: "终审人",
+                input: "",
+                icon: "el-icon-close",
+            });
+        },
+        BtnClick(index, li) {
+            if (li.select) {
+                return;
+            }
+            this.listone.map((item) => {
+                item.select = false;
+            });
+            this.list.map((item) => {
+                item.select = false;
+            });
+            li.select = true;
+            this.itemList[index].input = li.userName;
+            this.itemList[index].id = li.id + "-" + li.roleIdMap.id;
+        },
+        BtnClickTwo(index, li) {
+            this.show = !this.show;
+            this.itemID2 = li.id + "-" + li.roleIdMap.id;
+            this.input2 = li.userName;
+        },
+        BtnClickJia(index, li) {
+            if (li.select) {
+                return;
+            }
+            this.list_jia.map((item) => {
+                item.select = false;
+            });
+            li.select = true;
+            this.itemListone[index].id = li.id + "-" + li.roleIdMap.id;
+            this.itemListone[index].input = li.userName;
+        },
+        BtnClickTwojia(index, li) {
+            if (li.select) {
+                return;
+            }
+            this.listTwojia.map((item) => {
+                item.select = false;
+            });
+            li.select = true;
+            this.itemListtwo[0].input = li.userName;
+            this.itemListtwo[0].id = li.id + "-" + li.roleIdMap.id;
+        },
+        /* 对接确认 */
+        DockProject(state) {
+            if (state == 2) {
+                this.$confirm("此操作将终止项目流程, 是否继续?", "提示", {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning",
+                })
+                    .then(() => {
+                        DockProject({
+                            examineId: this.projectID,
+                            state: state,
+                            reviewerIdStr: itemID,
+                        }).then((res) => {
+                            if (res.data.stateStr == "成功") {
+                                this.$message({
+                                    type: "success",
+                                    message: "终止成功!",
+                                });
+                                this.ExaminePage();
+                            }
+                        });
+                    })
+                    .catch(() => {
+                        this.$message({
+                            type: "info",
+                            message: "已取消终止",
+                        });
+                    });
+            } else {
+                this.loading = true;
+                var itemID = "";
+                if (this.regionId != 2841) {
+                    this.itemList.map((item) => {
+                        itemID += item.id + ",";
+                        if (item.input == "") {
+                            this.$message.error("审核人不能为空");
+                            this.flag = false;
+                        } else {
+                            this.flag = true;
+                        }
+                    });
+                    itemID += this.itemID2;
+                } else {
+                    this.itemList.map((item) => {
+                        itemID += item.id + ",";
+                        if (item.input == "") {
+                            this.$message.error("审核人不能为空");
+                            this.flag1 = false;
+                        } else {
+                            this.flag1 = true;
+                        }
+                    });
+                    this.itemListone.map((item) => {
+                        itemID += item.id + ",";
+                        if (item.input == "") {
+                            this.$message.error("终审人不能为空");
+                            this.flag2 = false;
+                        } else {
+                            this.flag2 = true;
+                        }
+                    });
+                    itemID += this.itemListtwo[0].id;
+                }
+                if (this.regionId != 2841) {
+                    if (this.flag == false) {
+                        this.$message.error("审核人不能为空");
+                        this.loading = false;
+                    } else if (this.input2 == "") {
+                        this.$message.error("对接人不能为空");
+                        this.loading = false;
+                    } else {
+                        DockProject({
+                            examineId: this.projectID,
+                            state: state,
+                            reviewerIdStr: itemID,
+                        }).then((res) => {
+                            this.Visible = false;
+                            this.loading = false;
+                            if (res.data.stateStr == "成功") {
+                                this.$message.success("对接成功");
+                                this.ExaminePage();
+                            } else {
+                                this.$message.success("对接失败");
+                            }
+                        });
+                    }
+                }
+                if (this.regionId == 2841) {
+                    if (this.itemListtwo[0].input == "") {
+                        this.$message.error("编印人不能为空");
+                        this.loading = false;
+                    } else if (this.flag2 == false) {
+                        this.$message.error("终审人不能为空");
+                        this.loading = false;
+                    } else if (this.flag1 == false) {
+                        this.$message.error("审核人不能为空");
+                        this.loading = false;
+                    } else {
+                        DockProject({
+                            examineId: this.projectID,
+                            state: state,
+                            reviewerIdStr: itemID,
+                        }).then((res) => {
+                            this.Visible = false;
+                            this.loading = false;
+                            if (res.data.stateStr == "成功") {
+                                this.$message.success("对接成功");
+                                this.ExaminePage();
+                            } else {
+                                this.$message.success("对接失败");
+                            }
+                        });
+                    }
+                }
+            }
+        },
+        TimeLineShowlose(val) {
+            this.TimeLineShow = val;
+            this.TimeLineShowone = val;
+        },
+        async approved(row) {
+            const { data: res } = await selectProjectRecord({
+                id: row.id,
+            });
+            if (res.state == 200) {
+                this.dilongList = res.records;
+                this.TimeLineShow = true;
+            }
+        },
+        docSrcShow(file) {
+            let arr = file.replaceAll("docx", "pdf");
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                arr;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        pdfSrcShow(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/Contract/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /*报价单 */
+        pdfSrcShowTwo(file) {
+            file = file.replaceAll("docx", "pdf");
+            file = file.replaceAll("doc", "pdf");
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/quotation/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /* 原始记录 */
+        pdfSrcShow2(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        imgShowList(row) {
+            let arr = row.split(",");
+            this.imgList = arr
+                .map((item) => {
+                    return (
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                        item
+                    );
+                })
+                .join(",")
+                .split(",");
+            setTimeout(() => {
+                this.imgShow = true;
+            }, 1500);
+        },
+        Gonggao(content) {
+            this.AnnounceList.content = content;
+            this.VisibleGong = true;
+        },
+        ItemDetails(item) {
+            this.editDilongone = true;
+            this.itemDetails = item.projectMap;
+            if (item.lastExamineInfoMap != null) {
+                this.itemDetails.remarks = item.lastExamineInfoMap.remarks;
+            }
+        },
+        Details(item) {
+            console.log(item);
+            this.editDilongtwo = true;
+            this.itemDetailstwo = item.quotationInfo;
+        },
+        imgCom(row) {
+            if (row) {
+                let arr = row.split(",");
+                if (arr.length > 0) {
+                    return arr[0];
+                } else {
+                    return arr;
+                }
+            }
+        },
+        /* 通知信息 */
+        projectmsg(regionId) {
+            projectmsg({
+                current: this.current,
+                size: this.size,
+                userId: regionId.id,
+                roleId: regionId.roleIdMap.id,
+            }).then((res) => {
+                this.messageList = res.data.records;
+            });
+        },
+        /* 获得未读消息数量 */
+        getMsgCount(regionId) {
+            getMsgCount({
+                userId: regionId.id,
+                roleId: regionId.roleIdMap.id,
+            }).then((res) => {
+                this.$store.commit("app/MESSAGELIST", res.data.records);
+            });
+        },
+        /* 获得未读留言信息条数 */
+        getMessListread() {
+            let params = JSON.parse(sessionStorage.getItem("records"));
+            const arrAll = {
+                receiveUserid: params.id,
+                isread: 0,
+            };
+            getMessList(arrAll).then((res) => {
+                if (res.data.state == 200) {
+                    this.$store.commit(
+                        "app/MESSAGELISTTwo",
+                        res.data.records.length
+                    );
+                }
+            });
+        },
+        /* 管理员待审核报价单任务 */
+        quotationExaminelist(regionId) {
+            const regionIdbeifen = JSON.parse(
+                sessionStorage.getItem("records")
+            );
+            this.completed = [];
+            quotationExaminelist({
+                regionId: regionId
+                    ? regionId.regionIdMap.id
+                    : regionIdbeifen.regionIdMap.id,
+                userId: regionId ? regionId.id : regionIdbeifen.id,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    res.data.records.map((item) => {
+                        if (item.quotationInfo != null) {
+                            if (item.id == item.quotationInfo.lastExamine) {
+                                this.completed.push(item);
+                            }
+                            if (item.regionId == item.quotationInfo.regionid) {
+                                this.completedIshow = true;
+                            }
+                        }
+                    });
+                }
+            });
+        },
+    },
+};
+</script>
+
+<style lang="scss" scoped>
+.dashboard {
+    height: 100%;
+    .header {
+        height: 30%;
+        display: flex;
+        margin-bottom: 7px;
+        .header-left {
+            border: 1px solid #ccc;
+            height: 100%;
+            margin-right: 7px;
+            width: 70%;
+            background: rgb(255, 255, 255);
+            .header-left-top {
+                height: 40px;
+                line-height: 40px;
+                border-bottom: 1px solid #ccc;
+                padding: 0px 10px;
+                font-size: 14px;
+            }
+            .header-left-bottom {
+                display: flex;
+                height: calc(100% - 40px);
+                .panel.panel-success {
+                    flex: 1;
+                    .panel-heading {
+                        margin: 14% 5%;
+                        color: #3c763d;
+                        background-color: #dff0d8;
+                        border-color: #d6e9c6;
+                        border-radius: 3px 3px 0 0;
+                    }
+                }
+                .panel.panel-warning {
+                    flex: 1;
+                    .panel-heading {
+                        margin: 14% 5%;
+                        color: #8a6d3b;
+                        background-color: #fcf8e3;
+                        border-color: #faebcc;
+                        border-radius: 3px 3px 0 0;
+                    }
+                }
+                .panel.panel-danger {
+                    flex: 1;
+                    .panel-heading {
+                        margin: 14% 5%;
+                        color: #a94442;
+                        background-color: #f2dede;
+                        border-color: #ebccd1;
+                        border-radius: 3px 3px 0 0;
+                    }
+                }
+            }
+        }
+        .header-right {
+            border: 1px solid #ccc;
+            width: 30%;
+            overflow: hidden;
+            background: rgb(255, 255, 255);
+            .header-right-top {
+                display: flex;
+                justify-content: space-between;
+                height: 40px;
+                line-height: 40px;
+                border-bottom: 1px solid #ccc;
+                padding: 0px 10px;
+                font-size: 14px;
+                div:last-child:hover {
+                    color: rgb(0, 140, 219);
+                }
+            }
+            .header-right-bottom {
+                height: calc(100% - 40px);
+                overflow-y: auto;
+                ::v-deep.el-tabs__header {
+                    margin: 0;
+                }
+                ::v-deep.el-table .cell {
+                    cursor: pointer;
+                }
+                .left {
+                    cursor: pointer;
+                    line-height: 30px;
+                    text-align: center;
+                }
+                .left:hover {
+                    text-decoration: underline;
+                }
+                .right {
+                    cursor: pointer;
+                    padding: 20px 10px;
+                    padding-top: 0px;
+                }
+            }
+        }
+    }
+    .footer {
+        height: 69%;
+        display: flex;
+        .footer-left {
+            border: 1px solid #ccc;
+            height: 100%;
+            margin-right: 7px;
+            width: 70%;
+            background: rgb(255, 255, 255);
+            overflow: hidden;
+            .footer-left-header {
+                display: flex;
+                justify-content: space-between;
+                height: 40px;
+                line-height: 40px;
+                border-bottom: 1px solid #ccc;
+                padding: 0px 10px;
+                font-size: 14px;
+                div:last-child:hover {
+                    color: rgb(0, 140, 219);
+                }
+            }
+            .footer-left-bottom {
+                padding: 6px;
+                overflow: hidden;
+            }
+        }
+        .footer-right {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            .footer-right-top {
+                flex: 1;
+                border: 1px solid #ccc;
+                background: rgb(255, 255, 255);
+                height: 100%;
+                .footer-right-top-header {
+                    display: flex;
+                    justify-content: space-between;
+                    height: 40px;
+                    line-height: 40px;
+                    border-bottom: 1px solid #ccc;
+                    padding: 0px 10px;
+                    font-size: 14px;
+                    div:last-child:hover {
+                        color: rgb(0, 140, 219);
+                    }
+                }
+                ::v-deep.el-tabs__content {
+                    overflow-y: auto;
+                    height: calc(100% - 55px);
+                }
+                ol {
+                    margin: 0;
+                    padding-left: 25px;
+                    margin-bottom: 5px;
+                    overflow-y: auto;
+                    height: calc(100% - 55px);
+                    li {
+                        line-height: 32px;
+                        .hang {
+                            display: flex;
+                            flex-wrap: wrap;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-bottom: 1px solid #ccc;
+                            margin-bottom: 5px;
+                            cursor: pointer;
+                            line-height: 43px;
+                            .el-button {
+                                margin: 5px;
+                            }
+                            .svg-icon {
+                                flex: 1;
+                                height: 2.5em;
+                            }
+                            .font-sty {
+                                flex: 1;
+                                overflow: hidden;
+                                white-space: nowrap;
+                                text-overflow: ellipsis;
+                            }
+                            .fintStyle {
+                                font-size: 12px;
+                                border: 1px solid red;
+                                display: block;
+                                height: 30px;
+                                line-height: 30px;
+                                flex: 0.3;
+                                text-align: center;
+                                color: red;
+                                border-radius: 15px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .isshow {
+            display: none;
+        }
+        .widthsty {
+            margin-right: 0px;
+            width: 100%;
+        }
+    }
+    .el-dialog {
+        .item_box {
+            width: 50%;
+            margin: auto;
+            .item_header {
+                height: 20px;
+                border-radius: 5px 5px 0 0;
+                background: rgb(214, 111, 14);
+                line-height: 20px;
+                color: #fff;
+                font-size: 12px;
+                padding-left: 10px;
+                .el-icon-close {
+                    position: relative;
+                    left: 60%;
+                    cursor: pointer;
+                }
+            }
+            .item_footer {
+                position: relative;
+                ::v-deep.el-input__inner {
+                    border-radius: 0 !important;
+                }
+                .el-divider--vertical {
+                    display: inline-block;
+                    width: 2px;
+                    height: 1.5em;
+                    margin: 0 85px;
+                    position: relative;
+                }
+                .iconstyle {
+                    width: 30px;
+                    height: 30px;
+                    margin: auto;
+                    cursor: pointer;
+                    background: rgb(48, 114, 201);
+                    border-radius: 50%;
+                    color: #fff;
+                    i {
+                        line-height: 30px;
+                        padding: 0 6px;
+                        width: 30px;
+                        font-size: 18px;
+                    }
+                }
+                ::v-deep.el-popover {
+                    left: 180px;
+                    top: 0px;
+                }
+            }
+        }
+    }
+    /* .cur:hover {
+        background: aliceblue;
+        cursor: pointer;
+    } */
+    .pdf {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    .iframes {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9998;
+    }
+    .close {
+        width: 30px;
+        height: 30px;
+        background: #323639;
+        position: absolute;
+        right: 12%;
+        top: 9px;
+        cursor: pointer;
+        font-size: 34px;
+        color: #fff;
+        z-index: 9999;
+    }
+    ::v-deep.gonggao {
+        height: 40%;
+        overflow-y: auto;
+        .el-dialog__body {
+            padding-top: 0px;
+            overflow-y: auto;
+            height: 85%;
+        }
+    }
+    .imgShow {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.9);
+        img {
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            width: 50%;
+            transform: translate(-50%, -10%);
+        }
+    }
+    .closer {
+        width: 30px;
+        height: 30px;
+        background: #0000005e;
+        position: absolute;
+        right: 12%;
+        top: 9px;
+        cursor: pointer;
+        font-size: 34px;
+        color: #fff;
+        z-index: 9999;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+    }
+}
+::v-deep.cur:hover {
+    background: aliceblue;
+    cursor: pointer;
+}
+::v-deep.isSelect:hover {
+    background: aliceblue;
+    cursor: not-allowed;
+}
+/* 详细信息 */
+.editCont {
+    ::v-deep .el-input__inner {
+        height: 32px;
+        line-height: 32px;
+    }
+
+    p {
+        margin: 0;
+        .item {
+            ::v-deep.el-form-item__label {
+                padding-right: 0 !important;
+            }
+        }
+    }
+    .el-form-item {
+        padding: 0;
+        margin-bottom: 10px;
+    }
+    .st {
+        width: 100%;
+        line-height: 35px;
+        padding-left: 10px;
+        text-align: left;
+        background: rgb(231, 231, 231);
+        border: 1px solid #ddd;
+    }
+    .hang {
+        display: flex;
+    }
+    .hang1 {
+        display: flex;
+    }
+    .trrr {
+        border: 1px solid #ddd;
+        width: 100%;
+        padding: 10px;
+        border-top: none;
+    }
+
+    .tr {
+        flex: 2;
+        border: 1px solid #ddd;
+        line-height: 100px;
+        border-right: none;
+        border-bottom: none;
+        font-size: 14px;
+        color: gray;
+    }
+    .tr1 {
+        width: 142.2px;
+        border: 1px solid #ddd;
+        line-height: 50px;
+        border-right: none;
+        border-bottom: none;
+        font-size: 14px;
+        color: gray;
+    }
+    .mytr {
+        line-height: 50px;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        flex: 6;
+        padding: 0 20px;
+        .projectMap:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    }
+    .trs {
+        flex: 6;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        .el-form {
+            padding-left: 20px;
+        }
+        .el-form-item {
+            margin-bottom: 0px;
+            width: 25%;
+            ::v-deep .el-form-item__label {
+                padding-top: 3px;
+            }
+        }
+        .el-form-item__content {
+            line-height: 34px;
+        }
+        .el-select {
+            width: 100%;
+        }
+        .el-input__inner {
+            padding: 0 0 0 15px;
+        }
+    }
+}
+</style>

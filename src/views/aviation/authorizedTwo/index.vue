@@ -1,0 +1,986 @@
+<template>
+    <div>
+        <table
+            width=100%
+            bgcolor=#cccccc
+            cellpadding=1
+            cellspacing=1
+        >
+            <tr>
+                <td
+                    valign=top
+                    width=80
+                    bgcolor=white
+                    align=center
+                >
+                    <table id="tablebut">
+                        <tr>
+                            <td valign="top">
+                                [<b style="color:green">打开保存</b>]<br>
+
+                                <!-- <input
+                                    type=button
+                                    class="button"
+                                    value="打开本地文件"
+                                    @click="WebOpenLocal()"
+                                ></input><br> -->
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="存为本地文件"
+                                    @click="WebSaveLocal()"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="指定页保存"
+                                    @click="WebSavePage()"
+                                ></input><br>
+
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="删除文件"
+                                    @click="WebDelFile()"
+                                ></input><br>
+                                [<b style="color:green">文档转换</b>]<br>
+
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="保存本地PDF"
+                                    @click="WebSaveLocalPdf()"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="保存本地HTML"
+                                    @click="WebSaveLocalHTML()"
+                                ></input><br>
+
+                                [<b style="color:green">打印控制</b>]<br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打印预览"
+                                    @click="WebDocPrintPreView()"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="设置后打印一"
+                                    @click="WebDocPrint()"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="设置后打印二"
+                                    @click="WebDocPrint2()"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="直接打印"
+                                    @click="WebPrintDirc()"
+                                ></input><br>
+                                [<b style="color:green">窗口设置</b>]<br>
+                                <!--  <input
+                                    type=button
+                                    class="button"
+                                    value="关闭标题栏"
+                                    @click="WebTitlebar(false)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打开标题栏"
+                                    @click="WebTitlebar(true)"
+                                ></input><br> -->
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="关闭菜单栏"
+                                    @click="WebMenubar(false)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打开菜单栏"
+                                    @click="WebMenubar(true)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="关闭工具栏"
+                                    @click="WebToolbar(false)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打开工具栏"
+                                    @click="WebToolbar(true)"
+                                ></input><br>
+
+                                [<b style="color:green">文档视图</b>]<br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="普通视图"
+                                    @click="WebShowView(1)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="大纲视图"
+                                    @click="WebShowView(2)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="页面视图"
+                                    @click="WebShowView(3)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="打印预览"
+                                    @click="WebShowView(4)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="主控视图"
+                                    @click="WebShowView(5)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="WEB视图"
+                                    @click="WebShowView(6)"
+                                ></input><br>
+                                <input
+                                    type=button
+                                    class="button"
+                                    value="阅读视图"
+                                    @click="WebShowView(7)"
+                                ></input><br>
+
+                            </td>
+                            <td valign="top">
+                            </td>
+                            <td valign="top">
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+                <td
+                    valign="top"
+                    bgcolor="white"
+                >
+                    <div id="WebOCX"><object
+                            classid="clsid:FF09E4FA-BFAA-486E-ACB4-86EB0AE875D5"
+                            codebase="http://www.officectrl.com/weboffice/WebOffice.ocx#Version=2018,1,6,2"
+                            id="WebOffice"
+                            width="80%"
+                            height="900"
+                        >
+                            <param
+                                name="BorderStyle"
+                                value="1"
+                            >
+                            <param
+                                name="Menubar"
+                                value="1"
+                            >
+                            <param
+                                name="Titlebar"
+                                value="1"
+                            >
+                            <param
+                                name="Toolbars"
+                                value="1"
+                            >
+                        </object></div>
+                </td>
+                <td
+                    valign=top
+                    width=180
+                    bgcolor=white
+                    align=center
+                >
+                    <table
+                        id="tablebut"
+                        width=180
+                    >
+                        <tr
+                            width=180
+                            v-if="ishow!= 1"
+                        >
+                            <td valign="top">
+                                <input
+                                    style="margin-top:20%"
+                                    type=button
+                                    class="button"
+                                    value="保存"
+                                    @click="WebSaveC()"
+                                ><br>
+                                <br>
+                            </td>
+
+                        </tr>
+                        <tr
+                            width=180
+                            v-if="ishowAlgin=='true'"
+                        >
+                            <td valign="top">
+                                <input
+                                    style="margin-top:20%"
+                                    type=button
+                                    class="button"
+                                    value="再次提交"
+                                    @click="Examine()"
+                                ><br>
+                                <br>
+                            </td>
+
+                        </tr>
+                        <b
+                            style="color:green;"
+                            v-if="ishow== 1"
+                        >处理意见</b><br>
+                        <div
+                            class="borderBoxs"
+                            ref="borderBoxs"
+                            v-if="ishow== 1"
+                        >
+                            <div
+                                class="borderBox"
+                                :class="index === borderBoxs.length - 1 ? 'col':''"
+                                v-for="(item,index) in borderBoxs"
+                                :key="index"
+                            >
+                                <!--  <span style="font-size:12px">角色：{{item.roleIdInfoMap!=null ? item.roleIdInfoMap.other :"-"}}</span><br> -->
+
+                                <span style="font-size:12px">操作人 {{ item.reviewInfo!=null ?  item.reviewInfo.userName :item.submitterInfo.userName}}</span><br>
+                                <span style="font-size:12px">备注：{{item.remarks!=null ? item.remarks :"-"}}</span>
+                            </div>
+                        </div>
+                        <el-input
+                            v-if="ishow== 1"
+                            type="textarea"
+                            :rows="6"
+                            placeholder="备注"
+                            v-model="remarks"
+                            show-word-limit
+                            style="margin-bottom:10px;margin-top:10px"
+                        >
+                        </el-input><br>
+                        <tr
+                            width=180
+                            v-if="ishow== 1 && ishowAlgin!= 'true'"
+                        >
+                            <td valign="top">
+                                <div>
+                                    <div style="display:flex;margin-top:5px">
+                                        <el-button
+                                            type="success"
+                                            @click="Examine()"
+                                            size="mini"
+                                            style="flex:1"
+                                        >通过</el-button>
+                                    </div>
+                                    <div style="display:flex;margin-top:5px">
+                                        <el-button
+                                            type="warning"
+                                            size="mini"
+                                            @click="Back()"
+                                            style="flex:1"
+                                        >退回</el-button>
+                                        <el-button
+                                            type="info"
+                                            size="mini"
+                                            @click="deliver()"
+                                            style="flex:1"
+                                        >转交</el-button>
+                                    </div>
+                                    <div style="display:flex;margin-top:5px">
+                                        <el-button
+                                            type="danger"
+                                            @click="Nopass()"
+                                            size="mini"
+                                            style="flex:1"
+                                        >不通过</el-button>
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <transition name="fade">
+                                <div
+                                    class="classsty"
+                                    v-if="pass"
+                                >
+                                    <label style="color:green;margin:5px 0;display:block">审核人列表</label>
+                                    <el-checkbox-group
+                                        v-model="goPass.ladder"
+                                        @change="ladderChange"
+                                    >
+                                        <el-checkbox
+                                            v-for="(item, index) in goPassList"
+                                            :key="item.id"
+                                            :label="item.id"
+                                        >{{item.trueName}}</el-checkbox>
+                                    </el-checkbox-group>
+                                    <span class="footer">
+                                        <el-button
+                                            @click="pass = false"
+                                            size="small"
+                                            style="flex:1"
+                                        >取 消</el-button>
+                                        <el-button
+                                            type="primary"
+                                            size="small"
+                                            style="flex:1"
+                                            @click="GoPassClick"
+                                        >确 定</el-button>
+                                    </span>
+                                </div>
+                                <div
+                                    class="classsty"
+                                    v-if="back"
+                                >
+                                    <label style="color:green;margin:5px 0;display:block">退回人列表</label>
+                                    <el-checkbox-group
+                                        v-model="goBack.ladder"
+                                        @change="ladderBackChange"
+                                    >
+                                        <el-checkbox
+                                            v-for="(item, index) in goBackList"
+                                            :key="item.id"
+                                            :label="item.id"
+                                        >{{item.trueName + '('+item.roleIdMap.name +')'}}</el-checkbox>
+                                    </el-checkbox-group>
+                                    <span class="footer">
+                                        <el-button
+                                            @click="back = false"
+                                            size="small"
+                                            style="flex:1"
+                                        >取 消</el-button>
+                                        <el-button
+                                            type="primary"
+                                            size="small"
+                                            style="flex:1"
+                                            @click="GoBackClick"
+                                        >确 定</el-button>
+                                    </span>
+                                </div>
+                                <div
+                                    class="classsty"
+                                    v-if="Turn"
+                                >
+                                    <label style="color:green;margin:5px 0;display:block">转交用户列表</label>
+                                    <el-checkbox-group
+                                        v-model="lessonForm.ladder"
+                                        @change="ladderTurnChange"
+                                    >
+                                        <el-checkbox
+                                            v-for="(item, index) in ladderList"
+                                            :key="item.id"
+                                            :label="item.id"
+                                        >{{item.trueName + '('+item.roleIdMap.name +')'}}</el-checkbox>
+                                    </el-checkbox-group>
+                                    <div v-if="ladderList.length == 0">暂无可转交用户</div>
+                                    <span class="footer">
+                                        <el-button
+                                            @click="Turn = false"
+                                            size="small"
+                                            style="flex:1"
+                                        >取 消</el-button>
+                                        <el-button
+                                            type="primary"
+                                            size="small"
+                                            style="flex:1"
+                                            @click="GoTurnClick"
+                                        >确 定</el-button>
+                                    </span>
+                                </div>
+                            </transition>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+<script>
+import * as WebCtrl from "@/assets/WebOffice.js?v=1"; //注意路径
+import {
+    sendMsg,
+    getAdministrators,
+    getBackUser,
+    quotationExamineRecord,
+} from "@/api/aviation";
+let strUrl = "";
+let doctype = "";
+export default {
+    data() {
+        return {
+            timer: null,
+            ishow: true,
+            pass: false,
+            back: false,
+            Turn: false,
+            goPassList: [],
+            goPass: {
+                ladder: [],
+            },
+            goBackList: [],
+            goBack: {
+                ladder: [],
+            },
+            ladderList: [],
+            lessonForm: {
+                ladder: [],
+            },
+            ishowAlgin: null,
+            remarks: "",
+            borderBoxs: [],
+        };
+    },
+    created() {
+        this.$store.commit("app/TRUNOFF", false);
+    },
+    mounted() {
+        this.$nextTick(function () {
+            WebCtrl.LoadCtrl(WebOCX);
+            var fileName = window.location.hash
+                .split("?")[1]
+                .split("&")[1]
+                .split("=")[1];
+            var role = window.location.hash
+                .split("?")[1]
+                .split("&")[2]
+                .split("=")[1];
+            var ishowAlgin = window.location.hash
+                .split("?")[1]
+                .split("&")[6]
+                .split("=")[1];
+            this.ishow = role;
+            /*  alert(ishowAlgin) */
+            this.ishowAlgin = ishowAlgin;
+            strUrl = `http://140.249.209.176:8084/LightningDetection/quotation/${fileName}`;
+           /*  strUrl = `http://140.249.209.176:8084/LightningDetection/quotation/${fileName}`; */
+            //通过对象WebOffice的Open方法打开个一个服务器文档
+            WebOffice.UserName = "杞人气象科技服务(北京)有限公司";
+            WebOffice.Authorizer = "www.officectrl.com";
+            doctype = "doc";
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                WebOffice.Open(strUrl, true, doctype);
+            }, 500);
+            this.WebTitlebar(false);
+            this.getAdministrators();
+            this.getAdministratorstwo();
+            this.getBackUser();
+            this.quotationExamineRecord();
+        });
+    },
+    methods: {
+        NoCopyIt: function (e) {
+            WebCtrl.isNotCopy(e);
+        },
+        WebSignature: function (e) {
+            var strpic;
+            if (e == 1) strpic = "001.gif";
+            if (e == 2) strpic = "002.gif";
+            if (e == 3) strpic = "003.gif";
+            WebCtrl.WebSignature(
+                "http://www.officectrl.com/weboffice/images/" + strpic
+            );
+        },
+        WebSave: function () {
+            WebOffice.Save(
+                "http://www.officectrl.com/officecs/uploadedit.aspx?oper=edit&flsid=4167975720113410419&flag=1"
+            ); //uploadedit.aspx是表单一个文件上传的后二进制接收器
+        },
+        WebHttpSave: function () {
+            WebOffice.HttpInit();
+            WebOffice.HttpAddPostString("filename", "4167975720113410419.doc");
+            WebOffice.HttpAddPostCurrFile("docfile", "");
+            var strResults = WebOffice.HttpPost(
+                "http://www.officectrl.com/officecs/postsave.aspx"
+            ); //postsave.aspx是表单一个文件上传的后二进制接收器
+            if (strResults == "ok") alert("保存成功！");
+        },
+        WebDocReload: function () {
+            location.reload();
+        },
+        WebOpen1: function () {
+            WebOffice.WebLoadFile(
+                "http://www.officectrl.com/weboffice/temp/%E6%95%B0%E6%8D%AE%E6%99%BA%E8%83%BD%E8%AF%86%E5%88%AB%E4%B8%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%98%E5%82%A8%E8%A1%A8%E6%A0%BC%E6%95%B0%E6%8D%AE%E7%AE%97%E6%B3%95%2Edocx",
+                "Word.Document"
+            );
+        },
+        WebOpen2: function () {
+            WebOffice.Close();
+            WebOffice.WebOpen(
+                "http://www.officectrl.com/weboffice/temp/file1.doc",
+                "doc"
+            );
+        },
+        WebOpen3: function () {
+            WebOffice.WebLoadFile(
+                "http://www.officectrl.com/weboffice/temp/file1.doc",
+                null
+            );
+        },
+        CreateXLS: function () {
+            WebOffice.WebLoadFile("", "xls");
+        },
+        CreateDoc: function () {
+            WebOffice.WebLoadFile("", "doc");
+        },
+        CreatePpt: function () {
+            WebOffice.WebLoadFile("", "ppt");
+        },
+        /* 获取上一级别审核人 */
+        getAdministrators() {
+            this.goPassList = [];
+            var regionId = window.location.hash
+                .split("?")[1]
+                .split("&")[3]
+                .split("=")[1];
+            var company = window.location.hash
+                .split("?")[1]
+                .split("&")[7]
+                .split("=")[1];
+            getAdministrators({
+                regionId: regionId,
+                parent: 1,
+                company:company,
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.goPassList.push(item);
+                });
+            });
+        },
+        /* 获取同级别审核人 */
+        getAdministratorstwo() {
+            this.ladderList = [];
+            var regionId = window.location.hash
+                .split("?")[1]
+                .split("&")[3]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            var company = window.location.hash
+                .split("?")[1]
+                .split("&")[7]
+                .split("=")[1];
+            getAdministrators({
+                regionId: regionId,
+                parent: 0,
+                company:company,
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    if (sessionID != item.id) {
+                        this.ladderList.push(item);
+                    }
+                });
+            });
+        },
+        /* 查询可以退回的用户列表 */
+        getBackUser() {
+            this.goBackList = [];
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[5]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            var company = window.location.hash
+                .split("?")[1]
+                .split("&")[7]
+                .split("=")[1];
+            getBackUser({
+                id: projectId,
+                userId: sessionID,
+                company:company,
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    this.goBackList.push(item);
+                });
+            });
+        },
+        /* 保存在服务器*/
+        async WebSaveC() {
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            const re = WebOffice.Save(
+                `http://140.249.209.176:8084/LightningDetection/quotation/updateQuotationFile?id=${ID}`
+            );
+            const res = re.substring(0, 3);
+            if (res == "200") {
+                this.$message.success(
+                    "保存成功,需要关闭页面以提高文件正确性。"
+                );
+                let msg = {
+                    sendType: 1,
+                    acceptUserIds: sessionID,
+                    messageStr: "4",
+                };
+                sendMsg(msg).then((res) => {});
+                window.close();
+            } else {
+                this.$message.error("保存失败");
+            }
+        },
+        /* 审核通过 */
+        Examine() {
+            var regionId = window.location.hash
+                .split("?")[1]
+                .split("&")[3]
+                .split("=")[1];
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            if (regionId == "2841" || this.ishowAlgin == "true") {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "通过成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "4",
+                    };
+                    sendMsg(msg).then((res) => {});
+                    window.close();
+                } else {
+                    this.$message.error("请退出后重试");
+                }
+            } else {
+                this.pass = true;
+            }
+        },
+        /* 退回 */
+        Back() {
+            this.back = true;
+        },
+        /* 转交 */
+        deliver() {
+            this.Turn = true;
+        },
+        /* 不通过 */
+        Nopass() {
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            const re = WebOffice.Save(
+                `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${2}&id=${ID}`
+            );
+            const res = re.substring(0, 3);
+            if (res == "200") {
+                this.$message.success(
+                    "不通过成功,需要关闭页面以提高文件正确性。"
+                );
+                let msg = {
+                    sendType: 1,
+                    acceptUserIds: sessionID,
+                    messageStr: "4",
+                };
+                sendMsg(msg).then((res) => {});
+                window.close();
+            } else {
+                this.$message.error("请退出后重试");
+            }
+        },
+        ladderChange() {
+            if (this.goPass.ladder.length > 1) {
+                this.goPass.ladder.shift();
+            }
+        },
+        ladderBackChange() {
+            if (this.goBack.ladder.length > 1) {
+                this.goBack.ladder.shift();
+            }
+        },
+        ladderTurnChange() {
+            if (this.lessonForm.ladder.length > 1) {
+                this.lessonForm.ladder.shift();
+            }
+        },
+        /* 审核确定 */
+        GoPassClick() {
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            if (this.goPass.ladder.length == 0) {
+                this.$message("请先选择审核人");
+            } else {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}&Reviewer=${this.goPass.ladder.toString()}&remarks=${
+                        this.remarks
+                    }`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "提交成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "4",
+                    };
+                    sendMsg(msg).then((res) => {});
+                    window.close();
+                } else {
+                    this.$message.error("请退出后重试");
+                }
+            }
+        },
+        /* 退回确定 */
+        GoBackClick() {
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            if (this.goBack.ladder.length == 0) {
+                this.$message("请先选择退回用户");
+            } else {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${3}&id=${ID}&Reviewer=${this.goBack.ladder.toString()}&remarks=${
+                        this.remarks
+                    }`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "退回成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "4",
+                    };
+                    sendMsg(msg).then((res) => {});
+                    window.close();
+                } else {
+                    this.$message.error("请退出后重试");
+                }
+            }
+        },
+        /* 转交确定 */
+        GoTurnClick() {
+            var ID = window.location.hash
+                .split("?")[1]
+                .split("&")[0]
+                .split("=")[1];
+            var sessionID = window.location.hash
+                .split("?")[1]
+                .split("&")[4]
+                .split("=")[1];
+            if (this.lessonForm.ladder.length == 0) {
+                this.$message("请先选择转交用户");
+            } else {
+                const re = WebOffice.Save(
+                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${4}&id=${ID}&Reviewer=${this.lessonForm.ladder.toString()}&remarks=${
+                        this.remarks
+                    }`
+                );
+                const res = re.substring(0, 3);
+                if (res == "200") {
+                    this.$message.success(
+                        "转交成功,需要关闭页面以提高文件正确性。"
+                    );
+                    let msg = {
+                        sendType: 1,
+                        acceptUserIds: sessionID,
+                        messageStr: "4",
+                    };
+                    sendMsg(msg).then((res) => {});
+                    window.close();
+                } else {
+                    this.$message.error("请退出后重试");
+                }
+            }
+        },
+        /* 获取全部流程备注 */
+        quotationExamineRecord() {
+            var projectId = window.location.hash
+                .split("?")[1]
+                .split("&")[5]
+                .split("=")[1];
+            quotationExamineRecord({
+                id: projectId,
+            }).then((res) => {
+                if (res.data.state == 200) {
+                    this.borderBoxs = res.data.records;
+                    setTimeout(() => {
+                        this.$refs.borderBoxs.scrollTop =
+                            this.$refs.borderBoxs.scrollHeight;
+                    }, 500);
+                }
+            });
+        },
+        WebSaveLocal: function () {
+            WebOffice.showdialog(3);
+        },
+        WebSavePage: function () {
+            WebOffice.SetPageAs("c:\\b.doc", 1, 0);
+            alert("已将文档第1页的内容另存为c盘根目录下的b.doc文件");
+        },
+        WebDelFile: function () {
+            WebOffice.DeleteLocalFile("c:\\a.doc");
+            alert("已将c盘根目a.doc删除");
+        },
+        WebSaveLocalPdf: function () {
+            var pdfile = "c:\\a.pdf";
+            var WebOffice = document.getElementById("WebOffice");
+            WebOffice.ActiveDocument.ExportAsFixedFormat(pdfile, 17);
+            alert(
+                "已在C盘根目录下生成" +
+                    pdfile +
+                    "，请到你本地电脑的C盘目录查看！"
+            );
+        },
+        WebSaveLocalHTML: function () {
+            var htmlfullpath = "c:\\a.html";
+            WebOffice.ActiveDocument.saveas(htmlfullpath, 8);
+            alert(
+                "已在C盘根目录下生成" +
+                    htmlfullpath +
+                    "，请到你本地电脑的C盘目录查看！"
+            );
+        },
+        WebGetUser: function () {
+            var app = WebOffice.GetApplication;
+            alert("用Application对象取得当前WORD文档用户名是：" + app.username);
+        },
+        WebActive: function () {
+            WebOffice.WebDialogs(129);
+        },
+        WebTempPath: function () {
+            var a = WebOffice.TempFilePath;
+            alert(a);
+        },
+        WebDocPrintPreView: function () {
+            WebOffice.ActiveDocument.Application.PrintPreview = 1;
+        },
+        WebDocPrint: function () {
+            WebOffice.printout(true);
+        },
+        WebDocPrint2: function () {
+            WebOffice.ActiveDocument.Application.Dialogs(88).Show();
+        },
+        WebPrintDirc: function () {
+            WebOffice.ActiveDocument.PrintOut();
+        },
+        WebTitlebar: function (e) {
+            WebOffice.Titlebar = e;
+        },
+        WebMenubar: function (e) {
+            WebOffice.MenuBars = e;
+        },
+        WebToolbar: function (e) {
+            WebOffice.Toolbars = e;
+        },
+        WebShowView: function (e) {
+            WebOffice.ShowView(e);
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+body,
+a {
+    font-size: 12px;
+}
+.button {
+    height: 25px;
+    width: 80px;
+    flex: 1;
+    background-color: #c6d7ef;
+    color: #000080;
+    line-height: 9pt;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    cursor: hand;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 9pt;
+}
+.classsty {
+    box-shadow: 2px 2px 3px #888888;
+    border: 1px solid #c6d7ef;
+    padding: 10px;
+    .footer {
+        margin-top: 10px;
+        display: flex;
+    }
+}
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    transition: opacity 0.5s;
+}
+.borderBoxs {
+    height: 30vh;
+    overflow-y: auto;
+    .borderBox {
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .col {
+        color: #008cdb;
+        border: 1px solid #008cdb;
+    }
+}
+.operation {
+    height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+</style>

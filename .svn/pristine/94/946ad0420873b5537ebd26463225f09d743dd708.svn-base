@@ -1,0 +1,404 @@
+import Vue from 'vue'
+import 'normalize.css/normalize.css' // A modern alternative to CSS resets
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import locale from 'element-ui/lib/locale/lang/en' // lang i18n
+import '@/styles/index.scss' // global css
+import App from './App'
+import store from './store'
+import router from './router'
+import vueEsign from 'vue-esign'
+Vue.use(vueEsign)
+import '@/icons' // icon
+import '@/permission' // permission control
+Vue.filter('statusFilter', function (status, arr) {
+    if (arr != "" && arr == 13) {
+        if (status == "15") {
+            return "省级编印中";
+        } else if (status == "16") {
+            return "通过";
+        } else {
+            switch (status) {
+                case "3":
+                    return "备案待通过";
+                    break;
+                case "4":
+                    return "备案审核通过";
+                    break;
+                case "5":
+                    return "备案申请不通过";
+                    break;
+                case "6":
+                    return "州市对接中";
+                    break;
+                case "7":
+                    return "州市已对接";
+                    break;
+                case "8":
+                    return "州市对接不通过";
+                    break;
+                case "9":
+                    return "州市审核中";
+                    break;
+                case "10":
+                    return "州市审核通过";
+                    break;
+                case "11":
+                    return "州市审核不通过";
+                    break;
+                case "12":
+                    return "省级对接中";
+                    break;
+                case "13":
+                    return "省级已对接";
+                    break;
+                case "14":
+                    return "省级对接不通过";
+                    break;
+                case "15":
+                    return "省级审核中";
+                    break;
+                case "16":
+                    return "省级已审核";
+                    break;
+                case "17":
+                    return "省级审核不通过";
+                    break;
+                case "18":
+                    return "市级退回";
+                    break;
+                case "19":
+                    return "省级退回";
+                    break;
+                case "20":
+                    return "被退回在编辑";
+                    break;
+                case "21":
+                    return "再编辑已提交";
+                    break;
+                case "22":
+                    return "报告已编制";
+                    break;
+                case "23":
+                    return "已转交";
+                    break;
+                case "24":
+                    return "被转交";
+                    break;
+                case "25":
+                    return "编印撤回";
+                    break;
+                case '32':
+                    return "备案退回";
+                    break;
+                case '33':
+                    return "备案被退回";
+                    break;
+                    case "34":
+                        return "再次提交";
+                        break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        switch (status) {
+            case "3":
+                return "备案待通过";
+                break;
+            case "4":
+                return "备案审核通过";
+                break;
+            case "5":
+                return "备案申请不通过";
+                break;
+            case "6":
+                return "州市对接中";
+                break;
+            case "7":
+                return "州市已对接";
+                break;
+            case "8":
+                return "州市对接不通过";
+                break;
+            case "9":
+                return "州市审核中";
+                break;
+            case "10":
+                return "州市审核通过";
+                break;
+            case "11":
+                return "州市审核不通过";
+                break;
+            case "12":
+                return "省级对接中";
+                break;
+            case "13":
+                return "省级已对接";
+                break;
+            case "14":
+                return "省级对接不通过";
+                break;
+            case "15":
+                return "省级审核中";
+                break;
+            case "16":
+                return "省级已审核";
+                break;
+            case "17":
+                return "省级审核不通过";
+                break;
+            case "18":
+                return "市级退回";
+                break;
+            case "19":
+                return "省级退回";
+                break;
+            case "20":
+                return "被退回在编辑";
+                break;
+            case "21":
+                return "再编辑已提交";
+                break;
+            case "22":
+                return "报告已编制";
+                break;
+            case "23":
+                return "已转交";
+                break;
+            case "24":
+                return "被转交";
+                break;
+            case "25":
+                return "编印撤回";
+                break;
+            case "32":
+                return "备案退回";
+                break;
+            case "33":
+                return "备案被退回";
+                break;
+            case "34":
+                return "再次提交";
+                break;
+            default:
+                break;
+        }
+    }
+})
+
+Vue.filter('statusFilterNew', function (status) {
+    switch (status) {
+        case "31":
+            return "省级审核不通过";
+            break;
+        case "32":
+            return "备案退回";
+            break;
+        case "33":
+            return "备案被退回";
+            break;
+        case "26":
+            return "市级备案人审核中";
+            break;
+        case "27":
+            return "市级备案审核通过";
+            break;
+        case "28":
+            return "市级备案审核不通过";
+            break;
+        case "29":
+            return "省级备案待审核";
+            break;
+            case "34":
+                return "再次提交";
+                break;
+      
+    }
+})
+Vue.filter('stateFilter', function (status) {
+    const statusMap = [
+        "success",
+        "gray",
+        "danger",
+    ];
+    if (status == '16') {
+        return statusMap[0];
+    }
+})
+Vue.filter('applyForinfoFilter', function (status, index) {
+    if (index != 1 && status == '1' && index!=undefined) {
+        return '再次提交'
+    } else {
+        switch (status) {
+            case '1':
+                return '申请开票'
+            case '2':
+                return '开票退回'
+                break;
+            case '3':
+                return '开票被退回'
+                break;
+            case '4':
+                return '已开具'
+                break;
+            case '5':
+                return '备案审核人通过'
+                break;
+            case '6':
+                return '省级备案人审核中'
+                break;
+            case '7':
+                return '省级备案人审核通过'
+                break;
+            case '8':
+                return '已作废'
+                break;
+            default:
+                break;
+        }
+    }
+
+})
+Vue.filter('applyForinfoFilterzuofei', function (status) {
+    switch (status) {
+        case '1':
+            return '申请作废'
+        case '2':
+            return '作废退回'
+            break;
+        case '3':
+            return '作废被退回'
+            break;
+        case '4':
+            return '已作废'
+            break;
+        case null:
+            return '已开具'
+            break;
+        default:
+            break;
+    }
+})
+Vue.filter('stateFilterTwo', function (status) {
+    switch (status) {
+        case '4':
+            return '创建完成'
+            break;
+        case '5':
+            return '已保存报告'
+            break;
+        case '6':
+            return '县审核中'
+            break;
+        case '7':
+            return '县审核通过'
+            break;
+        case '8':
+            return '县审核不通过'
+            break;
+        case '9':
+            return '州市审核中'
+            break;
+        case '10':
+            return '州市审核通过'
+            break;
+        case '11':
+            return '州市审核不通过'
+            break;
+        case '15':
+            return '省级审核中'
+            break;
+        case '16':
+            return '省级审核通过'
+            break;
+        case '17':
+            return '省级审核不通过'
+            break;
+
+        case '18':
+            return '县级退回'
+            break;
+        case '19':
+            return '市级退回'
+            break;
+        case '20':
+            return '省级退回'
+            break;
+        case '21':
+            return '被退回在编辑'
+            break;
+
+        case '22':
+            return '在编辑已提交'
+            break;
+        case '23':
+            return '已转交'
+            break;
+        case '24':
+            return '被转交'
+            break;
+        case '26':
+            return '完整通过'
+            break;
+        case '32':
+            return '备案退回'
+            break;
+        case '33':
+            return '备案被退回'
+            break;
+
+        default:
+            break;
+    }
+})
+Vue.filter('typeFilter', function (status) {
+    switch (status) {
+        case '0':
+            return '正常项目'
+            break;
+        case '1':
+            return '复用正常项目'
+            break;
+        case '2':
+            return '非模板项目'
+            break;
+        case '3':
+            return '复用非模板项目'
+            break;
+        case '4':
+            return '模板项目创建的子项目'
+            break;
+        case '5':
+            return '非模板项目创建的子项目'
+            break;
+
+        default:
+            break;
+    }
+})
+/**
+ * If you don't want to use mock-server
+ * you want to use MockJs for mock api
+ * you can execute: mockXHR()
+ *
+ * Currently MockJs will be used in the production environment,
+ * please remove it before going online ! ! !
+ */
+if (process.env.NODE_ENV === 'production') {
+    const { mockXHR } = require('../mock')
+    mockXHR()
+}
+
+// set ElementUI lang to EN
+/* Vue.use(ElementUI, { locale }) */
+// 如果想要中文版 element-ui，按如下方式声明
+Vue.use(ElementUI)
+
+Vue.config.productionTip = false
+new Vue({
+    el: '#app',
+    router,
+    store,
+    render: h => h(App)
+})

@@ -1,0 +1,840 @@
+<template>
+    <div class="app-container" style="height:100%">
+        <el-form :inline="true" :model="formInline" class="demo-form-inline" size='mini'
+            style="background:#FFF;padding: 10px 0 0 10px;margin-bottom:7px">
+            <el-col :span="24">
+                <el-form-item label="行政区划">
+                    <el-input v-model="formInline.regionName" placeholder="行政区划"></el-input>
+                </el-form-item>
+                <el-form-item label="出厂编号">
+                    <el-input v-model="formInline.number" placeholder="出厂编号"></el-input>
+                </el-form-item>
+                <el-form-item label="设备名称">
+                    <el-input v-model="formInline.name" placeholder="设备名称"></el-input>
+                </el-form-item>
+                <el-form-item label="型号">
+                    <el-input v-model="formInline.model" placeholder="型号"></el-input>
+                </el-form-item>
+                <el-form-item label="人员归属">
+                    <!-- <el-input v-model="formInline.regionName" placeholder="人员归属"></el-input> -->
+                    <el-select v-model="formInline.company" placeholder="请选择" clearable>
+                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-form-item label="检定时间范围">
+                <el-date-picker v-model="formInline.timeDate" type="daterange" range-separator="至"
+                    start-placeholder="检定开始时间" end-placeholder="检定结束时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="过期时间范围">
+                <el-date-picker v-model="formInline.ExpirationTime" type="daterange" range-separator="至"
+                    start-placeholder="过期开始时间" end-placeholder="过期结束时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd">
+                </el-date-picker>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="onblur(1)">查询</el-button>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="Addproject">添加设备</el-button>
+            </el-form-item>
+        </el-form>
+        <div style="background:#FFF;height: calc(100% - 110px);">
+            <el-table v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row
+                height="70vh" :row-class-name="tableRowClassName">
+                <el-table-column align="center" label="序号" width="95" type="index">
+                    <!--   <template slot-scope="scope">
+                        {{ scope.row.id }}
+                    </template> -->
+                </el-table-column>
+                <el-table-column align="center" label="行政区划">
+                    <template slot-scope="scope">
+                        {{ scope.row.regionIdMap ? scope.row.regionIdMap.name : "-" }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="设备名称" align="center">
+                    <template slot-scope="scope">
+                        {{ scope.row.name }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="型号" align="center">
+                    <template slot-scope="scope">
+                        <span>{{ scope.row.model }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="出厂编号" align="center">
+                    <template slot-scope="scope">
+                        <span>{{ scope.row.number }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="检定日期" align="center">
+                    <template slot-scope="scope">
+                        <span>{{ scope.row.inspectTime ? scope.row.inspectTime : '-' }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="到期日期" align="center">
+                    <template slot-scope="scope">
+                        {{ scope.row.expirationTime ? scope.row.expirationTime : '-' }}
+                    </template>
+                </el-table-column>
+                <el-table-column class-name="status-col" label="检定证书（上传pdf扫描件）" align="center">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.inspectFile" @click.stop="docSrcShow(scope.row.inspectFile)"
+                            style="cursor: pointer;color: #2788EE"> {{ scope.row.inspectFile.split('.')[0] + '.pdf' }}
+                        </span>
+                        <span v-else> 未上传 </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="created_at" label="操作" width="220">
+                    <template slot-scope="scope">
+                        <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDetele(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <Page :total="total" :pageNum="current" :pageSize="size" @pageChange="pageChange" />
+        </div>
+        <div v-show="imgShow" class="imgShow">
+            <el-carousel :autoplay="false" height="1030px">
+                <el-carousel-item v-for="item in imgList" :key="item">
+                    <img :src="item">
+                </el-carousel-item>
+            </el-carousel>
+            <div class="closer" @click.stop="imgShow = false"> × </div>
+        </div>
+        <!-- 添加弹框 -->
+        <el-dialog width="30%" title="添加设备" :visible.sync="dialog.innerVisible" append-to-body @close='close'>
+            <el-form :label-position="labelPosition" label-width="100px" :model="formLabelAlign" ref="ruleForm"
+                :rules="rules">
+                <el-form-item label="设备名称" prop="name">
+                    <el-input v-model="formLabelAlign.name"></el-input>
+                </el-form-item>
+                <el-form-item label="型号" prop="model">
+                    <el-input v-model="formLabelAlign.model"></el-input>
+                </el-form-item>
+                <el-form-item label="出厂编号" prop="number">
+                    <el-input v-model="formLabelAlign.number"></el-input>
+                </el-form-item>
+                <el-form-item label="人员归属" prop="company">
+                    <el-select v-model="formLabelAlign.company" placeholder="请选择" clearable>
+                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="检定日期" prop="inspectTime">
+
+                    <el-date-picker v-model="formLabelAlign.inspectTime" style="width:100%" type="date" placeholder="选择日期"
+                        value-format="yyyy-MM-dd" :picker-options="pickerOptions0">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="到期日期" prop="expirationTime">
+                    <el-date-picker v-model="formLabelAlign.expirationTime" style="width:100%" type="date"
+                        placeholder="选择日期" value-format="yyyy-MM-dd" :picker-options="pickerOptions1">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="检定证书" prop="qualifications">
+                    <el-upload action="" ref="upload" accept=".pdf" :limit="1" :before-upload="uploadHttpimg"
+                        :file-list="fileList">
+                        <el-button size="mini" type="primary">上传证书</el-button>
+                    </el-upload>
+                </el-form-item>
+                <!-- <el-form-item
+                    label="角色"
+                    prop="roleId"
+                >
+                    <el-select
+                        v-model="formLabelAlign.roleId"
+                        clearable
+                        placeholder="角色编号"
+                    >
+                        <el-option
+                            v-for="item in regionIdList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id"
+                        >
+                            <span>{{ item.name }}</span>
+                        </el-option>
+                    </el-select>
+                </el-form-item> -->
+                <el-form-item style="display: flex;justify-content: flex-end;">
+                    <el-button type="primary" @click="submitForm()">保存</el-button>
+                    <el-button @click="unfollow">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+        <!-- 编辑弹框 -->
+        <el-dialog width="30%" title="编辑" :visible.sync="dialogone.innerVisible" append-to-body @close='close'>
+            <el-form :label-position="labelPosition" label-width="100px" :model="formLabel" ref="ruleForm">
+                <el-form-item label="设备名称" prop="name">
+                    <el-input v-model="formLabel.name"></el-input>
+                </el-form-item>
+                <el-form-item label="型号" prop="password">
+                    <el-input v-model="formLabel.model"></el-input>
+                </el-form-item>
+                <el-form-item label="出场编号" prop="true_name">
+                    <el-input v-model="formLabel.number"></el-input>
+                </el-form-item>
+                <el-form-item label="检定日期" prop="phone">
+
+                    <el-date-picker v-model="formLabel.inspectTime" style="width:100%" type="date" placeholder="选择日期"
+                        value-format="yyyy-MM-dd" :picker-options="pickerOptions0">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="到期日期" prop="qualifications">
+                    <el-date-picker v-model="formLabel.expirationTime" style="width:100%" type="date" placeholder="选择日期"
+                        value-format="yyyy-MM-dd" :picker-options="pickerOptions1">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="人员归属" prop="company">
+                    <el-select v-model="formLabel.company" placeholder="请选择" clearable>
+                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="检定证书" prop="qualifications">
+                    <el-upload action="" ref="upload" accept=".pdf" :limit="1" :before-upload="uploadHttpimg"
+                        :file-list="fileList">
+                        <el-button size="mini" type="primary">上传证书</el-button>
+                    </el-upload>
+                </el-form-item>
+                <!-- <el-form-item
+                    label="角色"
+                    prop="roleId"
+                >
+                    <el-select
+                        v-model="formLabelAlign.roleId"
+                        clearable
+                        placeholder="角色编号"
+                    >
+                        <el-option
+                            v-for="item in regionIdList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id"
+                        >
+                            <span>{{ item.name }}</span>
+                        </el-option>
+                    </el-select>
+                </el-form-item> -->
+                <el-form-item style="display: flex;justify-content: flex-end;">
+                    <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+                    <el-button @click="unfollow">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+        <div v-show="pdfShow" class="pdf">
+            <iframe :src="pdfSrc" frameborder="0" class="iframes"></iframe>
+            <div class="close" @click.stop="pdfShow = false"> × </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import {
+    getList,
+    PostList,
+    GetroleList,
+    compiletwo,
+    getInfoByParentCode,
+    RemoveUser,
+} from "@/api/user";
+import {
+    equipmentpage,
+    equipmentsaveOrUpdate,
+    equipmentremove,
+} from "@/api/config";
+import Page from "@/components/page/index.vue";
+export default {
+    filters: {
+        statusFilter(status) {
+            const statusMap = {
+                published: "success",
+                draft: "gray",
+                deleted: "danger",
+            };
+            return statusMap[status];
+        },
+    },
+    data() {
+        return {
+            list: null,
+            listLoading: true,
+            /* 用户传递参数 */
+            size: 10,
+            current: 1,
+            total: 0,
+            regionId: "",
+            formInline: {
+                regionName: "",
+                number: "",
+                name: "",
+                model: "",
+                timeDate: [],
+                ExpirationTime: [],
+                company: "",
+            },
+            imgList: [],
+            imgShow: false,
+            dialog: {
+                innerVisible: false,
+            },
+            dialogone: {
+                innerVisible: false,
+            },
+            labelPosition: "left",
+            formLabelAlign: {
+                regionId: "",
+                name: "",
+                model: "",
+                number: "",
+                inspectTime: "",
+                expirationTime: "",
+                file: "",
+                radio: 3,
+                roleId: "",
+                flag: "",
+                id: "",
+            },
+            formLabel: {
+                regionId: "",
+                name: "",
+                model: "",
+                number: "",
+                inspectTime: "",
+                expirationTime: "",
+                file: "",
+                radio: 3,
+                roleId: "",
+                flag: "",
+                id: "",
+            },
+            regionIdList: [],
+            regionIdlevelxian: [],
+            regionIdlevelList: [],
+            regionIdlevelListsheng: [],
+            regionIdlevelListxian: [],
+            fileList: [],
+            pickerOptions0: {
+                disabledDate: (time) => {
+                    if (this.formLabelAlign.inspectTime != "") {
+                        return (
+                            time.getTime() <
+                            new Date(this.formLabelAlign.inspectTime).getTime()
+                        );
+                    }
+                },
+            },
+            pickerOptions1: {
+                disabledDate: (time) => {
+                    return (
+                        time.getTime() <
+                        new Date(this.formLabelAlign.inspectTime).getTime()
+                    ); //减去一天的时间代表可以选择同一天;
+                },
+            },
+            formData: new FormData(),
+            rules: {
+                name: [
+                    {
+                        required: true,
+                        message: "请输入设备名称",
+                        trigger: "blur",
+                    },
+                ],
+                model: [
+                    {
+                        required: true,
+                        message: "请输入设备型号",
+                        trigger: "blur",
+                    },
+                ],
+                number: [
+                    {
+                        required: true,
+                        message: "请输入出厂编号",
+                        trigger: "blur",
+                    },
+                ],
+                inspectTime: [
+                    {
+                        required: true,
+                        message: "请选择日期",
+                        trigger: "blur",
+                    },
+                ],
+                expirationTime: [
+                    {
+                        required: true,
+                        message: "请选择时间",
+                        trigger: "blur",
+                    },
+                ],
+            },
+            pdfShow: false,
+            pdfSrc: false,
+            options: [
+                {
+                    value: "1",
+                    label: "云南省气象灾害防御技术中心"
+                },
+                {
+                    value: "2",
+                    label: "云南启旭科技有限公司"
+                }
+            ]
+        };
+    },
+    components: {
+        Page,
+    },
+    created() {
+        this.getcompany()
+        this.fetchData();
+        this.changeBox();
+        const params = JSON.parse(sessionStorage.getItem("records"));
+        if (params.regionIdMap.level == "3") {
+            this.formLabelAlign.radio = 3;
+        } else if (params.regionIdMap.level == "2") {
+            this.formLabelAlign.radio = 6;
+            this.regionIdlevelList.push({
+                name: params.regionIdMap.name,
+                id: params.regionIdMap.id,
+            });
+        } else if (params.regionIdMap.level == "1") {
+            this.formLabelAlign.radio = 9;
+            this.regionIdlevelListsheng.push({
+                name: params.regionIdMap.name,
+                id: params.regionIdMap.id,
+            });
+        }
+    },
+    computed: {
+        sessionlevel() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.level;
+        },
+        sessionName() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.roleIdMap.name;
+        },
+    },
+    methods: {
+        getcompany() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            /* console.log(params.company,'人员归属') */
+            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+        },
+        fetchData() {
+            this.listLoading = true;
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            let parameter = {
+                size: this.size,
+                current: this.current,
+                regionId: params.regionIdMap.id,
+                company: this.formInline.company == '云南省气象灾害防御技术中心' ? '1' : '2',
+            };
+            equipmentpage(parameter).then((response) => {
+                this.list = response.data.records;
+                this.total = response.data.total;
+                this.listLoading = false;
+            });
+        },
+        onblur(current) {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            equipmentpage({
+                size: this.size,
+                current: this.current,
+                regionId: params.regionIdMap.id,
+                regionName: this.formInline.regionName,
+                number: this.formInline.number,
+                name: this.formInline.name,
+                model: this.formInline.model,
+                startInspectTime:
+                    this.formInline.timeDate != null
+                        ? this.formInline.timeDate[0]
+                        : "",
+                endInspectTime:
+                    this.formInline.timeDate != null
+                        ? this.formInline.timeDate[1]
+                        : "",
+                startExpirationTime:
+                    this.formInline.ExpirationTime != null
+                        ? this.formInline.ExpirationTime[0]
+                        : "",
+                endExpirationTime:
+                    this.formInline.ExpirationTime != null
+                        ? this.formInline.ExpirationTime[1]
+                        : "",
+                company: this.formInline.company,
+            }).then((response) => {
+                this.list = response.data.records;
+                this.total = response.data.total;
+                this.listLoading = false;
+            });
+        },
+        imgCom(row) {
+            let arr = row.split(",");
+            if (arr.length > 0) {
+                return arr[0];
+            } else {
+                return arr;
+            }
+        },
+        imgShowList(row) {
+            let arr = row.split(",");
+            this.imgList = arr
+                .map((item) => {
+                    return (
+                        "http://140.249.209.176:8084/LightningDetection/Equipment/" +
+                        item
+                    );
+                })
+                .join(",")
+                .split(",");
+            setTimeout(() => {
+                this.imgShow = true;
+            }, 100);
+        },
+        pageChange(page) {
+            this.size = page._pageSize;
+            this.current = page._currentPage;
+            this.onblur(this.current);
+        },
+        /* 编辑用户 */
+        handleEdit(index, row) {
+            /*  console.log(row.id); */
+            this.dialogone.innerVisible = true;
+            this.formLabel.name = row.name;
+            this.formLabel.model = row.model;
+            this.formLabel.number = row.number;
+            this.formLabel.regionId = row.regionIdMap.id;
+            this.formLabel.inspectTime = row.inspectTime;
+            this.formLabel.expirationTime = row.expirationTime;
+            this.formLabel.id = row.id;
+            this.formLabel.company = row.company;
+        },
+        unfollow() {
+            this.dialog.innerVisible = false;
+            this.dialogone.innerVisible = false;
+            this.formLabelAlign.regionId = "";
+        },
+        close() {
+            this.unfollow();
+        },
+        changeShi() {
+            this.formLabelAlign.regionId = "";
+            getInfoByParentCode({
+                parentcode: this.formLabelAlign.flag,
+            }).then((res) => {
+                this.regionIdlevelListxian = res.data.records;
+            });
+        },
+        changeBox() {
+            if (this.formLabelAlign.radio == 3) {
+                this.GetroleList(3);
+            } else if (this.formLabelAlign.radio == 6) {
+                this.GetroleList(2);
+            } else if (this.formLabelAlign.radio == 9) {
+                this.GetroleList(1);
+            }
+            this.formLabelAlign.regionId = "";
+            this.formLabelAlign.roleId = "";
+        },
+        /* 添加设备 */
+        Addproject() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            if (params.regionIdMap.level == "3") {
+                this.formLabelAlign.radio = 3;
+            } else if (params.regionIdMap.level == "2") {
+                this.formLabelAlign.radio = 6;
+            } else if (params.regionIdMap.level == "1") {
+                this.formLabelAlign.radio = 9;
+                this.regionIdlevelListsheng = [];
+                this.regionIdlevelListsheng.push({
+                    name: params.regionIdMap.name,
+                    id: params.regionIdMap.id,
+                });
+            }
+            this.dialog.innerVisible = true;
+            this.GetroleList(params.roleIdMap.level);
+            this.getInfoByParentCode(params.regionIdMap.code);
+        },
+        submitForm(params) {
+            if (params) {
+                this.formData.append("name", this.formLabel.name);
+                this.formData.append("model", this.formLabel.model);
+                this.formData.append("number", this.formLabel.number);
+                this.formData.append("id", this.formLabel.id);
+                this.formData.append("inspectTime", this.formLabel.inspectTime);
+                this.formData.append(
+                    "expirationTime",
+                    this.formLabel.expirationTime
+                );
+                this.formData.append(
+                    "company",
+                    this.formLabel.company
+                );
+                equipmentsaveOrUpdate(this.formData).then((res) => {
+                    if (res.data.state == 200) {
+                        this.$message.success("修改设备成功");
+                        this.fetchData();
+                        this.dialogone.innerVisible = false;
+                        this.formData = new FormData();
+                        this.formLabel = {}
+                    } else {
+                        this.formData = new FormData();
+                        this.$message.success("修改设备失败");
+                        this.formLabel = {}
+                    }
+                });
+            } else {
+                this.$refs.ruleForm.validate((valid) => {
+                    if (valid) {
+                        if (this.formData.has("file") == false) {
+                            this.$message.error("证书不能为空");
+                        } else {
+                            const records = JSON.parse(
+                                sessionStorage.getItem("records")
+                            );
+                            this.formData.append(
+                                "regionId",
+                                records.regionIdMap.id
+                            );
+                            this.formData.append(
+                                "name",
+                                this.formLabelAlign.name
+                            );
+                            this.formData.append(
+                                "model",
+                                this.formLabelAlign.model
+                            );
+                            this.formData.append(
+                                "number",
+                                this.formLabelAlign.number
+                            );
+                            this.formData.append(
+                                "inspectTime",
+                                this.formLabelAlign.inspectTime
+                            );
+                            this.formData.append(
+                                "expirationTime",
+                                this.formLabelAlign.expirationTime
+                            );
+                            this.formData.append(
+                                "company",
+                                this.formLabelAlign.company
+                            );
+                            equipmentsaveOrUpdate(this.formData).then((res) => {
+                                /*  console.log(res); */
+                                if (res.data.state == 200) {
+                                    this.$message.success("添加设备成功");
+                                    this.fetchData();
+                                    this.dialog.innerVisible = false;
+                                    this.formData = new FormData();
+                                    this.formLabelAlign = {};
+                                } else {
+                                    this.formData = new FormData();
+                                    this.$message.success("添加设备失败");
+                                    this.formLabelAlign = {};
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        },
+        // 查询角色列表
+        GetroleList(records) {
+            this.regionIdList = [];
+            GetroleList({
+                level: records,
+            }).then((res) => {
+                res.data.records.map((item) => {
+                    if (this.roleIdMapName == item.name) {
+                        return;
+                    } else {
+                        this.regionIdList.push(item);
+                    }
+                });
+            });
+        },
+        // 根据上一级编号查询下级全部区划信息
+        getInfoByParentCode(code) {
+            getInfoByParentCode({
+                parentcode: code,
+            }).then((res) => {
+                if (this.sessionlevel == "1") {
+                    this.regionIdlevelList = res.data.records;
+                    this.regionIdlevelxian = res.data.records;
+                } else if (this.sessionlevel == "2") {
+                    this.regionIdlevelListxian = res.data.records;
+                }
+            });
+        },
+        uploadHttpimg(data) {
+            var fileType =
+                data.name.split(".")[data.name.split(".").length - 1];
+            const extension = fileType.toLowerCase() == "pdf";
+            if (!extension) {
+                this.$message.error("证书必须为pdf格式");
+            } else {
+                this.formData.append("file", data);
+            }
+        },
+        tableRowClassName({ row, rowIndex }) {
+            let d1 = new Date(row.expirationTime) * 1;/* 到期时间 */
+            let d2 = new Date(row.inspectTime) * 1;/* 检定日期 */
+            let time = d1 - d2;
+            let day = time / (1000 * 60 * 60 * 24);
+            if (d2 > d1) {
+                return "warm-row-red";
+            } else if (day < 30) {
+                return "warm-row-yellow";
+            }
+        },
+        /* 现场照片 */
+        docSrcShow(file) {
+            this.pdfSrc =
+                "http://140.249.209.176:8084/LightningDetection/Equipment/" +
+                file;
+            setTimeout(() => {
+                this.pdfShow = true;
+            }, 1500);
+        },
+        /* 删除设备 */
+        handleDetele(row) {
+            this.$confirm("此操作将删除该设备信息, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    equipmentremove({ id: row.id }).then((res) => {
+                        this.$message({
+                            type: "success",
+                            message: "删除成功!",
+                        });
+                        this.fetchData();
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除",
+                    });
+                });
+        },
+    },
+};
+</script>
+<style lang="scss">
+.warm-row-red {
+    background-color: #efa0a0 !important;
+}
+
+.warm-row-yellow {
+    background-color: #e8efa0 !important;
+}
+
+/* .el-table--enable-row-hover .el-table__body tr:hover > td {
+    background-color: transparent !important;
+} */
+.el-table__body tr.current-row>td {
+    background-color: transparent !important;
+    /* 去掉点击效果 */
+}
+
+.pdf {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.iframes {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+}
+
+.close {
+    width: 30px;
+    height: 30px;
+    background: #323639;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+}
+</style>
+<style lang="scss" scoped>
+.imgShow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.1);
+
+    img {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 50%;
+        transform: translate(-50%, -100%);
+    }
+}
+
+.closer {
+    width: 30px;
+    height: 30px;
+    background: #0000005e;
+    position: absolute;
+    right: 12%;
+    top: 9px;
+    cursor: pointer;
+    font-size: 34px;
+    color: #fff;
+    z-index: 9999;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    //滑块部分
+    border-radius: 5px;
+    background-color: rgb(206, 184, 219);
+}
+
+::-webkit-scrollbar-track {
+    //轨道部分
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #ededed;
+    border-radius: 5px;
+}
+
+::v-deep .el-dialog__body {
+    padding-bottom: 1px;
+}
+
+::v-deep .el-select {
+    width: 100%;
+}
+</style>
