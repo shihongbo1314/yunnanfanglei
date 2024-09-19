@@ -2481,7 +2481,7 @@ export default {
             this.options = [];
             const records = JSON.parse(sessionStorage.getItem("records"));
             let regionId = await this.settingGetByRegionId(
-                records.regionIdMap.id
+                records.regionIdMap.id,
             );
             if (regionId != null) {
                 /* 获取省级审核人 */
@@ -2508,9 +2508,11 @@ export default {
             }
         },
         async settingGetByRegionId(regionId) {
+            const params = JSON.parse(sessionStorage.getItem("records"));
             return new Promise((resolve, reject) => {
                 settingGetByRegionId({
                     regionId: regionId,
+                    company:params.company
                 }).then((res) => {
                     resolve(res.data.records);
                 });

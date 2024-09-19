@@ -245,24 +245,29 @@ export default {
     },
     mounted() {
         const params = JSON.parse(sessionStorage.getItem("records"));
+        console.log(params);
+        
         this.getInfoByParentCode(params.regionIdMap.code);
     },
     methods: {
         fetchData() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
             this.listLoading = true;
             settingConfig({
                 size: this.size,
                 current: this.current,
+                company:params.company
             }).then((response) => {
-                /* console.log(response); */
                 this.list = response.data.records;
                 this.total = response.data.total;
                 this.listLoading = false;
             });
         },
         onblur() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
             settingGetByRegionId({
                 regionId: this.formInline.regionId,
+                company:params.company
             }).then((res) => {
                /*  console.log(res, "查询成功"); */
             });
@@ -312,8 +317,10 @@ export default {
         },
         /* 添加 */
         onSubmit() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
             settingSaveOrUpdate({
                 regionId: this.formLabelAlign.regionId,
+                company:params.company
             }).then((res) => {
                 if (res.data.state == 200) {
                     this.$message.success("添加成功");

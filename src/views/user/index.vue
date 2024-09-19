@@ -522,27 +522,33 @@ export default {
         },
         /* 提交 */
         compile() {
-            PostList({
-                userName: this.formLabel.name,
-                password: this.formLabel.password,
-                trueName: this.formLabel.trueName,
-                regionId: this.formLabel.regionId,
-                roleId: this.formLabel.roleId,
-                id: this.formLabel.id,
-                qualifications: this.formLabel.qualifications,
-                company: this.formLabel.company,
-                statisticalStatus:
-                    this.formLabel.statisticalStatus == "统计" ? 1 : 0,
-            }).then((res) => {
-                this.$message.success(res.data.stateStr);
-                if (res.data.stateStr == "成功") {
-                    this.$message.success("修改成功");
-                    this.dialogone.innerVisible = false;
-                    this.fetchData();
-                } else {
-                    this.$message.error("修改失败");
-                }
-            });
+            var regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).+$/;
+            if (regex.test(this.formLabel.password)) {
+                PostList({
+                    userName: this.formLabel.name,
+                    password: this.formLabel.password,
+                    trueName: this.formLabel.trueName,
+                    regionId: this.formLabel.regionId,
+                    roleId: this.formLabel.roleId,
+                    id: this.formLabel.id,
+                    qualifications: this.formLabel.qualifications,
+                    company: this.formLabel.company,
+                    statisticalStatus:
+                        this.formLabel.statisticalStatus == "统计" ? 1 : 0,
+                }).then((res) => {
+                    this.$message.success(res.data.stateStr);
+                    if (res.data.stateStr == "成功") {
+                        this.$message.success("修改成功");
+                        this.dialogone.innerVisible = false;
+                        this.fetchData();
+                    } else {
+                        this.$message.error("修改失败");
+                    }
+                });
+            }else {
+                this.$message.error("密码格式不正确,请确保包含大小写字母、特殊字符和数字!");
+            }
+
         },
         /* 添加用户 */
         Addproject() {
@@ -563,7 +569,7 @@ export default {
                 this.formLabelAlign.company = '2';
                 this.formLabelAlign.flag = true;
             } else {
-                this.formLabelAlign.flag = false;
+                this.formLabelAlign.flag = '';
             }
             this.dialog.innerVisible = true;
             this.GetroleList(params.roleIdMap.level);
@@ -571,27 +577,33 @@ export default {
         },
         // 保存用户信息
         submitForm() {
-            PostList({
-                userName: this.formLabelAlign.name,
-                password: this.formLabelAlign.password,
-                trueName: this.formLabelAlign.trueName,
-                regionId: this.formLabelAlign.regionId,
-                roleId: this.formLabelAlign.roleId,
-                phone: this.formLabelAlign.phone,
-                qualifications: this.formLabelAlign.qualifications,
-                company: this.formLabelAlign.company,
-            }).then((res) => {
-                if (res.data.state == 200) {
-                    this.fetchData();
-                    this.$message.success("添加成功");
-                    this.dialog.innerVisible = false;
-                    this.formLabelAlign = {};
-                } else {
-                    this.$message.error("添加失败");
-                    this.dialog.innerVisible = false;
-                    this.formLabelAlign = {};
-                }
-            });
+            var regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).+$/;
+            if (regex.test(this.formLabelAlign.password)) {
+                PostList({
+                    userName: this.formLabelAlign.name,
+                    password: this.formLabelAlign.password,
+                    trueName: this.formLabelAlign.trueName,
+                    regionId: this.formLabelAlign.regionId,
+                    roleId: this.formLabelAlign.roleId,
+                    phone: this.formLabelAlign.phone,
+                    qualifications: this.formLabelAlign.qualifications,
+                    company: this.formLabelAlign.company,
+                }).then((res) => {
+                    if (res.data.state == 200) {
+                        this.fetchData();
+                        this.$message.success("添加成功");
+                        this.dialog.innerVisible = false;
+                        this.formLabelAlign = {};
+                    } else {
+                        this.$message.error("添加失败");
+                        this.dialog.innerVisible = false;
+                        this.formLabelAlign = {};
+                    }
+                });
+            } else {
+                this.$message.error("密码格式不正确,请确保包含大小写字母、特殊字符和数字!");
+            }
+
         },
         // 保存二级角色
         compiletwo() {
