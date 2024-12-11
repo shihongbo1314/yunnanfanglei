@@ -10,7 +10,8 @@
                     <tr class="hang">
                         <th class="tr">委托单位</th>
                         <th class="trs">
-                            <el-form ref="formInline" :model="formInline" label-width="130px" :rules="rules" size="mini">
+                            <el-form ref="formInline" :model="formInline" label-width="130px" :rules="rules"
+                                size="mini">
                                 <el-col :span="6">
                                     <el-form-item label="用户编号：" style="display: none;">
                                         <el-input v-model="formInline.userid" disabled></el-input>
@@ -34,24 +35,44 @@
                                         <el-input v-model="formInline.contractMoney" type="number"></el-input>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :span="8">
+                                <el-col :span="14">
                                     <el-form-item label="合同编号：">
-                                        <span style="color:red">{{formInline.company=='云南省气象灾害防御技术中心' ? '云':'启'}}雷检字[<el-date-picker v-model="formInline.year" type="year"
-                                                value-format="yyyy" style="width:100px;" placeholder="选择年">
-                                            </el-date-picker>]</span><el-input v-model="formInline.contract"
-                                            style="width:80px;"></el-input>
-                                        <span style="color:red">第<el-input v-model="formInline.Number" type="number"
-                                                style="width:80px;"></el-input>号</span>
+                                        <div v-if="['1', '2'].includes(companyNum())">
+                                            <span style="color:red">{{ setTitle(formInline.company)
+                                                }}雷检字[<el-date-picker v-model="formInline.year" type="year"
+                                                    value-format="yyyy" style="width:100px;" placeholder="选择年">
+                                                </el-date-picker>]</span><el-input v-model="formInline.contract"
+                                                style="width:80px;"></el-input>
+                                            <span style="color:red">第<el-input v-model="formInline.Number" type="number"
+                                                    style="width:80px;"></el-input>号</span>
+                                        </div>
+                                        <div v-else>
+                                            <span style="color:red">{{ setTitle(formInline.company)
+                                                }}雷检字</span>
+                                            <el-input v-model="formInline.first" type="number"
+                                                style="width:120px;"></el-input>—
+                                            <el-input v-model="formInline.sencond" type="number"
+                                                style="width:90px;"></el-input>—
+                                            <el-date-picker v-model="formInline.year" type="year" value-format="yyyy"
+                                                style="width:100px;" placeholder="选择年">
+                                            </el-date-picker>—<el-input v-model="formInline.contract"
+                                                style="width:80px;" @blur="blurContract"></el-input>
+                                            —<span style="color:red"><el-input v-model="formInline.NumberNew"
+                                                    type="number" style="width:80px;"
+                                                    @blur="blurNumberNew"></el-input>号</span>
+                                        </div>
+
                                     </el-form-item>
                                     <el-form-item label="合同时间：" class="time" prop="contractTime">
                                         <el-date-picker v-model="formInline.contractTime" type="date" placeholder="选择日期"
-                                            value-format="yyyy-MM-dd">
+                                            style="width: 200px;" value-format="yyyy-MM-dd">
                                         </el-date-picker>
                                     </el-form-item>
                                     <el-form-item label="合同附件：">
                                         <el-upload action="" ref="upload" accept=".pdf,doc,docx"
                                             :before-upload="uploadHttpRequest" :file-list="fileList">
-                                            <el-button slot="trigger" size="small" type="primary" plain>点击上传文件</el-button>
+                                            <el-button slot="trigger" size="small" type="primary"
+                                                plain>点击上传文件</el-button>
                                         </el-upload>
                                     </el-form-item>
                                 </el-col>
@@ -93,7 +114,8 @@
                                         </el-select>
                                     </el-form-item>
                                     <el-form-item label="检测单位：" prop="textCompany">
-                                        <el-input v-model="formInline.textCompany"></el-input>
+                                        <el-input v-model="formInline.textCompany"
+                                            :disabled="companyNum() == '3' ? true : false"></el-input>
                                     </el-form-item>
                                     <!--  <el-form-item
                                         label="开票时间："
@@ -109,7 +131,8 @@
                                         >
                                         </el-date-picker>
                                     </el-form-item> -->
-                                    <el-form-item label="共同编制：" prop="common" v-if="sessionlevel == '1' || sessionlevel == '2'">
+                                    <el-form-item label="共同编制：" prop="common"
+                                        v-if="sessionlevel == '1' || sessionlevel == '2'">
                                         <el-radio-group v-model="formInline.common">
                                             <el-radio :label="1">可以编制</el-radio>
                                             <el-radio :label="0">不可以编制</el-radio>
@@ -207,15 +230,14 @@
                                         </el-upload>
                                     </el-form-item> -->
                                 </el-col>
-
-                                </el-col>
                             </el-form>
                         </th>
                     </tr>
                     <tr class="hang">
                         <th class="trr" style="line-height:120px">备注</th>
                         <th class="trss">
-                            <el-input type="textarea" :rows="4" placeholder="本项目主要检测防雷、防静电等内容。" v-model="formInline.remark">
+                            <el-input type="textarea" :rows="4" placeholder="本项目主要检测防雷、防静电等内容。"
+                                v-model="formInline.remark">
                             </el-input>
                         </th>
                     </tr>
@@ -237,6 +259,7 @@ import {
     getDockUserbianzhi,
     getDockUserParent,
 } from "@/api/aviation";
+
 export default {
     name: "XXX",
     data() {
@@ -260,7 +283,7 @@ export default {
                 contractNumber: "" /*  合同编号*/,
                 contract: "" /* 合同编号前边 */,
                 Number: "" /* 合同编号后边*/,
-                year: "" /* 合同编号年份 */,
+                year: new Date().getFullYear() + '' /* 合同编号年份 */,
                 invoiceTime: "" /* 开票时间 */,
                 arrivalTime: "" /* 入账时间 */,
                 arrivalMoney: "" /* 入账金额 */,
@@ -270,7 +293,7 @@ export default {
                 invoiceNumber: "" /* 发票号码 */,
                 arrearsMoney: "" /* 欠款金额 */,
                 common: 0 /* 下级编制 */,
-                company:"",
+                company: "",
                 companyauditorList: [
                     {
                         value: "1",
@@ -281,6 +304,9 @@ export default {
                         label: "云南启旭科技有限公司"
                     }
                 ] /* 人员归属列表 */,
+                first: "1252017012",/* 资质证号 */
+                sencond: "",/* 地区编码 */
+                NumberNew: ""/* 区分判断 */
             },
             rules: {
                 number: [
@@ -421,6 +447,8 @@ export default {
             const records = JSON.parse(sessionStorage.getItem("records"));
             return records.roleIdMap.level;
         },
+
+
     },
     watch: {
         "formInline.contractMoney"(val) {
@@ -434,19 +462,86 @@ export default {
                 this.formInline.invoiceMoney = "";
             }
         },
+        'formInline.contract'(newVal, oldVal) {
+            if (this.formInline.company == '楚雄州气象灾害防御技术中心') {
+                if (newVal.length > 2) {
+                    this.formInline.contract = newVal.slice(0, 2);
+                    return this.$message.info('事项代码为2位数');
+                }
+            }
+
+
+        },
+        'formInline.NumberNew'(newVal, oldVal) {
+            if (newVal.length > 5) {
+                this.formInline.NumberNew = newVal.slice(0, 5);
+                return this.$message.info('流水编码为5位数');
+            }
+        }
+
     },
     mounted() {
         const params = JSON.parse(sessionStorage.getItem("records"));
+        if (params.company == '3') {
+            if (params.regionIdMap.code == 530000) {
+                this.formInline.sencond = "532300";
+            } else {
+                this.formInline.sencond = params.regionIdMap.code;
+            }
+            this.formInline.textCompany = '楚雄州气象灾害防御技术中心'
+        }
         this.formInline.userid = params.id;
         this.formInline.roleId = params.roleIdMap.id;
         this.getPromotion();
         this.getcompany()
     },
     methods: {
-        getcompany(){
+        blurContract() {
+            if (this.formInline.contract.length < 2 && this.formInline.contract.length > 0) {
+                return this.$message.info('事项代码为2位数');
+            }
+        },
+        blurNumberNew() {
+            if (this.formInline.NumberNew.length < 5 && this.formInline.NumberNew.length > 0) {
+                return this.$message.info('流水编码为5位数');
+            }
+        },
+        companyNum() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.company;
+        },
+        setTitle(company) {
+            let str
+            if (company == "云南省气象灾害防御技术中心") {
+                str = "云"
+            } else if (company == "云南启旭科技有限公司") {
+                str = "启"
+            } else {
+                str = "楚"
+            }
+            return str
+        },
+        setState(company) {
+            let num
+            if (company == "云南省气象灾害防御技术中心") {
+                num = "1"
+            } else if (company == "云南启旭科技有限公司") {
+                num = "2"
+            } else {
+                num = "3"
+            }
+            return num
+        },
+        getcompany() {
             const params = JSON.parse(sessionStorage.getItem("records"));
             /* console.log(params.company,'人员归属') */
-            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心':'云南启旭科技有限公司';
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[params.company] || '';
         },
         open(message) {
             this.$alert(`<strong>${message}</strong>`, "提示", {
@@ -501,9 +596,11 @@ export default {
                     ) {
                         this.$message.error("备案审核人不能为空");
                     } */ else {
-                        if (this.formInline.Number.length != 4) {
-                            this.$message.info("请输入四位数字");
-                            return;
+                        if (['1', '2'].includes(this.companyNum())) {
+                            if (this.formInline.Number.length != 4) {
+                                this.$message.info("请输入四位数字");
+                                return;
+                            }
                         }
                         this.formData.append("userid", this.formInline.userid);
                         this.formData.append(
@@ -546,10 +643,30 @@ export default {
                             "contractTime",
                             this.formInline.contractTime
                         );
-                        this.formData.append(
-                            "contractNumber",
-                            `云雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
-                        );
+                        if (['1', '2'].includes(this.companyNum())) {
+                            this.formData.append(
+                                "contractNumber",
+                                `${this.setTitle(this.formInline.company)}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                            );
+                        } else {
+                            if(this.formInline.contract == ''){
+                                return this.$message.info('事项代码不能为空');
+                            }
+                            if (this.formInline.contract.length < 2 && this.formInline.contract.length > 0) {
+                                return this.$message.info('事项代码为2位数');
+                            }
+                            if(this.formInline.NumberNew == ''){
+                                return this.$message.info('流水编码不能为空');
+                            }
+                            if (this.formInline.NumberNew.length < 5 && this.formInline.NumberNew.length > 0) {
+                                return this.$message.info('流水编码为5位数');
+                            }
+                            this.formData.append(
+                                "contractNumber",
+                                `${this.setTitle(this.formInline.company)}雷检字—${this.formInline.first}—${this.formInline.sencond}—${this.formInline.year}—${this.formInline.contract}—${this.formInline.NumberNew}号`
+                            );
+                        }
+
                         this.formData.append(
                             "invoiceTime",
                             this.formInline.invoiceTime
@@ -594,7 +711,7 @@ export default {
                         );
                         this.formData.append(
                             "company",
-                            this.formInline.company == '云南省气象灾害防御技术中心' ? '1':'2'
+                            this.setState(this.formInline.company)
                         );
                         this.loading = true;
                         addProject(this.formData).then((res) => {

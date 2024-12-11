@@ -112,14 +112,14 @@
                             <ol>
                                 <li v-for="item in MyprojectListtwo">
                                     <div class="hang">
-                                        <div style="width:70%;display: flex;">
+                                        <div style="width:100%;display: flex;">
                                             <div style="margin: 22px 0;"></div>
                                             <div style="display: flex;">
                                                 <span
-                                                    style="margin-left: 10px;height: 21px;display: flex;align-items: center;">{{
+                                                    style="margin-left: 10px;display: flex;align-items: center;">{{
                                                         item.projectMap.contractNumber }}</span>
                                                 <span
-                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 21px;height: 21px;display: flex;align-items: center;">({{
+                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 35px;height: 21px;display: flex;align-items: center;">({{
                                                         item.auditeeMap.userName }})</span>
                                             </div>
 
@@ -158,10 +158,10 @@
                                             <el-checkbox v-model="item.checked" :key='item.id'></el-checkbox>
                                             <div style="display: flex;">
                                                 <span
-                                                    style="margin-left: 10px;height: 21px;display: flex;align-items: center;">{{
+                                                    style="margin-left: 10px;display: flex;align-items: center;">{{
                                                         item.projectMap.contractNumber }}</span>
                                                 <span
-                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 21px;height: 21px;display: flex;align-items: center;">({{
+                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 35px;height: 21px;display: flex;align-items: center;">({{
                                                         item.auditeeMap.userName }})</span>
                                             </div>
 
@@ -204,10 +204,10 @@
                                                 v-if="item.state != '4'"></el-checkbox>
                                             <div style="display: flex;">
                                                 <span
-                                                    style="margin-left: 10px;height: 21px;display: flex;align-items: center;">{{
+                                                    style="margin-left: 10px;display: flex;align-items: center;">{{
                                                         item.projectMap.contractNumber }}</span>
                                                 <span
-                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 21px;height: 21px;display: flex;align-items: center;">({{
+                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 35px;height: 21px;display: flex;align-items: center;">({{
                                                         item.auditeeMap.userName }})</span>
                                             </div>
 
@@ -244,10 +244,10 @@
                                                 v-if="item.state != '4'"></el-checkbox>
                                             <div style="display: flex;">
                                                 <span
-                                                    style="margin-left: 10px;height: 21px;display: flex;align-items: center;">{{
+                                                    style="margin-left: 10px;display: flex;align-items: center;">{{
                                                         item.projectMap.contractNumber }}</span>
                                                 <span
-                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 21px;height: 21px;display: flex;align-items: center;">({{
+                                                    style="margin-left: 5px;transform: scale(0.9);position: absolute;top: 35px;height: 21px;display: flex;align-items: center;">({{
                                                         item.auditeeMap.userName }})</span>
                                             </div>
                                         </div>
@@ -1729,14 +1729,15 @@
                         </div>
                         <div style="width: 100%;display: flex;">
                             <div style="width: 50%">
-                            <el-form-item label="合同附件：">
-                                <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                    v-if="itemDetailsthree.contract_img != null"
-                                    :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
-                                    @click.stop="pdfSrcShow(itemDetailsthree.contract_file)">
-                                </el-image>
-                                <span v-else>未录入</span>
-                            </el-form-item></div>
+                                <el-form-item label="合同附件：">
+                                    <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
+                                        v-if="itemDetailsthree.contract_img != null"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
+                                        @click.stop="pdfSrcShow(itemDetailsthree.contract_file)">
+                                    </el-image>
+                                    <span v-else>未录入</span>
+                                </el-form-item>
+                            </div>
                             <div style="width: 50%" v-if="sessionName == '备案人'">
                                 <p>
                                     <el-form-item label="合同时间：">
@@ -1871,9 +1872,7 @@
                             <div style="width: 50%">
                                 <p>
                                     <el-form-item label="人员归属：">
-                                        <el-input
-                                            v-model="itemDetailsthree.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司'"
-                                            disabled></el-input>
+                                        <el-input :value="setText(itemDetailsthree.company)" disabled />
                                     </el-form-item>
                                 </p>
                             </div>
@@ -2427,6 +2426,7 @@ export default {
                 size: this.size,
                 enable: 1,
                 regionId: regionId.regionIdMap.id,
+                company: regionId.company
             }).then((res) => {
                 if (res.data.state == 200) {
                     this.MBAData = res.data.records.filter(
@@ -3548,7 +3548,9 @@ export default {
                 projectId,
                 ishow,
                 remarks,
-                row.projectMap.multiplex
+                row.projectMap.multiplex,
+                null,
+                sessionID.company
             );
         },
         /* 对接 */
@@ -3681,7 +3683,9 @@ export default {
                 projectId,
                 ishow,
                 remarks,
-                row.projectMap.multiplex
+                row.projectMap.multiplex,
+
+
             );
         },
         /* 管理员审核 */
@@ -4025,9 +4029,16 @@ export default {
             this.getPromotion();
         },
         checkMYLook(item) {
-            console.log(item.projectMap)
             this.itemDetailsthree = item.projectMap;
             this.editDilongLook = true;
+        },
+        setText(company) {
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+            return companyMap[company];
         },
         checkMYqueding() {
             let params = JSON.parse(sessionStorage.getItem("records"));
@@ -4219,7 +4230,7 @@ export default {
             if (this.itemDetailsthree.contract_time != null) {
                 this.formData.set("contractTime", this.itemDetailsthree.contract_time);
             }
-            
+
             /* if (adm) { */
             if (!this.editDilongfourObj.flag) {
                 /*  parameter.nextReviewer = this.applyForinfoFrom.auditor;

@@ -8,12 +8,15 @@
             <el-form-item label="行政区划">
                 <el-input v-model="formInline.regionName" placeholder="行政区划"></el-input>
             </el-form-item>
-            <el-form-item label="人员归属">
+            <el-form-item label="人员归属" v-if="['1','2'].includes(formInline.company)">
                 <!-- <el-input v-model="formInline.regionName" placeholder="人员归属"></el-input> -->
                 <el-select v-model="formInline.company" placeholder="请选择" clearable>
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
                 </el-select>
+            </el-form-item>
+            <el-form-item label="人员归属" v-else>
+                <el-input v-model="options[2].label" placeholder="人员归属" disabled></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onblur(1)">查询</el-button>
@@ -113,7 +116,7 @@
                 </el-form-item>
                 <el-form-item label="人员归属" prop="company">
                     <el-select v-model="formLabelAlign.company" placeholder="请选择" clearable
-                        :disabled="formLabelAlign.flag">
+                        disabled>
                         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                         </el-option>
                     </el-select>
@@ -361,6 +364,10 @@ export default {
                 {
                     value: "2",
                     label: "云南启旭科技有限公司"
+                },
+                {
+                    value: "3",
+                    label: "楚雄州气象灾害防御技术中心"
                 }
             ]
         };
@@ -545,7 +552,7 @@ export default {
                         this.$message.error("修改失败");
                     }
                 });
-            }else {
+            } else {
                 this.$message.error("密码格式不正确,请确保包含大小写字母、特殊字符和数字!");
             }
 
@@ -568,7 +575,11 @@ export default {
             if (params.company == '2') {
                 this.formLabelAlign.company = '2';
                 this.formLabelAlign.flag = true;
+            } else if (params.company == '1') {
+                this.formLabelAlign.company = '1';
+                this.formLabelAlign.flag = '';
             } else {
+                this.formLabelAlign.company = '3';
                 this.formLabelAlign.flag = '';
             }
             this.dialog.innerVisible = true;
@@ -642,7 +653,6 @@ export default {
             GetroleList({
                 level: records,
             }).then((res) => {
-                console.log(res);
                 res.data.records.map((item) => {
                     if (this.roleIdMapName == item.name) {
                         return;
@@ -673,8 +683,17 @@ export default {
                 parentcode: code,
             }).then((res) => {
                 if (this.sessionlevel == "1") {
-                    this.regionIdlevelList = res.data.records;
-                    this.regionIdlevelxian = res.data.records;
+                    const params = JSON.parse(sessionStorage.getItem("records"));
+                    if(params.company == "3"){
+                        const target = res.data.records.find(item => item.name === "楚雄彝族自治州");
+                        
+                        this.regionIdlevelList = [target];
+                        this.regionIdlevelxian = [target];
+                    }else{
+                        this.regionIdlevelList = res.data.records;
+                        this.regionIdlevelxian = res.data.records;
+                    }
+                    
                 } else if (this.sessionlevel == "2") {
                     this.regionIdlevelListxian = res.data.records;
                 }

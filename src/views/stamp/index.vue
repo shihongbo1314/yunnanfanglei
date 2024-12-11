@@ -5,11 +5,15 @@
                 公章管理列表 {{ total }} 条
             </div>
             <div>
-                <el-form-item label="人员归属:">
+                <el-form-item label="人员归属" v-if="['云南省气象灾害防御技术中心', '云南启旭科技有限公司'].includes(formInline.company)">
+                    <!-- <el-input v-model="formInline.regionName" placeholder="人员归属"></el-input> -->
                     <el-select v-model="formInline.company" placeholder="请选择" clearable>
                         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                         </el-option>
                     </el-select>
+                </el-form-item>
+                <el-form-item label="人员归属" v-else>
+                    <el-input v-model="options[2].label" placeholder="人员归属" disabled></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-input v-model="formInline.name" placeholder="请输入标题"></el-input>
@@ -23,7 +27,8 @@
             </div>
         </el-form>
         <div class="content">
-            <el-table v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row>
+            <el-table v-loading="listLoading" :data="list" element-loading-text="Loading" border fit
+                highlight-current-row>
                 <el-table-column align="center" label="ID" width="95" type="index">
                 </el-table-column>
                 <el-table-column label="标题" align="center">
@@ -76,7 +81,8 @@
             </el-form>
         </el-dialog>
         <!-- 编辑弹框 -->
-        <el-dialog width="1080px" title="编辑公告信息" :visible.sync="dialogone.innerVisible" append-to-body @close="closeBox">
+        <el-dialog width="1080px" title="编辑公告信息" :visible.sync="dialogone.innerVisible" append-to-body
+            @close="closeBox">
             <el-form :label-position="labelPosition" label-width="100px" :model="formLabel" ref="ruleForm">
                 <el-form-item label="标题：" prop="name">
                     <el-input v-model="formLabel.title"></el-input>
@@ -133,7 +139,7 @@ export default {
             state: "",
             formInline: {
                 name: "",
-                company:"",
+                company: "",
             },
             formLabelAlign: {
                 title: "",
@@ -164,6 +170,10 @@ export default {
                 {
                     value: "2",
                     label: "云南启旭科技有限公司"
+                },
+                {
+                    value: "3",
+                    label: "楚雄州气象灾害防御技术中心"
                 }
             ]
         };
@@ -180,14 +190,31 @@ export default {
         getcompany() {
             const params = JSON.parse(sessionStorage.getItem("records"));
             /* console.log(params.company,'人员归属') */
-            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[params.company] || '';
+        },
+        setState(company) {
+            let num
+            if (company == "云南省气象灾害防御技术中心") {
+                num = "1"
+            } else if (company == "云南启旭科技有限公司") {
+                num = "2"
+            } else {
+                num = "3"
+            }
+            return num
         },
         fetchData() {
             this.listLoading = true;
             queryStamp({
                 size: this.size,
                 current: this.current,
-                company: this.formInline.company == '云南省气象灾害防御技术中心' ? '1' : '2',
+                company: this.setState(this.formInline.company)
             }).then((response) => {
                 this.list = response.data.records;
                 this.total = response.data.total;
@@ -200,7 +227,7 @@ export default {
                 size: this.size,
                 current: current,
                 title: this.formInline.name,
-                company: this.formInline.company,
+                company: this.setState(this.formInline.company)
             }).then((response) => {
                 this.list = response.data.records;
                 this.total = response.data.total;

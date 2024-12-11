@@ -21,12 +21,15 @@
                     placeholder="行政区划"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="人员归属">
+            <el-form-item label="人员归属" v-if="['云南省气象灾害防御技术中心','云南启旭科技有限公司'].includes(formInline.company)">
                 <!-- <el-input v-model="formInline.regionName" placeholder="人员归属"></el-input> -->
                 <el-select v-model="formInline.company" placeholder="请选择" clearable>
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
                 </el-select>
+            </el-form-item>
+            <el-form-item label="人员归属" v-else>
+                <el-input v-model="options[2].label" placeholder="人员归属" disabled></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button
@@ -340,7 +343,6 @@
                     prop="regionId"
                     v-if="formLabelAlign.radio == 3"
                 >
-                    </el-select>
                     <el-select
                         v-model="formLabelAlign.regionId"
                         clearable
@@ -652,6 +654,10 @@ export default {
                 {
                     value: "2",
                     label: "云南启旭科技有限公司"
+                },
+                {
+                    value: "3",
+                    label: "楚雄州气象灾害防御技术中心"
                 }
             ]
         };
@@ -693,8 +699,24 @@ export default {
     methods: {
         getcompany() {
             const params = JSON.parse(sessionStorage.getItem("records"));
-            /* console.log(params.company,'人员归属') */
-            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+             const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[params.company] || '';
+        },
+        setState(company) {
+            let num
+            if (company == "云南省气象灾害防御技术中心") {
+                num = "1"
+            } else if (company == "云南启旭科技有限公司") {
+                num = "2"
+            } else {
+                num = "3"
+            }
+            return num
         },
         fetchData() {
             this.listLoading = true;
@@ -705,7 +727,7 @@ export default {
                 regionId: params.regionIdMap.id,
                 statisticalStatus:'1',
                 state:'1',
-                company: this.formInline.company == '云南省气象灾害防御技术中心' ? '1' : '2',
+                company: this.setState(this.formInline.company)
             }).then((response) => {
                 /* console.log(response.data.records); */
                 this.list = response.data.records;

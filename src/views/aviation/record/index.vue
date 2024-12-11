@@ -1,7 +1,7 @@
 <template>
     <div style="width: 100%;height: 100%">
         <div class="table">
-           <!--  <div class="header">
+            <!--  <div class="header">
                 <div>
                     <el-date-picker v-model="timeValue" type="daterange" align="right" unlink-panels range-separator="至"
                         start-placeholder="备案开始时间" end-placeholder="备案结束时间" :picker-options="pickerOptions"
@@ -23,43 +23,23 @@
             <div class="header">
                 <div class="header-top">
                     <div>
-                        <el-date-picker
-                            v-model="timeValue"
-                            type="daterange"
-                            align="right"
-                            unlink-panels
-                            range-separator="至"
-                            start-placeholder="备案开始时间"
-                            end-placeholder="备案结束时间"
-                            :picker-options="pickerOptions"
-                            value-format="yyyy-MM-dd"
-                        >
+                        <el-date-picker v-model="timeValue" type="daterange" align="right" unlink-panels
+                            range-separator="至" start-placeholder="备案开始时间" end-placeholder="备案结束时间"
+                            :picker-options="pickerOptions" value-format="yyyy-MM-dd">
                         </el-date-picker>
                         <span>行政区划：</span>
-                        <el-input
-                            class="inputsty"
-                            v-model="regionName"
-                            placeholder="请填写行政区划"
-                        ></el-input>
+                        <el-input class="inputsty" v-model="regionName" placeholder="请填写行政区划"></el-input>
                         <span>档案编号：</span>
                         <el-input class="inputsty" v-model="number" placeholder="请填写档案编号"></el-input>
 
                     </div>
                     <div style="line-height:32px;">
                         <span>合同额范围：</span>
-                        <el-input
-                            class="inputsty"
-                            v-model="amountRangeStart"
-                            placeholder="合同额开始范围"
-                            type='number'
-                        ></el-input>
+                        <el-input class="inputsty" v-model="amountRangeStart" placeholder="合同额开始范围"
+                            type='number'></el-input>
                         <span style="width:20px;margin:0 10px;display:block">至</span>
-                        <el-input
-                            class="inputsty"
-                            v-model="amountRangeEnd"
-                            placeholder="合同额结束范围"
-                            type='number'
-                        ></el-input>
+                        <el-input class="inputsty" v-model="amountRangeEnd" placeholder="合同额结束范围"
+                            type='number'></el-input>
                     </div>
                     <span>项目归属：</span>
                     <el-input style="width: 240px;" v-model="company" disabled></el-input>
@@ -67,59 +47,22 @@
                 </div>
                 <div class="header-bottom">
                     <div>
-                        <el-date-picker
-                            v-model="invoiceTime"
-                            type="daterange"
-                            align="right"
-                            unlink-panels
-                            range-separator="至"
-                            start-placeholder="开票开始时间"
-                            end-placeholder="开票结束时间"
-                            :picker-options="pickerOptions"
-                            value-format="yyyy-MM-dd"
-                            style="margin-right: 35px;"
-                        >
+                        <el-date-picker v-model="invoiceTime" type="daterange" align="right" unlink-panels
+                            range-separator="至" start-placeholder="开票开始时间" end-placeholder="开票结束时间"
+                            :picker-options="pickerOptions" value-format="yyyy-MM-dd" style="margin-right: 35px;">
                         </el-date-picker>
-                        <el-date-picker
-                            v-model="arrivalTime"
-                            type="daterange"
-                            align="right"
-                            unlink-panels
-                            range-separator="至"
-                            start-placeholder="入账开始时间"
-                            end-placeholder="入账结束时间"
-                            :picker-options="pickerOptions"
-                            value-format="yyyy-MM-dd"
-                            style="margin-right: 35px;"
-                        >
+                        <el-date-picker v-model="arrivalTime" type="daterange" align="right" unlink-panels
+                            range-separator="至" start-placeholder="入账开始时间" end-placeholder="入账结束时间"
+                            :picker-options="pickerOptions" value-format="yyyy-MM-dd" style="margin-right: 35px;">
                         </el-date-picker>
-                        <el-date-picker
-                            v-model="completeTime"
-                            type="daterange"
-                            align="right"
-                            unlink-panels
-                            range-separator="至"
-                            start-placeholder="通过开始时间"
-                            end-placeholder="通过结束时间"
-                            :picker-options="pickerOptions"
-                            value-format="yyyy-MM-dd"
-                        >
+                        <el-date-picker v-model="completeTime" type="daterange" align="right" unlink-panels
+                            range-separator="至" start-placeholder="通过开始时间" end-placeholder="通过结束时间"
+                            :picker-options="pickerOptions" value-format="yyyy-MM-dd">
                         </el-date-picker>
-                        <el-checkbox
-                            v-model="checked"
-                            v-if="sessionlevel == '1'"
-                        >省本级</el-checkbox>
-                        <el-button
-                            type="info"
-                            size="small"
-                            @click.stop="selectRecord"
-                            style="margin-left: 18px"
-                        > 查询 </el-button>
-                        <el-button
-                            type="primary"
-                            size="small"
-                            @click.stop="downloadFile"
-                        > 下载 </el-button>
+                        <el-checkbox v-model="checked" v-if="sessionlevel == '1'">省本级</el-checkbox>
+                        <el-button type="info" size="small" @click.stop="selectRecord" style="margin-left: 18px"> 查询
+                        </el-button>
+                        <el-button type="primary" size="small" @click.stop="downloadFile"> 下载 </el-button>
 
                     </div>
                     <!-- <div>
@@ -159,7 +102,8 @@
                     <el-table :data="tableData" border style="width: 100%" height="580" v-loading="loading">
                         <el-table-column label="序号" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.xuhao != null && scope.row.xuhao != ''">{{ scope.row.xuhao }}</span>
+                                <span v-if="scope.row.xuhao != null && scope.row.xuhao != ''">{{ scope.row.xuhao
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -195,7 +139,7 @@
                             <template slot-scope="scope">
                                 <span v-if="scope.row.hetongjine != null && scope.row.hetongjine != ''">{{
                                     scope.row.hetongjine
-                                }}</span>
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -223,7 +167,7 @@
                         <el-table-column label="类别（民用/危化）" align="center">
                             <template slot-scope="scope">
                                 <span v-if="scope.row.leixing != null && scope.row.leixing != ''">{{ scope.row.leixing
-                                }}</span>
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -236,8 +180,9 @@
                         </el-table-column>
                         <el-table-column label="检测人" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.zhizuoren != null && scope.row.zhizuoren != ''">{{ scope.row.zhizuoren
-                                }}</span>
+                                <span v-if="scope.row.zhizuoren != null && scope.row.zhizuoren != ''">{{
+                                    scope.row.zhizuoren
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -257,15 +202,16 @@
                         </el-table-column>
                         <el-table-column label="审核人" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.shenheren != null && scope.row.shenheren != ''">{{ scope.row.shenheren
-                                }}</span>
+                                <span v-if="scope.row.shenheren != null && scope.row.shenheren != ''">{{
+                                    scope.row.shenheren
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
                         <el-table-column label="批准人" align="center">
                             <template slot-scope="scope">
                                 <span v-if="scope.row.fuzeren != null && scope.row.fuzeren != ''">{{ scope.row.fuzeren
-                                }}</span>
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -316,15 +262,17 @@
                         </el-table-column>
                         <el-table-column label="收入到账日期" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.shourudaozhangriqi != null && scope.row.shourudaozhangriqi != ''">{{
-                                    scope.row.shourudaozhangriqi }}</span>
+                                <span
+                                    v-if="scope.row.shourudaozhangriqi != null && scope.row.shourudaozhangriqi != ''">{{
+                                        scope.row.shourudaozhangriqi }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
                         <el-table-column label="收入到账金额" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.shourudaozhangjine != null && scope.row.shourudaozhangjine != ''">{{
-                                    scope.row.shourudaozhangjine }}</span>
+                                <span
+                                    v-if="scope.row.shourudaozhangjine != null && scope.row.shourudaozhangjine != ''">{{
+                                        scope.row.shourudaozhangjine }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -337,8 +285,9 @@
                         </el-table-column>
                         <el-table-column label="预拨金额" align="center">
                             <template slot-scope="scope">
-                                <span v-if="scope.row.yubojine != null && scope.row.yubojine != ''">{{ scope.row.yubojine
-                                }}</span>
+                                <span v-if="scope.row.yubojine != null && scope.row.yubojine != ''">{{
+                                    scope.row.yubojine
+                                    }}</span>
                                 <span v-else>-</span>
                             </template>
                         </el-table-column>
@@ -447,12 +396,12 @@ export default {
         };
     },
     watch: {
-        timeValue(val) {
-            if (val == null) {
-                this.timeValue = [];
-                this.selectRecord();
-            }
-        },
+        /*  timeValue(val) {
+             if (val == null) {
+                 this.timeValue = [];
+                 this.selectRecord();
+             }
+         }, */
     },
     computed: {
         sessionlevel() {
@@ -466,35 +415,59 @@ export default {
     methods: {
         selectRecord() {
             this.loading = true;
+            let formattedDate, formattedDate1;
             const regiId = JSON.parse(sessionStorage.getItem("records"));
-            this.company = regiId.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
-            const dateString = this.timeValue[0];
-            const dateString1 = this.timeValue[1];
-            const date = new Date(dateString);
-            const date1 = new Date(dateString1);
-            const formattedDate = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
-            const formattedDate1 = `${date1.getFullYear()}-${padZero(date1.getMonth() + 1)}-${padZero(date1.getDate())}`;
-              
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.company = companyMap[regiId.company] || '';
+            if (this.timeValue != null) {
+                const dateString = this.timeValue[0];
+                const dateString1 = this.timeValue[1];
+                const date = new Date(dateString);
+                const date1 = new Date(dateString1);
+                formattedDate = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
+                formattedDate1 = `${date1.getFullYear()}-${padZero(date1.getMonth() + 1)}-${padZero(date1.getDate())}`;
+            }
 
             function padZero(value) {
                 return value < 10 ? '0' + value : value;
             }
+
             let parameter = {
                 regionId: regiId.regionIdMap.id,
-                startTime: formattedDate,
-                endTime: formattedDate1,
-                invoiceStartTime: this.invoiceTime[0],
-                invoiceEndTime: this.invoiceTime[1],
-                arrivalStartTime: this.arrivalTime[0],
-                arrivalendTime: this.arrivalTime[1],
-                completeStartTime: this.completeTime[0],
-                completeEndTime: this.completeTime[1],
                 regionName: this.regionName,
                 amountRangeStart: this.amountRangeStart,
                 amountRangeEnd: this.amountRangeEnd,
                 number: this.number,
                 company: regiId.company
             };
+            if (this.invoiceTime) {
+                if (this.invoiceTime.length != 0) {
+                    parameter.invoiceStartTime = this.invoiceTime[0]
+                    parameter.invoiceEndTime = this.invoiceTime[1]
+                }
+
+            }
+            if (this.arrivalTime) {
+                if (this.arrivalTime.length != 0) {
+                    parameter.arrivalStartTime = this.arrivalTime[0]
+                    parameter.arrivalendTime = this.arrivalTime[1]
+                }
+            }
+            if (this.completeTime) {
+                if (this.completeTime.length != 0) {
+                    parameter.completeStartTime = this.completeTime[0]
+                    parameter.completeEndTime = this.completeTime[1]
+                }
+            }
+            if (this.timeValue != null) {
+                parameter.startTime = formattedDate
+                parameter.endTime = formattedDate1
+            }
             if (this.checked) {
                 parameter.justProvince = 1;
             }
@@ -581,13 +554,16 @@ table tr td {
         background: #fff;
         margin-bottom: 6px;
         border-radius: 5px;
+
         .header-top {
             margin-bottom: 10px;
         }
+
         .header-bottom {
             display: flex;
             justify-content: space-between;
         }
+
         div {
             display: flex;
 

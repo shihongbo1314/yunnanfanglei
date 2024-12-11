@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <table width=100% bgcolor=#cccccc cellpadding=1 cellspacing=1>
+    <div style="height: 100%;width: 100%;">
+        <table width=100% bgcolor=#cccccc cellpadding=1 cellspacing=1 style="height: 100%;">
             <tr>
                 <td valign=top width=80 bgcolor=white align=center>
                     <table id="tablebut">
@@ -20,11 +20,14 @@
                                 <input type=button class="button" value="删除文件" @click="WebDelFile()"></input><br>
                                 [<b style="color:green">文档转换</b>]<br>
 
-                                <input type=button class="button" value="保存本地PDF" @click="WebSaveLocalPdf()"></input><br>
-                                <input type=button class="button" value="保存本地HTML" @click="WebSaveLocalHTML()"></input><br>
+                                <input type=button class="button" value="保存本地PDF"
+                                    @click="WebSaveLocalPdf()"></input><br>
+                                <input type=button class="button" value="保存本地HTML"
+                                    @click="WebSaveLocalHTML()"></input><br>
 
                                 [<b style="color:green">打印控制</b>]<br>
-                                <input type=button class="button" value="打印预览" @click="WebDocPrintPreView()"></input><br>
+                                <input type=button class="button" value="打印预览"
+                                    @click="WebDocPrintPreView()"></input><br>
                                 <input type=button class="button" value="设置后打印一" @click="WebDocPrint()"></input><br>
                                 <input type=button class="button" value="设置后打印二" @click="WebDocPrint2()"></input><br>
                                 <input type=button class="button" value="直接打印" @click="WebPrintDirc()"></input><br>
@@ -65,9 +68,9 @@
 
                 </td>
                 <td valign="top" bgcolor="white">
-                    <div id="WebOCX"><object classid="clsid:FF09E4FA-BFAA-486E-ACB4-86EB0AE875D5"
-                            codebase="http://www.officectrl.com/weboffice/WebOffice.ocx#Version=2018,1,6,2" id="WebOffice"
-                            width="80%" height="900">
+                    <div id="WebOCX" style="height: 100%;"><object classid="clsid:FF09E4FA-BFAA-486E-ACB4-86EB0AE875D5"
+                            codebase="http://www.officectrl.com/weboffice/WebOffice.ocx#Version=2018,1,6,2"
+                            id="WebOffice" width="80%" style="height: 100vh;" height="100vh">
                             <param name="BorderStyle" value="1">
                             <param name="Menubar" value="1">
                             <param name="Titlebar" value="1">
@@ -85,11 +88,13 @@
                                         <span style="font-size:12px">角色：{{ item.roleIdInfoMap != null ?
                                             item.roleIdInfoMap.other : "-" }}</span><br>
                                         <span style="font-size:12px"
-                                            v-if="['4', '20', '21', '22'].includes(item.state)">操作人：{{ item.auditeeMap != null ?
+                                            v-if="['4', '20', '21', '22'].includes(item.state)">操作人：{{ item.auditeeMap
+                                                != null ?
                                                 item.auditeeMap.true_name : "-" }}</span>
                                         <span style="font-size:12px" v-else>操作人：{{ item.reviewerMap != null ?
                                             item.reviewerMap.true_name : "-" }}</span><br>
-                                        <span style="font-size:12px">备注：{{ item.remarks != null ? item.remarks : "-" }}</span>
+                                        <span style="font-size:12px">备注：{{ item.remarks != null ? item.remarks : "-"
+                                            }}</span>
                                     </div>
                                 </div>
                                 <el-input type="textarea" :rows="6" placeholder="备注" v-model="textarea" show-word-limit
@@ -100,27 +105,52 @@
                                         <div class="classsty" v-if="ishowtrue">
                                             <label style="color:green;margin:5px 0;display:block"
                                                 v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">公章列表</label>
-                                            <el-button v-for="(item, index) in commonList" :key="index" size="mini" round
-                                                @click="commonChange('http://140.249.209.176:8084/LightningDetection/Seal/' + item.filename)"
-                                                v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{ item.title }}
-                                            </el-button>
+                                            <div v-if="company == '1'">
+                                                <el-button v-for="(item, index) in commonList" :key="index" size="mini"
+                                                    round
+                                                    @click="commonChange('http://140.249.209.176:8083/LightningDetection/Seal/' + item.filename)"
+                                                    v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
+                                                        item.title }}
+                                                </el-button>
+                                            </div>
+                                            <div v-else-if="company == '2'">
+                                                <el-button v-for="(item, index) in commonList1" :key="index" size="mini"
+                                                    round
+                                                    @click="commonChange('http://140.249.209.176:8083/LightningDetection/Seal/' + item.filename)"
+                                                    v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
+                                                        item.title }}
+                                                </el-button>
+                                            </div>
+                                            <div v-else>
+                                                <el-button v-for="(item, index) in commonList2" :key="index" size="mini"
+                                                    round
+                                                    @click="commonChange('http://140.249.209.176:8083/LightningDetection/Seal/' + item.filename)"
+                                                    v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
+                                                        item.title }}
+                                                </el-button>
+                                            </div>
+
                                             <label style="color:green;margin:5px 0;display:block"
                                                 v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">检测人列表</label>
                                             <div v-if="['2', '3', '5'].includes(multiplex) && ishowtrue" class="footer">
-                                                <el-button v-for="(item, index) in inspectorList" :key="item.id" size="mini"
-                                                    @click="inspectorChange('http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath)">{{ item.userName }}
+                                                <el-button v-for="(item, index) in inspectorList" :key="item.id"
+                                                    size="mini"
+                                                    @click="inspectorChange('http://140.249.209.176:8083/LightningDetection/UserSign/' + item.signPath)">{{
+                                                        item.userName }}
                                                 </el-button>
                                             </div>
 
                                             <label style="color:green;margin:5px 0;display:block">审核人列表</label>
                                             <el-checkbox-group v-model="auditor.ladder" @change="personChange">
                                                 <el-checkbox v-for="(item, index) in auditorList" :key="item.id"
-                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8083/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
+                                                        item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
                                             </el-checkbox-group>
                                             <label style="color:green;margin:5px 0;display:block">负责人列表</label>
                                             <el-checkbox-group v-model="principal.ladder" @change="principalChange">
                                                 <el-checkbox v-for="(item, index) in principalList" :key="item.id"
-                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8083/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
+                                                        item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
                                             </el-checkbox-group>
                                             <span class="footer">
                                                 <el-button @click="ishowtrue = false" size="small" style="flex:1">取
@@ -135,12 +165,14 @@
                                             <label style="color:green;margin:5px 0;display:block">退回人列表</label>
                                             <el-checkbox-group v-model="goBack.ladder" @change="ladderChange">
                                                 <el-checkbox v-for="(item, index) in goBackList" :key="item.id"
-                                                    :label="item.id + ',' + item.roleId">{{ item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
+                                                    :label="item.id + ',' + item.roleId">{{ item.trueName + '(' +
+                                                        item.roleName + ')' }}</el-checkbox>
                                             </el-checkbox-group>
                                             <span class="footer">
                                                 <el-button @click="isback = false" size="small" style="flex:1">取
                                                     消</el-button>
-                                                <el-button type="primary" size="small" style="flex:1" @click="GoBackClick">确
+                                                <el-button type="primary" size="small" style="flex:1"
+                                                    @click="GoBackClick">确
                                                     定</el-button>
                                             </span>
                                         </div>
@@ -149,8 +181,8 @@
                                         <div style="display:flex;margin-top:5px">
                                             <el-button type="success" @click="Examine(1)" size="mini"
                                                 style="flex:1">通过</el-button>
-                                            <el-button type="info" v-if="ID == '1' || back == '2'" @click="giveIt" size="mini"
-                                                style="flex:1">转交</el-button>
+                                            <el-button type="info" v-if="ID == '1' || back == '2'" @click="giveIt"
+                                                size="mini" style="flex:1">转交</el-button>
                                         </div>
                                         <div style="display:flex;margin-top:5px">
                                             <el-button type="warning" size="mini" @click="Back()"
@@ -185,23 +217,25 @@
                                             <span class="footer">
                                                 <el-button @click="classsty = false" size="small" style="flex:1">取
                                                     消</el-button>
-                                                <el-button type="primary" size="small" style="flex:1" @click="giveItClick">确
+                                                <el-button type="primary" size="small" style="flex:1"
+                                                    @click="giveItClick">确
                                                     定</el-button>
                                             </span>
                                         </div>
                                     </transition>
                                 </div>
 
-                                <b style="color:green;" v-if="back != -1 && back1 != 1 && back != 2 && back2 != -3">保存</b><br>
-                                <input type=button class="button" value="保存" v-if="back != -1 && back != 2 && back2 != -3"
-                                    @click="WebSaveC()"><br>
+                                <b style="color:green;"
+                                    v-if="back != -1 && back1 != 1 && back != 2 && back2 != -3">保存</b><br>
+                                <input type=button class="button" value="保存"
+                                    v-if="back != -1 && back != 2 && back2 != -3" @click="WebSaveC()"><br>
                                 <input type=button class="button" value="再次提交" v-if="back1 != 1 && back != 2"
                                     @click="Examine(1)"><br>
-                                <input type="button" class="button" value="暂存" style="margin-top:5px;" @click="working()"
-                                    v-if="back1 != 1 && back != 2">
+                                <input type="button" class="button" value="暂存" style="margin-top:5px;"
+                                    @click="working()" v-if="back1 != 1 && back != 2">
                                 <br>
-                                <input type=button class="button" value="退回" v-if="back1 != 1 && back != 2 && back2 != -3"
-                                    @click="Back()"><br>
+                                <input type=button class="button" value="退回"
+                                    v-if="back1 != 1 && back != 2 && back2 != -3" @click="Back()"><br>
                                 <br>
 
                             </td>
@@ -259,6 +293,26 @@ export default {
                     title: "检测章",
                 },
             ],
+            commonList1: [
+                {
+                    filename: "111.png",
+                    title: "行政章",
+                },
+                {
+                    filename: "222.png",
+                    title: "检测章",
+                },
+            ],
+            commonList2: [
+                {
+                    filename: "cx_company.png",
+                    title: "行政章",
+                },
+                {
+                    filename: "cs_test.png",
+                    title: "检测章",
+                },
+            ],
             common: {
                 ladder: [],
             },
@@ -307,6 +361,7 @@ export default {
             variabletwo: false,
             tanFlog: false,
             messageQm: null,
+            company: "",//公司/启旭
         };
     },
     created() {
@@ -378,6 +433,7 @@ export default {
                 .split("&")[13]
                 .split("=")[1];
             this.multiplex = multiplex;
+            this.company = company;
             if (remarks == "null" || remarks == "undefined") {
                 this.textarea = "";
             } else {
@@ -413,10 +469,12 @@ export default {
             }
             if (fileName != "null" || back == "-1") {
                 strUrl = `http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/${fileName}`;
-            } else if (category != "null" && company != '2') {
+            } else if (category != "null" && company != '2' && company != '3') {
                 strUrl = "http://140.249.209.176:9080/fanglei/TestTempTextNew.doc";
             } else if (company == '2') {
                 strUrl = "http://140.249.209.176:9080/fanglei/Qi_TestTempText.doc";
+            } else if (company == '3') {
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempText_cx.doc";
             } else {
                 strUrl = "http://140.249.209.176:9080/fanglei/TestTempText.doc";
             }
@@ -727,7 +785,7 @@ export default {
                     ID = ID.split("&")[0];
                 }
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/record-temporary/save?examineId=${ID}&remarks=${this.textarea}`
+                    `http://140.249.209.176:8083/LightningDetection/record-temporary/save?examineId=${ID}&remarks=${this.textarea}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -773,7 +831,7 @@ export default {
                 ID = ID.split("&")[0];
             }
             const re = WebOffice.Save(
-                `http://140.249.209.176:8084/LightningDetection/record-examine/saveFormalFile?examineId=${ID}`
+                `http://140.249.209.176:8083/LightningDetection/record-examine/saveFormalFile?examineId=${ID}`
             );
             const res = re.substring(0, 3);
             if (res == "200") {
@@ -799,7 +857,7 @@ export default {
                     .split("&")[7]
                     .split("=")[1];
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/project-record/updateTestImg?projectId=${ID}&makeUserid=${makeUserid}&roleId=${roleIdMap}&remarks=${this.textarea}`
+                    `http://140.249.209.176:8083/LightningDetection/project-record/updateTestImg?projectId=${ID}&makeUserid=${makeUserid}&roleId=${roleIdMap}&remarks=${this.textarea}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -840,7 +898,7 @@ export default {
                 this.$message("请先选择转交用户");
             } else {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/record-examine/TransferProject?transferUser=${this.lessonForm.ladder.toString()}&id=${id}&roleId=${identity}`
+                    `http://140.249.209.176:8083/LightningDetection/record-examine/TransferProject?transferUser=${this.lessonForm.ladder.toString()}&id=${id}&roleId=${identity}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -879,7 +937,7 @@ export default {
                     this.$message("请先选择审核人和负责人");
                 } else {
                     const re = WebOffice.Save(
-                        `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}`
+                        `http://140.249.209.176:8083/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}`
                     );
                     const res = re.substring(0, 3);
                     if (res == "200") {
@@ -932,7 +990,7 @@ export default {
                 this.$message("请先选择退回人");
             } else {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.goBack.ladder.toString().split(",")[0]
+                    `http://140.249.209.176:8083/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.goBack.ladder.toString().split(",")[0]
                     }&roleId=${this.goBack.ladder.toString().split(",")[1]}`
                 );
                 const res = re.substring(0, 3);
@@ -985,7 +1043,7 @@ export default {
                     let re;
                     if (["2", "3", "5"].includes(this.multiplex)) {
                         re = WebOffice.Save(
-                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder
+                            `http://140.249.209.176:8083/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder
                                 .toString()
                                 .split("-")[1]
                                 .split("+")[0]
@@ -997,7 +1055,7 @@ export default {
                         );
                     } else {
                         re = WebOffice.Save(
-                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder.toString().split("+")[0]
+                            `http://140.249.209.176:8083/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder.toString().split("+")[0]
                             }&LiableUser=${this.principal.ladder.toString().split("+")[0]
                             }`
                         );
@@ -1213,5 +1271,9 @@ a {
     height: 35vh;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+#WebOffice {
+    height: 100vh !important;
 }
 </style>

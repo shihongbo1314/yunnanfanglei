@@ -104,7 +104,7 @@
                                 <el-form-item label="检测报告痕迹版下载：" v-if="props.row.state != '16'">
                                     <span @click="Download(props.row.testMarkImg)" style="cursor:pointer;">{{
                                         props.row.testMarkImg != null ? '(' + props.row.testMarkImg.split('(')[1] : '-'
-                                    }}</span>
+                                        }}</span>
                                 </el-form-item>
                                 <el-form-item label="检测报告打印版下载：" v-if="props.row.state != '16'">
                                     <span
@@ -112,15 +112,15 @@
                                         style="cursor:pointer;">{{ props.row.testPrintImg != null ?
                                             props.row.testPrintImg.split('.')[1].replaceAll('.docx', '.pdf') : '-' }}</span>
 
-                                    <span @click="lookPwdShow = !lookPwdShow"
-                                        v-if="props.row.testPrintImg != null"
-                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看' }}密码</span>
+                                    <span @click="lookPwdShow = !lookPwdShow" v-if="props.row.testPrintImg != null"
+                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看'
+                                        }}密码</span>
                                     <span v-if="lookPwdShow">{{ ':' + props.row.lookPwd }}</span>
                                 </el-form-item>
                                 <el-form-item label="检测报告正式版下载：" v-if="props.row.state != '16'">
                                     <span @click="Download(props.row.testFormalImg)" style="cursor:pointer;">{{
                                         props.row.testFormalImg ? '(' + props.row.testFormalImg.split('(')[1] : '-'
-                                    }}</span>
+                                        }}</span>
                                 </el-form-item>
                             </el-form>
                             <el-form label-position="left" inline class="demo-table-expand hide"
@@ -134,22 +134,22 @@
                                 <el-form-item label="检测报告痕迹版下载：">
                                     <span @click="Download(props.row.testMarkImg)" style="cursor:pointer;">{{
                                         props.row.testMarkImg != null ? '(' + props.row.testMarkImg.split('(')[1] : '-'
-                                    }}</span>
+                                        }}</span>
                                 </el-form-item>
                                 <el-form-item label="检测报告打印版下载：">
                                     <span
                                         @click="Download(props.row.testPrintImg != null ? props.row.testPrintImg.split('.')[0] + '.pdf' : '')"
                                         style="cursor:pointer;">{{ props.row.testPrintImg != null ?
                                             props.row.testPrintImg.split('.')[1].replaceAll('.docx', '.pdf') : '-' }}</span>
-                                    <span @click="lookPwdShow = !lookPwdShow"
-                                        v-if="props.row.testPrintImg != null"
-                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看' }}密码</span>
+                                    <span @click="lookPwdShow = !lookPwdShow" v-if="props.row.testPrintImg != null"
+                                        style="cursor:pointer;margin-left: 10px;">{{ lookPwdShow ? '隐藏' : '查看'
+                                        }}密码</span>
                                     <span v-if="lookPwdShow">{{ ':' + props.row.lookPwd }}</span>
                                 </el-form-item>
                                 <el-form-item label="检测报告正式版下载：">
                                     <span @click="Download(props.row.testFormalImg)" style="cursor:pointer;">{{
                                         props.row.testFormalImg ? '(' + props.row.testFormalImg.split('(')[1] : '-'
-                                    }}</span>
+                                        }}</span>
                                 </el-form-item>
                             </el-form>
                         </template>
@@ -738,7 +738,13 @@ export default {
         this.getProject();
         this.getDockUserbianzhi();
         const regionId = JSON.parse(sessionStorage.getItem("records"));
-        this.formInline.company = regionId.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+        const companyMap = {
+            "1": '云南省气象灾害防御技术中心',
+            "2": '云南启旭科技有限公司',
+            "3": '楚雄州气象灾害防御技术中心'
+        };
+
+        this.formInline.company = companyMap[regionId.company] || '';
         initWebSocket(regionId.id);
     },
     destroyed() {

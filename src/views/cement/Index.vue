@@ -366,7 +366,7 @@
 
 <script>
 import {
-    selectCement,
+    selectCementPage,
     addCement,
     delectCement,
     enableCement,
@@ -449,10 +449,12 @@ export default {
     },
     methods: {
         fetchData() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
             this.listLoading = true;
-            selectCement({
+            selectCementPage({
                 size: this.size,
                 current: this.current,
+                company:records.company
             }).then((response) => {
                 this.list = response.data.records;
                 this.total = this.list.length;
@@ -460,11 +462,13 @@ export default {
             });
         },
         onblur(current) {
+            const records = JSON.parse(sessionStorage.getItem("records"));
             this.listLoading = true;
-            selectCement({
+            selectCementPage({
                 size: this.size,
                 current: current,
                 title: this.formInline.name,
+                company:records.company
             }).then((response) => {
                 this.list = response.data.records;
                 this.total = response.data.total;
@@ -574,8 +578,8 @@ export default {
             this.formData.append("msgType", this.formLabel.msgType);
             this.formData.append("regionId", regionId.regionIdMap.id);
             this.formData.append("visibleType", this.formLabel.visibleType);
+            this.formData.append("company", regionId.company);
             this.fileListPng.map((item) => {
-                console.log(item,'123')
                 this.formData.append("files", item);
             });
             addCement(this.formData).then((res) => {
@@ -610,6 +614,7 @@ export default {
                 this.formData.append("content", this.formLabelAlign.content);
                 this.formData.append("msgType", this.formLabelAlign.msgType);
                 this.formData.append("regionId", regionId.regionIdMap.id);
+                this.formData.append("company", regionId.company);
                 this.formData.append(
                     "visibleType",
                     this.formLabelAlign.visibleType

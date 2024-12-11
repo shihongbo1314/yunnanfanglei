@@ -71,6 +71,14 @@ export function selectCement(params) {
         params
     })
 }
+/* 获取公告page */
+export function selectCementPage(params) {
+    return request({
+        url: '/LightningDetection/record-notice/page',
+        method: 'post',
+        params
+    })
+}
 /* 添加公告信息 */
 export function addCement(data) {
     return request({

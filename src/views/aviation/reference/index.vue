@@ -398,13 +398,13 @@
                             </div>
                             <div style="width: 50%;">
                                 <p v-if="sessionName != '备案人'">
-                                    <el-form-item label="报告档案编号：" class="item">
+                                    <el-form-item label="报告档案编号：" class="item" v-if="['1', '2'].includes(companyNum())">
                                         <!--  <el-input
                                             placeholder="请输入内容"
                                             v-model="enquire.number"
                                         >
                                         </el-input> -->
-                                        <span style="color:red">{{ enquire.company == '1' ? '云' : '启'
+                                        <span style="color:red">{{ setTitle(enquire.company)
                                             }}雷检字[<el-date-picker v-model="formInline.year" type="year"
                                                 value-format="yyyy" style="width:100px;" placeholder="选择年"
                                                 :disabled="State35 && StateNull">
@@ -416,7 +416,21 @@
                                                 style="width:100px;"></el-input></span>
 
                                     </el-form-item>
-
+                                    <el-form-item label="报告档案编号：" class="item" v-else>
+                                        <span style="color:red">{{ setTitle(enquire.company) }}雷检字</span>
+                                        <el-input v-model="formInline.first" :disabled="State35 && StateNull"
+                                            style="width:120px;"></el-input>—
+                                        <el-input v-model="formInline.sencond" :disabled="State35 && StateNull"
+                                            style="width:90px;"></el-input>—
+                                        <el-date-picker v-model="formInline.yearNew" type="year" value-format="yyyy"
+                                            style="width:100px;" placeholder="选择年" :disabled="State35 && StateNull">
+                                        </el-date-picker>—<el-input v-model="formInline.contractNew"
+                                            :disabled="State35 && StateNull" style="width:80px;"></el-input>
+                                        <span style="color:red">—<el-input v-model="formInline.NumberNew"
+                                                :disabled="State35 && StateNull" @input="handleInput"
+                                                style="width:80px;"></el-input>号 <el-input
+                                                v-model="formInline.NumberNew2" style="width:100px;"></el-input></span>
+                                    </el-form-item>
                                 </p>
                                 <p v-else>
                                     <el-form-item label="类别：">
@@ -536,9 +550,9 @@
                                 </p>
                             </div>
                             <div style="width: 50%">
-                                <p>
+                                <p v-if="['1', '2'].includes(companyNum())">
                                     <el-form-item label="合同编号：" v-if="formInline.flag">
-                                        <span style="color:red">{{ enquire.company == '1' ? '云' : '启'
+                                        <span style="color:red">{{ setTitle(enquire.company)
                                             }}雷检字[<el-date-picker v-model="formInline.yearflag" type="year"
                                                 value-format="yyyy" :disabled="State35" style="width:100px;"
                                                 placeholder="选择年">
@@ -549,7 +563,7 @@
                                                 style="width:80px;"></el-input>号</span>
                                     </el-form-item>
                                     <el-form-item label="合同编号：" v-else>
-                                        <span style="color:red">{{ enquire.company == '1' ? '云' : '启'
+                                        <span style="color:red">{{ setTitle(enquire.company)
                                             }}雷检字[<el-date-picker v-model="formInline.year" type="year"
                                                 value-format="yyyy" :disabled="State35" style="width:100px;"
                                                 placeholder="选择年">
@@ -558,6 +572,24 @@
                                         <span style="color:red">第<el-input :disabled="State35"
                                                 v-model="formInline.Number" @input="handleInput"
                                                 style="width:80px;"></el-input>号</span>
+                                    </el-form-item>
+                                </p>
+                                <p v-else>
+                                    <el-form-item label="合同编号：">
+                                        <span style="color:red">{{ setTitle(enquire.company)
+                                            }}雷检字</span>
+                                        <el-input v-model="formInline.first" :disabled="State35 && StateNull"
+                                            style="width:120px;"></el-input>—
+                                        <el-input v-model="formInline.sencond" :disabled="State35 && StateNull"
+                                            style="width:90px;"></el-input>—
+                                        <el-date-picker v-model="formInline.year" type="year" value-format="yyyy"
+                                            :disabled="State35" style="width:100px;" placeholder="选择年">
+                                        </el-date-picker>
+                                        <el-input :disabled="State35" v-model="formInline.contract" style="width:80px;"
+                                            @blur="blurContract"></el-input>
+                                        <span style="color:red">第<el-input :disabled="State35"
+                                                v-model="formInline.Number" style="width:80px;"
+                                                @blur="blurNumber"></el-input>号</span>
                                     </el-form-item>
                                 </p>
                             </div>
@@ -813,13 +845,26 @@
                 <el-form-item label="项目名称">
                     <el-input v-model="reuseform.projectName"></el-input>
                 </el-form-item>
-                <el-form-item label="合同编号">
+                <el-form-item label="合同编号" v-if="['1', '2'].includes(companyNum())">
                     <!--  <el-input v-model="reuseform.number"></el-input> -->
-                    <span style="color:red">{{ enquire.company == '1' ? '云' : '启'
+                    <span style="color:red">{{ setTitle(enquire.company)
                         }}雷检字[<el-date-picker v-model="reuseform.year" type="year" value-format="yyyy"
                             style="width:100px;" placeholder="选择年">
                         </el-date-picker>]</span><el-input v-model="reuseform.contract" style="width:80px;"></el-input>
                     <span style="color:red">第<el-input v-model="reuseform.Number" type="number" @input="handleInput"
+                            style="width:80px;"></el-input>号</span>
+                </el-form-item>
+                <el-form-item label="合同编号" v-else>
+                    <!--  <el-input v-model="reuseform.number"></el-input> -->
+                    <span style="color:red">{{ setTitle(enquire.company)
+                        }}雷检字</span>—
+                    <el-input v-model="reuseform.first" style="width:120px;"></el-input>—
+                    <el-input v-model="reuseform.sencond" style="width:90px;"></el-input>—
+                    <el-date-picker v-model="reuseform.year" type="year" value-format="yyyy" style="width:100px;"
+                        placeholder="选择年">
+                    </el-date-picker>—<el-input v-model="reuseform.contract" style="width:80px;"R
+                        @blur="blurContractReRuseform"></el-input>—
+                    <span style="color:red"><el-input v-model="reuseform.Number" type="number" @blur="blurNumberNewReuseform"
                             style="width:80px;"></el-input>号</span>
                 </el-form-item>
             </el-form>
@@ -833,14 +878,30 @@
                 <el-form-item label="项目名称">
                     <el-input v-model="Childishowfrom.projectName"></el-input>
                 </el-form-item>
-                <el-form-item label="报告子档案号">
+                <el-form-item label="报告子档案号" v-if="['1', '2'].includes(companyNum())">
                     <!-- <el-input v-model="Childishowfrom.number"></el-input> -->
-                    <span style="color:red">{{ enquire.company == '1' ? '云' : '启'
+                    <span style="color:red">{{ setTitle(enquire.company)
                         }}雷检字[<el-date-picker v-model="Childishowfrom.year" type="year" disabled value-format="yyyy"
                             style="width:100px;" placeholder="选择年">
                         </el-date-picker>]</span><el-input v-model="Childishowfrom.contract" disabled
                         style="width:80px;"></el-input>
                     <span style="color:red">第<el-input v-model="Childishowfrom.Number" disabled @input="handleInput"
+                            style="width:100px;"></el-input>号 <el-input v-model="Childishowfrom.Number2"
+                            style="width:100px;"></el-input></span>
+                </el-form-item>
+                <el-form-item label="报告子档案号" v-else>
+                    <!-- <el-input v-model="Childishowfrom.number"></el-input> -->
+                    <span style="color:red">{{ setTitle(enquire.company)
+                        }}雷检字</span>—
+                    <el-input v-model="Childishowfrom.first" :disabled="State35 && StateNull"
+                        style="width:120px;"></el-input>—
+                    <el-input v-model="Childishowfrom.sencond" :disabled="State35 && StateNull"
+                        style="width:90px;"></el-input>—
+                    <el-date-picker v-model="Childishowfrom.year" type="year" disabled value-format="yyyy"
+                        style="width:100px;" placeholder="选择年">—
+                    </el-date-picker>—<el-input v-model="Childishowfrom.contract" disabled
+                        style="width:80px;"></el-input>—
+                    <span style="color:red"><el-input v-model="Childishowfrom.Number" disabled @input="handleInput"
                             style="width:100px;"></el-input>号 <el-input v-model="Childishowfrom.Number2"
                             style="width:100px;"></el-input></span>
                 </el-form-item>
@@ -1802,6 +1863,13 @@ export default {
                 company: "",/* 人员归属 */
                 Number2: "",
                 flag: false /*状态区分 */,
+                /* 楚雷增加 */
+                first: "",
+                sencond: "",
+                yearNew: "",
+                contractNew: "",
+                NumberNew: "",
+                NumberNew2: "",
             },
             tableData: [],
             addishow: false,
@@ -1814,6 +1882,8 @@ export default {
             reuse: false /* 复用弹框 */,
             Childishow: false /* 子报告弹框 */,
             reuseform: {
+                first: "1252017012",
+                sencond: "",
                 userid: "",
                 projectId: "",
                 number: "",
@@ -1825,6 +1895,8 @@ export default {
                 Number2: "",
             },
             Childishowfrom: {
+                first: "",
+                sencond: "",
                 year: "",
                 contract: "",
                 Number: "",
@@ -2010,6 +2082,34 @@ export default {
                 this.open("开票金额不能大于合同金额");
             }
         },
+        'formInline.contract'(newVal, oldVal) {
+            if (this.formInline.company == '楚雄州气象灾害防御技术中心') {
+                if (newVal.length > 2) {
+                    this.formInline.contract = newVal.slice(0, 2);
+                    return this.$message.info('事项代码为2位数');
+                }
+            }
+        },
+        'formInline.NumberNew'(newVal, oldVal) {
+            if (newVal.length > 5) {
+                this.formInline.NumberNew = newVal.slice(0, 5);
+                return this.$message.info('流水编码为5位数');
+            }
+        },
+        'reuseform.contract'(newVal, oldVal) {
+            if (this.formInline.company == '楚雄州气象灾害防御技术中心') {
+                if (newVal.length > 2) {
+                    this.reuseform.contract = newVal.slice(0, 2);
+                    return this.$message.info('事项代码为2位数');
+                }
+            }
+        },
+        'reuseform.Number'(newVal, oldVal) {
+            if (newVal.length > 5) {
+                this.reuseform.Number = newVal.slice(0, 5);
+                return this.$message.info('流水编码为5位数');
+            }
+        }
     },
     created() {
         this.formInline.number = this.$route.query.number;
@@ -2019,6 +2119,13 @@ export default {
 
 
         const regionId = JSON.parse(sessionStorage.getItem("records"));
+        if (regionId.company == '3') {
+            if (regionId.regionIdMap.code == 530000) {
+                this.reuseform.sencond = "532300";
+            } else {
+                this.reuseform.sencond = regionId.regionIdMap.code;
+            }
+        }
         this.getDockUserbianzhi(regionId);
         initWebSocket(regionId.id);
     },
@@ -2026,6 +2133,36 @@ export default {
         websocketclose();
     },
     methods: {
+        blurContract() {
+            if (this.formInline.contract.length < 2 && this.formInline.contract.length > 0) {
+                return this.$message.info('事项代码为2位数');
+            }
+        },
+        blurNumberNew() {
+            if (this.formInline.NumberNew.length < 5 && this.formInline.NumberNew.length > 0) {
+                return this.$message.info('流水编码为5位数');
+            }
+        },
+        // 复用验证
+        blurContractReRuseform() {
+            if (this.reuseform.contract.length < 2 && this.reuseform.contract.length > 0) {
+                return this.$message.info('事项代码为2位数');
+            }
+        },
+        blurNumberNewReuseform() {
+            if (this.reuseform.Number.length < 5 && this.reuseform.Number.length > 0) {
+                return this.$message.info('流水编码为5位数');
+            }
+        },
+        blurNumber() {
+            if (this.formInline.Number.length < 5 && this.formInline.Number.length > 0) {
+                return this.$message.info('流水编码为5位数');
+            }
+        },
+        companyNum() {
+            const records = JSON.parse(sessionStorage.getItem("records"));
+            return records.company;
+        },
         setbeian(Name, level, state) {
             if (Name == '备案人') {
                 if (level == '1') {
@@ -2048,7 +2185,24 @@ export default {
         getcompany() {
             const params = JSON.parse(sessionStorage.getItem("records"));
             /* console.log(params.company,'人员归属') */
-            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[params.company] || '';
+        },
+        setTitle(company) {
+            let str
+            if (company == "云南省气象灾害防御技术中心") {
+                str = "云"
+            } else if (company == "云南启旭科技有限公司") {
+                str = "启"
+            } else {
+                str = "楚"
+            }
+            return str
         },
         StateNull() {
             if (this.formInline.year == "" || this.formInline.year == null) {
@@ -2098,7 +2252,7 @@ export default {
         },
         // 发票信息录入
         entryProjectinfo(row) {
-            console.log(row);
+
             this.enquire = row;
             this.Projectinfo = true;
             this.projectId.projectId = row.id;
@@ -2206,6 +2360,17 @@ export default {
                 this.bianzhiList = res.data.records;
             });
         },
+        setState(company) {
+            let num
+            if (company == "云南省气象灾害防御技术中心") {
+                num = "1"
+            } else if (company == "云南启旭科技有限公司") {
+                num = "2"
+            } else {
+                num = "3"
+            }
+            return num
+        },
         getProject(current, projectId, row) {
             /* console.log(row, '123') */
             if (row) {
@@ -2227,7 +2392,7 @@ export default {
                 roleId: regionId.roleIdMap.id,
                 trueName: this.formInline.trueName,
                 contractNumber: this.formInline.contractNumber,
-                company: this.formInline.company == '云南省气象灾害防御技术中心' ? '1' : '2',
+                company: this.setState(this.formInline.company)
             };
             if (this.sessionName == "备案人" || this.sessionName == "编制人") {
                 Object.assign(parameter2, parameter);
@@ -2301,7 +2466,6 @@ export default {
                     this.financialInfoPinzheng = []
                 }
             })
-            console.log(this.financialInfoPinzheng, '123333')
         },
 
         /* 废除申请 */
@@ -2441,7 +2605,6 @@ export default {
         async edit(row) {
             /* console.log(row) */
             const records = JSON.parse(sessionStorage.getItem("records"));
-            console.log(records)
             let testImg = await this.getProjectInfoById(row.id);
             WebCtrl.ShowPage(
                 row.id,
@@ -2512,7 +2675,7 @@ export default {
             return new Promise((resolve, reject) => {
                 settingGetByRegionId({
                     regionId: regionId,
-                    company:params.company
+                    company: params.company
                 }).then((res) => {
                     resolve(res.data.records);
                 });
@@ -2635,7 +2798,7 @@ export default {
         },
         /* 修改项目 */
         updateProject(row) {
-            console.log(row, '列表信息');
+
             this.Project_State = row.state;
             if (this.fileList.length < 1 && row.originalRecordPath != null) {
                 this.fileList.push({ name: row.originalRecordPath });
@@ -2680,7 +2843,6 @@ export default {
             this.userid = row.userMap.id;
             this.editDilong = true;
             this.enquire = row;
-            this.enquire.company = row.company == '1' ? '1' : '2';
             this.kaiTypevalue = row.billingType;
             this.radio = Number(row.multiplex);
             this.checkList = [];
@@ -2728,46 +2890,80 @@ export default {
             }
 
             this.enquire.urgent = row.urgent == "1" ? true : false;
-            /* 处理合同编号 */
-            const [contract, year, Number_] =
-                this.enquire.number.split(/[\[\]]/);
-            if (year && Number_) {
-                this.formInline.year = year;
-                if (Number_.includes("第") && Number_.includes("号")) {
-                    this.formInline.contract = Number_.split("第")[0];
-                    this.formInline.Number =
-                        Number_.split("第")[1].split("号")[0];
-                    this.formInline.Number2 = Number_.split("第")[1].split(
-                        "号"
-                    )[1]
-                        ? Number_.split("第")[1].split("号")[1]
-                        : "";
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            if (['1', '2'].includes(params.company)) {
+                /* 处理合同编号 */
+                const [contract, year, Number_] =
+                    this.enquire.number.split(/[\[\]]/);
+                if (year && Number_) {
+                    this.formInline.year = year;
+                    if (Number_.includes("第") && Number_.includes("号")) {
+                        this.formInline.contract = Number_.split("第")[0];
+                        this.formInline.Number =
+                            Number_.split("第")[1].split("号")[0];
+                        this.formInline.Number2 = Number_.split("第")[1].split(
+                            "号"
+                        )[1]
+                            ? Number_.split("第")[1].split("号")[1]
+                            : "";
+                    }
+                } else {
+                    this.formInline.year = "";
+                    this.formInline.contract = "";
+                    this.formInline.Number = "";
                 }
             } else {
-                this.formInline.year = "";
-                this.formInline.contract = "";
-                this.formInline.Number = "";
+                // 按照 "—" 进行分割，获取分割后的数组
+                const parts = this.enquire.contractNumber.split("—");
+
+                // 去除最后一个元素中的 "号" 字，并重新赋值给最后一个元素
+                parts[parts.length - 1] = parts[parts.length - 1].replace("号", "");
+                const [part1, part2, part3, part4, part5, part6] = parts;
+                // 分别获取各个部分
+                this.formInline.first = part2;
+                this.formInline.sencond = part3;
+                this.formInline.year = part4;
+                this.formInline.contract = part5;
+                this.formInline.Number = part6;
             }
-            /* 处理档案编号 */
-            const [contract1, year1, Number_1] =
-                this.enquire.contractNumber.split(/[\[\]]/);
-            console.log([contract1, year1, Number_1])
-            if (year1 && Number_1) {
-                this.formInline.flag = true;
-                this.formInline.yearflag = year1;
-                if (Number_1.includes("第") && Number_1.includes("号")) {
-                    this.formInline.contractflag = Number_1.split("第")[0];
-                    this.formInline.Numberflag =
-                        Number_1.split("第")[1].split("号")[0];
-                    /* this.formInline.Number2 = Number_1.split("第")[1].split(
-                        "号"
-                    )[1]
-                        ? Number_1.split("第")[1].split("号")[1]
-                        : ""; */
+
+
+            if (['1', '2'].includes(params.company)) {
+                /* 处理档案编号 */
+                const [contract1, year1, Number_1] =
+                    this.enquire.contractNumber.split(/[\[\]]/);
+
+                if (year1 && Number_1) {
+                    this.formInline.flag = true;
+                    this.formInline.yearflag = year1;
+                    if (Number_1.includes("第") && Number_1.includes("号")) {
+                        this.formInline.contractflag = Number_1.split("第")[0];
+                        this.formInline.Numberflag =
+                            Number_1.split("第")[1].split("号")[0];
+                        /* this.formInline.Number2 = Number_1.split("第")[1].split(
+                            "号"
+                        )[1]
+                            ? Number_1.split("第")[1].split("号")[1]
+                            : ""; */
+                    }
+                } else {
+                    this.formInline.flag = false;
                 }
             } else {
-                this.formInline.flag = false;
+                // 按照 "—" 进行分割，获取分割后的数组
+                const parts = this.enquire.contractNumber.split("—");
+
+                // 去除最后一个元素中的 "号" 字，并重新赋值给最后一个元素
+                parts[parts.length - 1] = parts[parts.length - 1].replace("号", "");
+                const [part1, part2, part3, part4, part5, part6] = parts;
+                // 分别获取各个部分
+                this.formInline.first = part2;
+                this.formInline.sencond = part3;
+                this.formInline.yearNew = part4;
+                this.formInline.contractNew = part5;
+                this.formInline.NumberNew = part6;
             }
+
             // 复用项目合同编号格式设置
             if (this.enquire.multiplex == '1') {
                 this.formInline.flag = false;
@@ -2822,73 +3018,175 @@ export default {
             this.Childishowfrom.projectId = row.id;
             this.enquire.company = row.company;
             this.Childishowfrom.number = row.contractNumber; // 引用的应该是合同档案号，而不是父报告的档案号
-            /* 处理合同编号 */
-            const [contract, year, Number_] =
-                this.Childishowfrom.number.split(/[\[\]]/);
-            if (year && Number_) {
-                this.Childishowfrom.year = year;
-                if (Number_.includes("第") && Number_.includes("号")) {
-                    this.Childishowfrom.contract = Number_.split("第")[0];
-                    this.Childishowfrom.Number =
-                        Number_.split("第")[1].split("号")[0];
+            if (['1', '2'].includes(params.company)) {
+                /* 处理合同编号 */
+                const [contract, year, Number_] =
+                    this.Childishowfrom.number.split(/[\[\]]/);
+                if (year && Number_) {
+                    this.Childishowfrom.year = year;
+                    if (Number_.includes("第") && Number_.includes("号")) {
+                        this.Childishowfrom.contract = Number_.split("第")[0];
+                        this.Childishowfrom.Number =
+                            Number_.split("第")[1].split("号")[0];
+                    }
+                } else {
+                    this.Childishowfrom.year = "";
+                    this.Childishowfrom.contract = "";
+                    this.Childishowfrom.Number = "";
                 }
             } else {
-                this.Childishowfrom.year = "";
-                this.Childishowfrom.contract = "";
-                this.Childishowfrom.Number = "";
+                // 按照 "—" 进行分割，获取分割后的数组
+                const parts = this.Childishowfrom.number.split("—");
+
+                // 去除最后一个元素中的 "号" 字，并重新赋值给最后一个元素
+                parts[parts.length - 1] = parts[parts.length - 1].replace("号", "");
+                const [part1, part2, part3, part4, part5, part6] = parts;
+                // 分别获取各个部分
+                this.Childishowfrom.first = part2;
+                this.Childishowfrom.sencond = part3;
+                this.Childishowfrom.year = part4;
+                this.Childishowfrom.contract = part5;
+                this.Childishowfrom.Number = part6;
             }
+
         },
         /* 复用项目确认 */
         multiplex() {
-            if (this.reuseform.projectId == "") {
-                this.$message("项目编号不能为空");
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            if (['1', '2'].includes(params.company)) {
+                if (this.reuseform.projectId == "") {
+                    this.$message("项目编号不能为空");
+                } else {
+                    if (this.reuseform.Number.length != 4) {
+                        this.$message.info("请输入四位数字");
+                        return;
+                    }
+                    if (this.reuseform.contract == "") {
+                        this.$message.info("此处为必填项");
+                        return;
+                    }
+                    if (this.loadingMultiplex) return;
+                    this.loadingMultiplex = true;
+                    multiplex({
+                        userid: this.reuseform.userid,
+                        projectName: this.reuseform.projectName,
+                        projectId: this.reuseform.projectId,
+                        number: `${this.setCompany(this.enquire.company)}雷检字[${this.reuseform.year}]${this.reuseform.contract}第${this.reuseform.Number}号${this.reuseform.Number2}`,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message.success("复用成功");
+                            this.reuse = false;
+                            this.reuseform.auditor = "";
+                            this.reuseform.Number2 = "";
+                            this.getProject();
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        this.loadingMultiplex = false;
+                    });
+                }
             } else {
-                if (this.reuseform.Number.length != 4) {
-                    this.$message.info("请输入四位数字");
-                    return;
+                if (this.reuseform.projectId == "") {
+                    this.$message("项目编号不能为空");
+                } else {
+                    if (this.reuseform.first == "" || this.reuseform.first == null) {
+                        this.$message.info("此处为必填项");
+                        return;
+                    }
+                    if (this.reuseform.sencond == "" || this.reuseform.sencond == null) {
+                        this.$message.info("此处为必填项");
+                        return;
+                    }
+                    if (this.reuseform.contract == "") {
+                        this.$message.info("此处为必填项");
+                        return;
+                    }
+                    if (this.reuseform.Number == "") {
+                        this.$message.info("此处为必填项");
+                        return;
+                    }
+                    if (this.reuseform.contract.length < 2 && this.reuseform.contract.length > 0) {
+                        return this.$message.info('事项代码为2位数');
+                    }
+                    if (this.reuseform.Number.length < 5 && this.reuseform.Number.length > 0) {
+                        return this.$message.info('流水编码为5位数');
+                    }
+                    if (this.loadingMultiplex) return;
+                    this.loadingMultiplex = true;
+                    multiplex({
+                        userid: this.reuseform.userid,
+                        projectName: this.reuseform.projectName,
+                        projectId: this.reuseform.projectId,
+                        number: `${this.setCompany(this.enquire.company)}雷检字—${this.reuseform.first}—${this.reuseform.sencond}—${this.reuseform.year}—${this.reuseform.contract}—${this.reuseform.Number}号${this.reuseform.Number2}`,
+                    }).then((res) => {
+                        if (res.data.state == 200) {
+                            this.$message.success("复用成功");
+                            this.reuse = false;
+                            this.reuseform.auditor = "";
+                            this.reuseform.Number2 = "";
+                            this.getProject();
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        this.loadingMultiplex = false;
+                    });
                 }
-                if (this.reuseform.contract == "") {
-                    this.$message.info("此处为必填项");
-                    return;
-                }
-                if (this.loadingMultiplex) return;
-                this.loadingMultiplex = true;
-                multiplex({
-                    userid: this.reuseform.userid,
-                    projectName: this.reuseform.projectName,
-                    projectId: this.reuseform.projectId,
-                    number: `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.reuseform.year}]${this.reuseform.contract}第${this.reuseform.Number}号${this.reuseform.Number2}`,
+            }
+
+        },
+        /* 子报告项目确认 */
+        childClick() {
+            const params = JSON.parse(sessionStorage.getItem("records"));
+            if (['1', '2'].includes(params.company)) {
+                createSubproject({
+                    userid: this.Childishowfrom.userid,
+                    projectId: this.Childishowfrom.projectId,
+                    number: `${this.setCompany(this.enquire.company)}雷检字[${this.Childishowfrom.year}]${this.Childishowfrom.contract}第${this.Childishowfrom.Number}号${this.Childishowfrom.Number2}`,
+                    projectName: this.Childishowfrom.projectName,
                 }).then((res) => {
                     if (res.data.state == 200) {
-                        this.$message.success("复用成功");
-                        this.reuse = false;
-                        this.reuseform.auditor = "";
-                        this.reuseform.Number2 = "";
+                        this.$message.success("创建子项目成功");
+                        this.Childishow = false;
+                        this.Childishowfrom.Number2 = "";
                         this.getProject();
                     } else {
                         this.$message.error(res.data.message);
                     }
-                    this.loadingMultiplex = false;
+                });
+            } else {
+                createSubproject({
+                    userid: this.Childishowfrom.userid,
+                    projectId: this.Childishowfrom.projectId,
+                    number: `${this.setCompany(this.enquire.company)}雷检字—${this.Childishowfrom.first}—${this.Childishowfrom.sencond}—${this.Childishowfrom.year}—${this.Childishowfrom.contract}—${this.Childishowfrom.Number}号${this.Childishowfrom.Number2}`,
+                    projectName: this.Childishowfrom.projectName,
+                }).then((res) => {
+                    if (res.data.state == 200) {
+                        this.$message.success("创建子项目成功");
+                        this.Childishow = false;
+                        this.Childishowfrom.Number2 = "";
+                        this.getProject();
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
                 });
             }
+
         },
-        /* 子报告项目确认 */
-        childClick() {
-            createSubproject({
-                userid: this.Childishowfrom.userid,
-                projectId: this.Childishowfrom.projectId,
-                number: `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.Childishowfrom.year}]${this.Childishowfrom.contract}第${this.Childishowfrom.Number}号${this.Childishowfrom.Number2}`,
-                projectName: this.Childishowfrom.projectName,
-            }).then((res) => {
-                if (res.data.state == 200) {
-                    this.$message.success("创建子项目成功");
-                    this.Childishow = false;
-                    this.Childishowfrom.Number2 = "";
-                    this.getProject();
-                } else {
-                    this.$message.error(res.data.message);
-                }
-            });
+        setCompany(company) {
+            switch (company) {
+                case '1':
+                    return '云'
+                    break;
+                case '2':
+                    return '启'
+                    break;
+                case '3':
+                    return '楚'
+                    break;
+
+                default:
+                    break;
+            }
         },
         // 修改确定
         editDilongclick(re) {
@@ -2934,13 +3232,31 @@ export default {
                         this.enquire.invoiceMoney
                     );
                 }
-                if (this.enquire.number != null) {
-                    /*  this.formData.set("number", this.enquire.number); */
+                if (['1', '2'].includes(this.companyNum())) {
+                    if (this.enquire.number != null) {
+                        this.formData.set(
+                            "number",
+                            `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号${this.formInline.Number2}`
+                        );
+                    }
+                } else {
+                    if (this.formInline.contract == '') {
+                        return this.$message.info('事项代码不能为空');
+                    }
+                    if (this.formInline.contract.length < 2 && this.formInline.contract.length > 0) {
+                        return this.$message.info('事项代码为2位数');
+                    }
+                    if (this.formInline.NumberNew == '') {
+                        return this.$message.info('流水编码不能为空');
+                    }
+                    if (this.formInline.NumberNew.length < 5 && this.formInline.NumberNew.length > 0) {
+                        return this.$message.info('流水编码为5位数');
+                    }
                     this.formData.set(
-                        "number",
-                        `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号${this.formInline.Number2}`
+                        "number", `${this.setCompany(this.enquire.company)}雷检字—${this.formInline.first}—${this.formInline.sencond}—${this.formInline.year}—${this.formInline.contract}—${this.formInline.NumberNew}号—${this.formInline.NumberNew2}`
                     );
                 }
+
                 if (this.enquire.invoice != null) {
                     this.formData.set("invoice", this.enquire.invoice);
                 }
@@ -3013,7 +3329,34 @@ export default {
                         this.enquire.contractTime
                     );
                 }
-                if (this.enquire.contractNumber != null) {
+                if (['1', '2'].includes(this.companyNum())) {
+                    if (this.enquire.contractNumber != null) {
+                        if (
+                            this.formInline.year == null ||
+                            this.formInline.year == ""
+                        ) {
+                            this.$message.info("合同编号年份不能为空");
+                            return;
+                        } else if (
+                            this.formInline.contract == null ||
+                            this.formInline.contract == ""
+                        ) {
+                            this.$message.info("合同编号不能为空");
+                            return;
+                        } else if (
+                            this.formInline.Number == null ||
+                            this.formInline.Number == ""
+                        ) {
+                            this.$message.info("合同编号不能为空");
+                            return;
+                        } else {
+                            this.formData.set(
+                                "contractNumber",
+                                `${this.setCompany(this.enquire.company)}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                            );
+                        }
+                    }
+                } else {
                     if (
                         this.formInline.year == null ||
                         this.formInline.year == ""
@@ -3032,10 +3375,18 @@ export default {
                     ) {
                         this.$message.info("合同编号不能为空");
                         return;
+                    } else if (this.formInline.first == null ||
+                        this.formInline.first == "") {
+                        this.$message.info("资质证号不能为空");
+                        return;
+                    } else if (this.formInline.sencond == null ||
+                        this.formInline.sencond == "") {
+                        this.$message.info("地区编码不能为空");
+                        return;
                     } else {
                         this.formData.set(
                             "contractNumber",
-                            `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                            `${this.setCompany(this.enquire.company)}雷检字—${this.formInline.first}—${this.formInline.sencond}—${this.formInline.year}—${this.formInline.contract}—${this.formInline.NumberNew}号`
                         );
                     }
                 }
@@ -3238,13 +3589,21 @@ export default {
                     if (this.userid != null) {
                         this.formData.set("userid", this.userid);
                     }
-                    if (this.enquire.number != null) {
-                        /*  this.formData.set("number", this.enquire.number); */
+                    if (['1', '2'].includes(this.companyNum())) {
+                        if (this.enquire.number != null) {
+
+                            this.formData.set(
+                                "number",
+                                `${this.setCompany(this.enquire.company)}雷检字${this.formInline.year}${this.formInline.contract}第${this.formInline.Number}号${this.formInline.Number2}`
+                            );
+
+                        }
+                    } else {
                         this.formData.set(
-                            "number",
-                            `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号${this.formInline.Number2}`
+                            "number", `${this.setCompany(this.enquire.company)}雷检字—${this.formInline.first}—${this.formInline.sencond}—${this.formInline.year}—${this.formInline.contract}—${this.formInline.NumberNew}号—${this.formInline.NumberNew2}`
                         );
                     }
+
                     if (this.enquire.invoice != null) {
                         this.formData.set("invoice", this.enquire.invoice);
                     }
@@ -3295,10 +3654,18 @@ export default {
                             );
                         }
                     } else {
-                        this.formData.set(
-                            "contractNumber",
-                            `${this.enquire.company == '1' ? '云' : '启'}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
-                        );
+                        if (['1', '2'].includes(this.companyNum())) {
+                            this.formData.set(
+                                "contractNumber",
+                                `${this.setCompany(this.enquire.company)}雷检字[${this.formInline.year}]${this.formInline.contract}第${this.formInline.Number}号`
+                            );
+                        } else {
+                            this.formData.set(
+                                "contractNumber",
+                                `${this.setCompany(this.enquire.company)}雷检字—${this.formInline.first}—${this.formInline.sencond}—${this.formInline.year}—${this.formInline.contract}—${this.formInline.NumberNew}号`
+                            );
+                        }
+
                     }
 
                     if (this.enquire.liableUserPhone != null) {
@@ -3631,7 +3998,7 @@ export default {
         },
         // 申请开票
         applyFor(row) {
-            console.log(row, '申请开票')
+
             this.applyForinfo = true;
             this.projectId.projectId = row.id;
             this.applyForinfoFromprojectId = row.id;
@@ -3787,7 +4154,7 @@ export default {
         },
         // 修改开票记录
         handleEditapplyForinfo(row) {
-            console.log(row);
+
             this.applyForinfoFrom.party = row.party;
             this.applyForinfoFrom.dutyNumber = row.dutyNumber;
             this.applyForinfoFrom.applicationAmount = row.applicationAmount;
@@ -3804,7 +4171,7 @@ export default {
                 projectId: this.applyForinfoFromprojectId,
                 invoiceId: row.id,
             }).then((res) => {
-                console.log(res.data.records);
+
                 this.dilongList1 = res.data.records;
                 this.TimeLineShow1 = true;
             });
@@ -3863,7 +4230,7 @@ export default {
         },
         // 备案项目state 35 提交审核员
         SubmitAuditor(row) {
-            console.log(row, '看看参数')
+
             this.applyForinfoFrom.projectId = row.id;
             this.SubmitAuditorFlag = true;
             this.getPromotion(row);
@@ -3891,7 +4258,7 @@ export default {
         },
         // 到账查询申请
         CheckApply(row) {
-            console.log(row, '到账查询申请')
+
             this.CheckApplyinfoFrom = {};
             this.CheckApplyinfoFrom.id = row.id;
             this.CheckApplyinfoFrom.contractNumber = row.contractNumber;

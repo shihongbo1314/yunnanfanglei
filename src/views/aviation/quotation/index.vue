@@ -444,7 +444,13 @@ export default {
     created() {
         this.quotationList();
         const regionId = JSON.parse(sessionStorage.getItem("records"));
-        this.formInline.company = regionId.company=='1' ? '云南省气象灾害防御技术中心':'云南启旭科技有限公司';
+        const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[regionId.company] || '';
         initWebSocket(regionId.id);
     },
     destroyed() {

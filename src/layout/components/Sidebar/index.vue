@@ -1,29 +1,11 @@
 <template>
-    <div
-        :class="{'has-logo':showLogo}"
-        v-if="this.$store.state.app.trunoff"
-    >
-        <logo
-            v-if="showLogo"
-            :collapse="isCollapse"
-        />
+    <div :class="{ 'has-logo': showLogo }" v-if="this.$store.state.app.trunoff">
+        <logo v-if="showLogo" :collapse="isCollapse" />
         <el-scrollbar wrap-class="scrollbar-wrapper">
-            <el-menu
-                :default-active="activeMenu"
-                :collapse="isCollapse"
-                :background-color="variables.menuBg"
-                :text-color="variables.menuText"
-                :unique-opened="false"
-                :active-text-color="variables.menuActiveText"
-                :collapse-transition="false"
-                mode="vertical"
-            >
-                <sidebar-item
-                    v-for="route in menuList"
-                    :key="route.path"
-                    :item="route"
-                    :base-path="route.path"
-                />
+            <el-menu :default-active="activeMenu" :collapse="isCollapse" :background-color="variables.menuBg"
+                :text-color="variables.menuText" :unique-opened="false" :active-text-color="variables.menuActiveText"
+                :collapse-transition="false" mode="vertical">
+                <sidebar-item v-for="route in menuList" :key="route.path" :item="route" :base-path="route.path" />
             </el-menu>
         </el-scrollbar>
     </div>
@@ -200,47 +182,84 @@ export default {
                     meta: { title: "项目报价统计表", icon: "el-icon-document" },
                 },
             );
-            this.menuList[7].children.push(
-                {
-                    path: "user",
-                    name: "用户管理",
-                    component: () => import("@/views/user/index"),
-                    meta: {
-                        title: "用户管理",
-                        icon: "user",
-                        roles: ["guanliyuan"],
+            if (records.company == '3' &&
+                records.regionIdMap.id == 2841) {
+                this.menuList[7].children.push(
+                    {
+                        path: "user",
+                        name: "用户管理",
+                        component: () => import("@/views/user/index"),
+                        meta: {
+                            title: "用户管理",
+                            icon: "user",
+                            roles: ["guanliyuan"],
+                        },
                     },
-                },
-                {
-                    path: "cement",
-                    name: "cement",
-                    component: () => import("@/views/cement/Index.vue"),
-                    meta: {
-                        title: "公告管理",
-                        icon: "el-icon-tickets",
+                    {
+                        path: "cement",
+                        name: "cement",
+                        component: () => import("@/views/cement/Index.vue"),
+                        meta: {
+                            title: "公告管理",
+                            icon: "el-icon-tickets",
+                        },
                     },
-                },
-                {
-                    path: "peoplestatistics",
-                    name: "人员统计表",
-                    component: () =>
-                        import("@/views/peoplestatistics/index.vue"),
-                    meta: {
-                        title: "人员统计表",
-                        icon: "el-icon-s-custom",
+                    {
+                        path: "peoplestatistics",
+                        name: "人员统计表",
+                        component: () =>
+                            import("@/views/peoplestatistics/index.vue"),
+                        meta: {
+                            title: "人员统计表",
+                            icon: "el-icon-s-custom",
+                        },
                     },
-                },
-                {
-                    path: "facilitystatistics",
-                    name: "设备统计表",
-                    component: () =>
-                        import("@/views/peoplestatistics/index.vue"),
-                    meta: {
-                        title: "设备统计表",
-                        icon: "el-icon-cpu",
+
+                );
+            } else {
+                this.menuList[7].children.push(
+                    {
+                        path: "user",
+                        name: "用户管理",
+                        component: () => import("@/views/user/index"),
+                        meta: {
+                            title: "用户管理",
+                            icon: "user",
+                            roles: ["guanliyuan"],
+                        },
                     },
-                }
-            );
+                    {
+                        path: "cement",
+                        name: "cement",
+                        component: () => import("@/views/cement/Index.vue"),
+                        meta: {
+                            title: "公告管理",
+                            icon: "el-icon-tickets",
+                        },
+                    },
+                    {
+                        path: "peoplestatistics",
+                        name: "人员统计表",
+                        component: () =>
+                            import("@/views/peoplestatistics/index.vue"),
+                        meta: {
+                            title: "人员统计表",
+                            icon: "el-icon-s-custom",
+                        },
+                    },
+                    {
+                        path: "facilitystatistics",
+                        name: "设备统计表",
+                        component: () =>
+                            import("@/views/peoplestatistics/index.vue"),
+                        meta: {
+                            title: "设备统计表",
+                            icon: "el-icon-cpu",
+                        },
+                    }
+                );
+            }
+
         }
         if (records.roleIdMap.name == "对接人") {
             this.menuList[6].children.push(
@@ -293,20 +312,30 @@ export default {
             );
         }
         if (records.roleIdMap.name == "业务员") {
-            this.menuList[6].children.push(
-                {
-                    path: "quotation",
-                    name: "报价单",
-                    component: () => import("@/views/aviation/quotation/index"),
-                    meta: { title: "报价单", icon: "el-icon-document" },
-                },
-                {
-                    path: "handling",
-                    name: "投标资料",
-                    component: () => import("@/views/aviation/handling/index"),
-                    meta: { title: "投标资料", icon: "el-icon-document" },
-                }
-            );
+            if (records.company == '3') {
+                this.menuList[6].children.push(
+                    {
+                        path: "quotation",
+                        name: "报价单",
+                        component: () => import("@/views/aviation/quotation/index"),
+                        meta: { title: "报价单", icon: "el-icon-document" },
+                    })
+            } else {
+                this.menuList[6].children.push(
+                    {
+                        path: "quotation",
+                        name: "报价单",
+                        component: () => import("@/views/aviation/quotation/index"),
+                        meta: { title: "报价单", icon: "el-icon-document" },
+                    },
+                    {
+                        path: "handling",
+                        name: "投标资料",
+                        component: () => import("@/views/aviation/handling/index"),
+                        meta: { title: "投标资料", icon: "el-icon-document" },
+                    }
+                );
+            }
         }
         if (records.roleIdMap.name == "备案审核员") {
             this.menuList[6].children.push({
@@ -345,28 +374,42 @@ export default {
             records.roleIdMap.name == "管理员" &&
             records.regionIdMap.id == 2841
         ) {
-            this.menuList[6].children.push(
-                {
-                    path: "refundledger",
-                    name: "refundledger",
-                    component: () =>
-                        import("@/views/aviation/refundledger/index.vue"),
-                    meta: { title: "项目返款台账表", icon: "el-icon-document" },
-                },
-                {
-                    path: "handling",
-                    name: "投标资料",
-                    component: () => import("@/views/aviation/handling/index"),
-                    meta: { title: "投标资料", icon: "el-icon-document" },
-                },
-                {
-                    path: "monthlystatistical",
-                    name: "monthlystatistical",
-                    component: () =>
-                        import("@/views/aviation/monthlystatistical/index.vue"),
-                    meta: { title: "月统计报告生成", icon: "el-icon-document" },
-                }
-            );
+            if (records.company == '3') {
+                this.menuList[6].children.push(
+                    {
+                        path: "refundledger",
+                        name: "refundledger",
+                        component: () =>
+                            import("@/views/aviation/refundledger/index.vue"),
+                        meta: { title: "项目返款台账表", icon: "el-icon-document" },
+                    },
+
+                );
+            } else {
+                this.menuList[6].children.push(
+                    {
+                        path: "refundledger",
+                        name: "refundledger",
+                        component: () =>
+                            import("@/views/aviation/refundledger/index.vue"),
+                        meta: { title: "项目返款台账表", icon: "el-icon-document" },
+                    },
+                    {
+                        path: "handling",
+                        name: "投标资料",
+                        component: () => import("@/views/aviation/handling/index"),
+                        meta: { title: "投标资料", icon: "el-icon-document" },
+                    },
+                    {
+                        path: "monthlystatistical",
+                        name: "monthlystatistical",
+                        component: () =>
+                            import("@/views/aviation/monthlystatistical/index.vue"),
+                        meta: { title: "月统计报告生成", icon: "el-icon-document" },
+                    }
+                );
+            }
+
             this.menuList[7].children.push(
                 {
                     path: "usage",

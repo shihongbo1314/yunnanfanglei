@@ -42,8 +42,8 @@
             </el-form-item>
         </el-form>
         <div style="background:#FFF;height: calc(100% - 110px);">
-            <el-table v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row
-                height="70vh" :row-class-name="tableRowClassName">
+            <el-table v-loading="listLoading" :data="list" element-loading-text="Loading" border fit
+                highlight-current-row height="70vh" :row-class-name="tableRowClassName">
                 <el-table-column align="center" label="序号" width="95" type="index">
                     <!--   <template slot-scope="scope">
                         {{ scope.row.id }}
@@ -125,8 +125,8 @@
                 </el-form-item>
                 <el-form-item label="检定日期" prop="inspectTime">
 
-                    <el-date-picker v-model="formLabelAlign.inspectTime" style="width:100%" type="date" placeholder="选择日期"
-                        value-format="yyyy-MM-dd" :picker-options="pickerOptions0">
+                    <el-date-picker v-model="formLabelAlign.inspectTime" style="width:100%" type="date"
+                        placeholder="选择日期" value-format="yyyy-MM-dd" :picker-options="pickerOptions0">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="到期日期" prop="expirationTime">
@@ -383,6 +383,10 @@ export default {
                 {
                     value: "2",
                     label: "云南启旭科技有限公司"
+                },
+                {
+                    value: "3",
+                    label: "楚雄州气象灾害防御技术中心"
                 }
             ]
         };
@@ -425,7 +429,13 @@ export default {
         getcompany() {
             const params = JSON.parse(sessionStorage.getItem("records"));
             /* console.log(params.company,'人员归属') */
-            this.formInline.company = params.company == '1' ? '云南省气象灾害防御技术中心' : '云南启旭科技有限公司';
+            const companyMap = {
+                "1": '云南省气象灾害防御技术中心',
+                "2": '云南启旭科技有限公司',
+                "3": '楚雄州气象灾害防御技术中心'
+            };
+
+            this.formInline.company = companyMap[params.company] || '';
         },
         fetchData() {
             this.listLoading = true;
@@ -434,13 +444,24 @@ export default {
                 size: this.size,
                 current: this.current,
                 regionId: params.regionIdMap.id,
-                company: this.formInline.company == '云南省气象灾害防御技术中心' ? '1' : '2',
+                company: this.setState(this.formInline.company)
             };
             equipmentpage(parameter).then((response) => {
                 this.list = response.data.records;
                 this.total = response.data.total;
                 this.listLoading = false;
             });
+        },
+        setState(company) {
+            let num
+            if (company == "云南省气象灾害防御技术中心") {
+                num = "1"
+            } else if (company == "云南启旭科技有限公司") {
+                num = "2"
+            } else {
+                num = "3"
+            }
+            return num
         },
         onblur(current) {
             const params = JSON.parse(sessionStorage.getItem("records"));

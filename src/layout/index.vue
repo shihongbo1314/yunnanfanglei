@@ -42,7 +42,9 @@
         >
             <app-main />
         </div>
-        <div class="footer-footer">版权所有：云南省气象灾害防御技术中心</div>
+        <div class="footer-footer" v-if="['1','2'].includes(company)">版权所有：云南省气象灾害防御技术中心</div>
+        <div class="footer-footer" v-else></div>
+
     </div>
 </template>
 
@@ -56,6 +58,7 @@ export default {
         return {
             options: [],
             active: null,
+            company:"",
         };
     },
     components: {
@@ -68,6 +71,7 @@ export default {
     },
     mounted() {
         const records = JSON.parse(sessionStorage.getItem("records"));
+        this.company = records.company;
         this.active = records.roleIdMap.id;
     },
     mixins: [ResizeMixin],
