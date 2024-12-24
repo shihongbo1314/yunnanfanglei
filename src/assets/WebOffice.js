@@ -24,8 +24,9 @@ function SetMenu() {
 
 function ShowPage(id, sessionID, fileName, back, makeUserid, ID, Division, identity, projectId, ishow, remarks, multiplex,category,company) {
 	var varpath = decodeURI(window.location.href);
+	var root = `http://172.24.97.210:8090/fanglei/#/`;
 	/* var root = `http://140.249.209.176:9080/fanglei/#/`; */
-	var root = `http://140.249.209.176:9080/fangleiTest/#/`;
+	/* var root = `http://140.249.209.176:9080/fangleiTest/#/`; */
 	/* var root = `http://localhost:9528/#/`; */
 	var path = `aviation/authorized?id=${id}&url=${sessionID}&fileName=${fileName}&back=${back}&makeUserid=${makeUserid}&ID=${ID}&Division=${Division}&identity=${identity}&projectId=${projectId}&ishow=${ishow}&remarks=${remarks}&multiplex=${multiplex}&category=${category}&company=${company}`;
 	var strUrl;

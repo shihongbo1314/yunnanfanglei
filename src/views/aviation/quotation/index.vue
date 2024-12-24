@@ -108,7 +108,7 @@
                             <el-image
                                 style="width: 50px;height:50px;cursor: pointer;"
                                 fit="cover"
-                                :src="'http://140.249.209.176:8084/LightningDetection/quotation/' + imgCom(scope.row.pngName)"
+                                :src="'http://172.24.97.210:8084/LightningDetection/quotation/' + imgCom(scope.row.pngName)"
                                 @click.stop="pdfSrcShow(scope.row.fileName)"
                                 v-if="scope.row.fileName!=null"
                             >
@@ -520,7 +520,7 @@ export default {
             file = file.replaceAll("docx", "pdf");
             file = file.replaceAll("doc", "pdf");
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/quotation/" +
+                "http://172.24.97.210:8084/LightningDetection/quotation/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -530,7 +530,7 @@ export default {
             fileName = fileName.replaceAll("docx", "pdf");
             fileName = fileName.replaceAll("doc", "pdf");
             window.open(
-                "http://140.249.209.176:8084/LightningDetection/quotation/" +
+                "http://172.24.97.210:8084/LightningDetection/quotation/" +
                     fileName
             );
         },

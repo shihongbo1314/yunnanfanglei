@@ -509,7 +509,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://140.249.209.176:8084/LightningDetection/Equipment/" +
+                        "http://172.24.97.210:8084/LightningDetection/Equipment/" +
                         item
                     );
                 })
@@ -719,7 +719,7 @@ export default {
         /* 现场照片 */
         docSrcShow(file) {
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/Equipment/" +
+                "http://172.24.97.210:8084/LightningDetection/Equipment/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;

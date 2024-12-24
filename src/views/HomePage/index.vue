@@ -999,7 +999,7 @@
                     <el-form-item label="合同附件：" v-if="sessionName == '备案人' || sessionName == '管理员'">
                         <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
                             v-if="itemDetails.contract_img != null"
-                            :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetails.contract_img)"
+                            :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(itemDetails.contract_img)"
                             @click.stop="pdfSrcShow(itemDetails.contract_file)">
                         </el-image>
                         <span v-else>未录入</span>
@@ -1008,7 +1008,7 @@
                         <el-form-item label="现场照片：" style="width:50%">
                             <el-image v-if="itemDetails.scene_img != null"
                                 style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.scene_img)"
+                                :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.scene_img)"
                                 @click.stop="imgShowList(itemDetails.scene_img)">
                             </el-image>
                             <span v-else>未录入</span>
@@ -1020,7 +1020,7 @@
                     </div>
                     <el-form-item label="原始记录：">
                         <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                            :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.original_record_img ? itemDetails.original_record_img : '')"
+                            :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(itemDetails.original_record_img ? itemDetails.original_record_img : '')"
                             @click.stop="pdfSrcShow2(itemDetails.original_record_path)"
                             v-if="itemDetails.original_record_img != null">
                         </el-image>
@@ -1077,7 +1077,7 @@
 
                     <el-form-item label="报价单：">
                         <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                            :src="'http://140.249.209.176:8084/LightningDetection/quotation/' + imgCom(itemDetailstwo.pngName)"
+                            :src="'http://172.24.97.210:8084/LightningDetection/quotation/' + imgCom(itemDetailstwo.pngName)"
                             @click.stop="pdfSrcShowTwo(itemDetailstwo.fileName)" v-if="itemDetailstwo.fileName != null">
                         </el-image>
                         <span v-else> 未上传 </span>
@@ -1732,7 +1732,7 @@
                                 <el-form-item label="合同附件：">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
                                         v-if="itemDetailsthree.contract_img != null"
-                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
+                                        :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
                                         @click.stop="pdfSrcShow(itemDetailsthree.contract_file)">
                                     </el-image>
                                     <span v-else>未录入</span>
@@ -1882,7 +1882,7 @@
                                 <el-form-item label="合同附件：">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
                                         v-if="itemDetailsthree.contract_img != null"
-                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
+                                        :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(itemDetailsthree.contract_img)"
                                         @click.stop="pdfSrcShow(itemDetailsthree.contract_file)">
                                     </el-image>
                                     <span v-else>未录入</span>
@@ -1948,7 +1948,7 @@
                         <th>
                             <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
                                 v-if="CheckApplyinfoFrom.images != null"
-                                :src="'http://140.249.209.176:8084/LightningDetection/Received/' + imgCom(CheckApplyinfoFrom.images)"
+                                :src="'http://172.24.97.210:8084/LightningDetection/Received/' + imgCom(CheckApplyinfoFrom.images)"
                                 @click.stop="pdfSrcShowThree(CheckApplyinfoFrom.images)">
                             </el-image>
                             <span v-else>未录入</span>
@@ -3627,6 +3627,7 @@ export default {
         },
         /* 退回编制 */
         async edit(row) {
+            console.log(row);
             let fileName;
             let remarks;
             await this.temporarylist(row.id);
@@ -3649,7 +3650,7 @@ export default {
                 null,
                 row.projectMap.id,
                 null,
-                remarks,
+                '',
                 row.projectMap.multiplex
             );
         },
@@ -3933,7 +3934,7 @@ export default {
         docSrcShow(file) {
             let arr = file.replaceAll("docx", "pdf");
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
+                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
                 arr;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -3941,7 +3942,7 @@ export default {
         },
         pdfSrcShow(file) {
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/Contract/" +
+                "http://172.24.97.210:8084/LightningDetection/Contract/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -3952,7 +3953,7 @@ export default {
             file = file.replaceAll("docx", "pdf");
             file = file.replaceAll("doc", "pdf");
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/quotation/" +
+                "http://172.24.97.210:8084/LightningDetection/quotation/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -3964,7 +3965,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://140.249.209.176:8084/LightningDetection/Received/" +
+                        "http://172.24.97.210:8084/LightningDetection/Received/" +
                         item
                     );
                 })
@@ -3977,7 +3978,7 @@ export default {
         /* 原始记录 */
         pdfSrcShow2(file) {
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -3988,7 +3989,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
+                        "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
                         item
                     );
                 })
@@ -4005,7 +4006,7 @@ export default {
         },
         GonggaoClick(item) {
             window.open(
-                "http://140.249.209.176:8084/LightningDetection/Notice/" + item
+                "http://172.24.97.210:8084/LightningDetection/Notice/" + item
             );
         },
         ItemDetails(item) {

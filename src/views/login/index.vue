@@ -79,9 +79,9 @@
                 </el-form>
             </div>
         </div>
-        <!-- <div class="login-footer">
+        <div class="login-footer">
             <p>版权所有：云南省气象灾害防御技术中心</p>
-        </div> -->
+        </div>
     </div>
 </template>
 

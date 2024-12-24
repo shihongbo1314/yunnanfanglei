@@ -2,7 +2,7 @@ import store from '@/store'
 
 var websock;
 function initWebSocket(regionId) {
-    const wsuri = `ws://140.249.209.176:8084/LightningDetection/webSocketService?userId=${regionId}`;
+    const wsuri = `ws://172.24.97.210:8084/LightningDetection/webSocketService?userId=${regionId}`;
     websock = new WebSocket(wsuri)
     //初始化websocket
     websock.onmessage = function (event) {

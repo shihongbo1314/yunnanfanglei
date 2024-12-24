@@ -66,7 +66,7 @@
                 <el-table-column class-name="status-col" label="签名图片" align="center">
                     <template slot-scope="scope">
                         <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                            :src="'http://140.249.209.176:8084/LightningDetection/UserSign/' + imgCom(scope.row.signPath)"
+                            :src="'http://172.24.97.210:8084/LightningDetection/UserSign/' + imgCom(scope.row.signPath)"
                             @click.stop="imgShowList(scope.row.signPath)" v-if="scope.row.signPath">
                         </el-image>
                         <span v-else> 未上传 </span>
@@ -482,7 +482,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://140.249.209.176:8084/LightningDetection/UserSign/" +
+                        "http://172.24.97.210:8084/LightningDetection/UserSign/" +
                         item
                     );
                 })
@@ -589,6 +589,10 @@ export default {
         // 保存用户信息
         submitForm() {
             var regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).+$/;
+            if(this.formLabelAlign.trueName == ''){
+                return this.$message.error("真实姓名不能为空");
+            }
+
             if (regex.test(this.formLabelAlign.password)) {
                 PostList({
                     userName: this.formLabelAlign.name,

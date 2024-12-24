@@ -511,7 +511,7 @@ export default {
                 enclo.forEach((item) => {
                     if (item) {
                         var name =
-                            "http://140.249.209.176:8084/LightningDetection/Notice/" +
+                            "http://172.24.97.210:8084/LightningDetection/Notice/" +
                             item;
                         this.changeBlob(name).then((res) => {
                             var na = name.split("/");

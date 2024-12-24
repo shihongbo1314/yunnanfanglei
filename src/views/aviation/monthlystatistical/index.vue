@@ -159,7 +159,7 @@ export default {
             file = file.replaceAll("docx", "pdf");
             file = file.replaceAll("doc", "pdf");
             this.pdfSrc =
-                "http://140.249.209.176:8084/LightningDetection/monthlyOnlinePath/" +
+                "http://172.24.97.210:8084/LightningDetection/monthlyOnlinePath/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -168,7 +168,7 @@ export default {
         /* 下载 */
         handleDownload(file) {
             const link = document.createElement('a');
-            link.href = 'http://140.249.209.176:8084/LightningDetection/monthlyOnlinePath/' + file;
+            link.href = 'http://172.24.97.210:8084/LightningDetection/monthlyOnlinePath/' + file;
             link.download = 'file';
             link.click();
             link.remove();

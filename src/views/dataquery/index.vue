@@ -29,7 +29,7 @@
                 </el-table-column>
                 <el-table-column label="公章图片" align="center">
                     <template slot-scope="scope">
-                        <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover" :src="'http://140.249.209.176:8084/LightningDetection/Seal/' + scope.row.filename"
+                        <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover" :src="'http://172.24.97.210:8084/LightningDetection/Seal/' + scope.row.filename"
                             @click.stop="imgShowList(scope.row.filename)" v-if="scope.row.filename">
                         </el-image>
                         <span v-else> - </span>
@@ -250,7 +250,7 @@ export default {
         },
         imgShowList(row) {
             this.imgList =
-                'http://140.249.209.176:8084/LightningDetection/Seal/' + row
+                'http://172.24.97.210:8084/LightningDetection/Seal/' + row
             setTimeout(() => {
                 this.imgShow = true
             }, 1500)

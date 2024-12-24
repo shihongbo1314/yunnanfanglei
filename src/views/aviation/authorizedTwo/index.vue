@@ -471,8 +471,8 @@ export default {
             this.ishow = role;
             /*  alert(ishowAlgin) */
             this.ishowAlgin = ishowAlgin;
-            strUrl = `http://140.249.209.176:8084/LightningDetection/quotation/${fileName}`;
-           /*  strUrl = `http://140.249.209.176:8084/LightningDetection/quotation/${fileName}`; */
+            strUrl = `http://172.24.97.210:8084/LightningDetection/quotation/${fileName}`;
+           /*  strUrl = `http://172.24.97.210:8084/LightningDetection/quotation/${fileName}`; */
             //通过对象WebOffice的Open方法打开个一个服务器文档
             WebOffice.UserName = "杞人气象科技服务(北京)有限公司";
             WebOffice.Authorizer = "www.officectrl.com";
@@ -630,7 +630,7 @@ export default {
                 .split("&")[4]
                 .split("=")[1];
             const re = WebOffice.Save(
-                `http://140.249.209.176:8084/LightningDetection/quotation/updateQuotationFile?id=${ID}`
+                `http://172.24.97.210:8084/LightningDetection/quotation/updateQuotationFile?id=${ID}`
             );
             const res = re.substring(0, 3);
             if (res == "200") {
@@ -664,7 +664,7 @@ export default {
                 .split("=")[1];
             if (regionId == "2841" || this.ishowAlgin == "true") {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}`
+                    `http://172.24.97.210:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -704,7 +704,7 @@ export default {
                 .split("&")[4]
                 .split("=")[1];
             const re = WebOffice.Save(
-                `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${2}&id=${ID}`
+                `http://172.24.97.210:8084/LightningDetection/quotationExamine/examine?state=${2}&id=${ID}`
             );
             const res = re.substring(0, 3);
             if (res == "200") {
@@ -751,7 +751,7 @@ export default {
                 this.$message("请先选择审核人");
             } else {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}&Reviewer=${this.goPass.ladder.toString()}&remarks=${
+                    `http://172.24.97.210:8084/LightningDetection/quotationExamine/examine?state=${1}&id=${ID}&Reviewer=${this.goPass.ladder.toString()}&remarks=${
                         this.remarks
                     }`
                 );
@@ -786,7 +786,7 @@ export default {
                 this.$message("请先选择退回用户");
             } else {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${3}&id=${ID}&Reviewer=${this.goBack.ladder.toString()}&remarks=${
+                    `http://172.24.97.210:8084/LightningDetection/quotationExamine/examine?state=${3}&id=${ID}&Reviewer=${this.goBack.ladder.toString()}&remarks=${
                         this.remarks
                     }`
                 );
@@ -821,7 +821,7 @@ export default {
                 this.$message("请先选择转交用户");
             } else {
                 const re = WebOffice.Save(
-                    `http://140.249.209.176:8084/LightningDetection/quotationExamine/examine?state=${4}&id=${ID}&Reviewer=${this.lessonForm.ladder.toString()}&remarks=${
+                    `http://172.24.97.210:8084/LightningDetection/quotationExamine/examine?state=${4}&id=${ID}&Reviewer=${this.lessonForm.ladder.toString()}&remarks=${
                         this.remarks
                     }`
                 );

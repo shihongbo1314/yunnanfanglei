@@ -374,7 +374,7 @@ export default {
                 if (res.data.state == 200 && res.data.stateStr == "成功") {
                     var iframe = document.createElement("a");
                     iframe.href =
-                        "http://140.249.209.176:8084/LightningDetection/quotation/" +
+                        "http://172.24.97.210:8084/LightningDetection/quotation/" +
                         res.data.records;
                     iframe.click();
                     iframe.remove();
