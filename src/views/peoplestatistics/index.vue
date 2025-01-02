@@ -785,7 +785,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://172.24.97.210:8084/LightningDetection/UserSign/" +
+                        "http://140.249.209.176:8084/LightningDetection/UserSign/" +
                         item
                     );
                 })

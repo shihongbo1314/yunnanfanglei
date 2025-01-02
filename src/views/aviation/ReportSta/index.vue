@@ -120,7 +120,7 @@
                             <el-image
                                 style="width: 50px;height:50px;cursor: pointer;"
                                 fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(scope.row.contract_img ? scope.row.contract_img:'')"
+                                :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contract_img ? scope.row.contract_img:'')"
                                 @click.stop="pdfSrcShow(scope.row.contract_file)"
                                 v-if="scope.row.contract_img!=null"
                             >
@@ -137,7 +137,7 @@
                             <el-image
                                 style="width: 50px;height:50px;cursor: pointer;"
                                 fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.original_record_img ? scope.row.original_record_img:'')"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.original_record_img ? scope.row.original_record_img:'')"
                                 @click.stop="pdfSrcShow2(scope.row.original_record_path)"
                                 v-if="scope.row.original_record_img!=null"
                             >
@@ -562,7 +562,7 @@ export default {
         pdfSrcShow(file) {
             if (file != null) {
                 this.pdfSrc =
-                    "http://172.24.97.210:8084/LightningDetection/Contract/" +
+                    "http://140.249.209.176:8084/LightningDetection/Contract/" +
                     file;
                 setTimeout(() => {
                     this.pdfShow = true;
@@ -572,7 +572,7 @@ export default {
         pdfSrcShow2(file) {
             if (file != null) {
                 this.pdfSrc =
-                    "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                    "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                     file;
                 setTimeout(() => {
                     this.pdfShow = true;
@@ -587,7 +587,7 @@ export default {
                 arr = file.replaceAll("docx", "pdf");
             }
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                 arr;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -595,19 +595,19 @@ export default {
         },
         Download(testImg) {
             window.open(
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                     testImg
             );
         },
         Dowkongjian() {
-            window.open("http://172.24.97.210:8084/fanglei/WebOffice.zip");
+            window.open("http://140.249.209.176:8084/fanglei/WebOffice.zip");
         },
         imgShowList(row) {
             let arr = row.split(",");
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                         item
                     );
                 })

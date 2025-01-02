@@ -144,7 +144,7 @@
                             ji<el-table-column prop="projectName" label="原始记录" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
                                         @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
                                         v-if="scope.row.originalRecordImg != null">
                                     </el-image>
@@ -154,7 +154,7 @@
                             <el-table-column prop="projectName" label="合同" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
                                         @click.stop="pdfSrcShow(scope.row.contractFile)" v-if="scope.row.contractImg">
                                     </el-image>
                                     <span v-else> 未上传 </span>
@@ -163,7 +163,7 @@
                             <el-table-column prop="projectName" label="现场照片" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
                                         @click.stop="imgShowList(scope.row.sceneImg)" v-if="scope.row.sceneImg">
                                     </el-image>
                                     <span v-else> - </span>
@@ -334,7 +334,7 @@
                             <el-table-column prop="projectName" label="原始记录" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
                                         @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
                                         v-if="scope.row.originalRecordImg != null">
                                     </el-image>
@@ -344,7 +344,7 @@
                             <el-table-column prop="projectName" label="合同" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
                                         @click.stop="pdfSrcShow(scope.row.contractFile)" v-if="scope.row.contractImg">
                                     </el-image>
                                     <span v-else> 未上传 </span>
@@ -353,7 +353,7 @@
                             <el-table-column prop="projectName" label="现场照片" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
                                         @click.stop="imgShowList(scope.row.sceneImg)" v-if="scope.row.sceneImg">
                                     </el-image>
                                     <span v-else> 未上传 </span>
@@ -522,7 +522,7 @@
                             <el-table-column prop="projectName" label="原始记录" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
                                         @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
                                         v-if="scope.row.originalRecordImg != null">
                                     </el-image>
@@ -532,7 +532,7 @@
                             <el-table-column prop="projectName" label="合同" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg)"
                                         @click.stop="pdfSrcShow(scope.row.contractFile)" v-if="scope.row.contractImg">
                                     </el-image>
                                     <span v-else> 未上传 </span>
@@ -541,7 +541,7 @@
                             <el-table-column prop="projectName" label="现场照片" align="center">
                                 <template slot-scope="scope">
                                     <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                        :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
+                                        :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg)"
                                         @click.stop="imgShowList(scope.row.sceneImg)" v-if="scope.row.sceneImg">
                                     </el-image>
                                     <span v-else> 未上传 </span>
@@ -731,7 +731,7 @@ export default {
         },
         pdfSrcShow(file) {
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/Contract/" +
+                "http://140.249.209.176:8084/LightningDetection/Contract/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -740,7 +740,7 @@ export default {
         /* 原始记录 */
         pdfSrcShow2(file) {
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -749,7 +749,7 @@ export default {
         docSrcShow(file) {
             let arr = file.replaceAll("docx", "pdf");
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                 arr;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -760,7 +760,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                         item
                     );
                 })
@@ -772,7 +772,7 @@ export default {
         },
         Download(testImg) {
             window.open(
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                 testImg
             );
         },

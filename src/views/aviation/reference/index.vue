@@ -236,7 +236,7 @@
                     <el-table-column prop="projectName" label="原始记录" align="center">
                         <template slot-scope="scope">
                             <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.originalRecordImg ? scope.row.originalRecordImg : '')"
                                 @click.stop="pdfSrcShow2(scope.row.originalRecordPath)"
                                 v-if="scope.row.originalRecordImg != null">
                             </el-image>
@@ -247,7 +247,7 @@
                         v-if="sessionName == '备案人' || sessionName == '管理员' || sessionName == '备案审核员'">
                         <template slot-scope="scope">
                             <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg ? scope.row.contractImg : '')"
+                                :src="'http://140.249.209.176:8084/LightningDetection/Contract/' + imgCom(scope.row.contractImg ? scope.row.contractImg : '')"
                                 @click.stop="pdfSrcShow(scope.row.contractFile)" v-if="scope.row.contractImg != null">
                             </el-image>
                             <span v-else> 未上传 </span>
@@ -256,7 +256,7 @@
                     <el-table-column prop="projectName" label="现场照片" align="center">
                         <template slot-scope="scope">
                             <el-image style="width: 50px;height:50px;cursor: pointer;" fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg ? scope.row.sceneImg : '')"
+                                :src="'http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/' + imgCom(scope.row.sceneImg ? scope.row.sceneImg : '')"
                                 @click.stop="imgShowList(scope.row.sceneImg)" v-if="scope.row.sceneImg">
                             </el-image>
                             <span v-else> 未上传 </span>
@@ -2195,9 +2195,9 @@ export default {
         },
         setTitle(company) {
             let str
-            if (company == "云南省气象灾害防御技术中心") {
+            if (company == "1") {
                 str = "云"
-            } else if (company == "云南启旭科技有限公司") {
+            } else if (company == "2") {
                 str = "启"
             } else {
                 str = "楚"
@@ -2711,7 +2711,7 @@ export default {
             file = file.replaceAll("docx", "pdf");
             file = file.replaceAll("doc", "pdf");
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/Contract/" +
+                "http://140.249.209.176:8084/LightningDetection/Contract/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -2720,7 +2720,7 @@ export default {
         /* 原始记录 */
         pdfSrcShow2(file) {
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                 file;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -2735,7 +2735,7 @@ export default {
                 arr = file.replaceAll("docx", "pdf");
             }
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                 arr;
             setTimeout(() => {
                 this.pdfShow = true;
@@ -2743,7 +2743,7 @@ export default {
         },
         Download(testImg) {
             window.open(
-                "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                 testImg
             );
         },
@@ -2755,7 +2755,7 @@ export default {
             this.imgList = arr
                 .map((item) => {
                     return (
-                        "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                        "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                         item
                     );
                 })
@@ -2815,8 +2815,9 @@ export default {
                 enclo.forEach((item) => {
                     if (item) {
                         var name =
-                            "http://172.24.97.210:8084/LightningDetection/ProjectOriginalRecord/" +
+                            "http://140.249.209.176:8084/LightningDetection/ProjectOriginalRecord/" +
                             item;
+                            console.log(name)
                         this.changeBlob(name).then((res) => {
                             var na = name.split("/");
                             const files = new File([res], na[na.length - 1], {
@@ -2824,6 +2825,7 @@ export default {
                             });
                             // var Blob = window.URL.createObjectURL(res);
                             this.fileListPng.push(files);
+                            
                         });
                     }
                 });

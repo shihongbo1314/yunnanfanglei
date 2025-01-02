@@ -94,7 +94,7 @@
                                 :key="index"
                                 v-for="(item, index) in scope.row.fileName.split(',')"
                                 fit="cover"
-                                :src="'http://172.24.97.210:8084/LightningDetection/Tender/' + item"
+                                :src="'http://140.249.209.176:8084/LightningDetection/Tender/' + item"
                                 @click.stop="pdfSrcShow(item)"
                             >
                           </el-image>
@@ -399,7 +399,7 @@ export default {
             file = file.replaceAll("docx", "pdf");
             file = file.replaceAll("doc", "pdf");
             this.pdfSrc =
-                "http://172.24.97.210:8084/LightningDetection/Tender/" + file;
+                "http://140.249.209.176:8084/LightningDetection/Tender/" + file;
             setTimeout(() => {
                 this.pdfShow = true;
             }, 1500);
@@ -409,7 +409,7 @@ export default {
             fileName = fileName.replaceAll("docx", "pdf");
             fileName = fileName.replaceAll("doc", "pdf");
             window.open(
-                "http://172.24.97.210:8084/LightningDetection/Tender/" +
+                "http://140.249.209.176:8084/LightningDetection/Tender/" +
                     fileName
             );
         },

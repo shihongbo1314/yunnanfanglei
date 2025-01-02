@@ -260,7 +260,7 @@ export default {
             var arr = file.replaceAll("docx", "pdf");
             if (arr != null) {
                 window.open(
-                    "http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/" +
+                    "http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/" +
                         arr
                 );
             } else {
@@ -270,7 +270,7 @@ export default {
         contract(file) {
             if (file != null) {
                 window.open(
-                    "http://172.24.97.210:8084/LightningDetection/Contract/" +
+                    "http://140.249.209.176:8084/LightningDetection/Contract/" +
                         file
                 );
             } else {

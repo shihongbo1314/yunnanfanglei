@@ -504,7 +504,7 @@ export default {
                 if (res.data.state == 200 && res.data.stateStr == "成功") {
                     var iframe = document.createElement("a");
                     iframe.href =
-                        "http://172.24.97.210:8084/LightningDetection/Summary/" +
+                        "http://140.249.209.176:8084/LightningDetection/Summary/" +
                         res.data.records;
                     iframe.click();
                     iframe.remove();

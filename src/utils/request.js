@@ -22,7 +22,7 @@ const service = axios.create({
 // response 拦截器
 service.interceptors.response.use(
   response => {
-    if (response.data.state == 204 && response.data.stateStr == "无内容" && response.request.responseURL.split('?')[0] == 'http://172.24.97.210:8084/LightningDetection/user-info/login') {
+    if (response.data.state == 204 && response.data.stateStr == "无内容" && response.request.responseURL.split('?')[0] == 'http://140.249.209.176:8084/LightningDetection/user-info/login') {
       Message({
         message: '登录失败',
         type: 'error',

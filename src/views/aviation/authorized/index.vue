@@ -108,7 +108,7 @@
                                             <div v-if="company == '1'">
                                                 <el-button v-for="(item, index) in commonList" :key="index" size="mini"
                                                     round
-                                                    @click="commonChange('http://172.24.97.210:8084/LightningDetection/Seal/' + item.filename)"
+                                                    @click="commonChange('http://140.249.209.176:8084/LightningDetection/Seal/' + item.filename)"
                                                     v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
                                                         item.title }}
                                                 </el-button>
@@ -116,7 +116,7 @@
                                             <div v-else-if="company == '2'">
                                                 <el-button v-for="(item, index) in commonList1" :key="index" size="mini"
                                                     round
-                                                    @click="commonChange('http://172.24.97.210:8084/LightningDetection/Seal/' + item.filename)"
+                                                    @click="commonChange('http://140.249.209.176:8084/LightningDetection/Seal/' + item.filename)"
                                                     v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
                                                         item.title }}
                                                 </el-button>
@@ -124,7 +124,7 @@
                                             <div v-else>
                                                 <el-button v-for="(item, index) in commonList2" :key="index" size="mini"
                                                     round
-                                                    @click="commonChange('http://172.24.97.210:8084/LightningDetection/Seal/' + item.filename)"
+                                                    @click="commonChange('http://140.249.209.176:8084/LightningDetection/Seal/' + item.filename)"
                                                     v-if="['2', '3', '5'].includes(multiplex) && ishowtrue">{{
                                                         item.title }}
                                                 </el-button>
@@ -135,7 +135,7 @@
                                             <div v-if="['2', '3', '5'].includes(multiplex) && ishowtrue" class="footer">
                                                 <el-button v-for="(item, index) in inspectorList" :key="item.id"
                                                     size="mini"
-                                                    @click="inspectorChange('http://172.24.97.210:8084/LightningDetection/UserSign/' + item.signPath)">{{
+                                                    @click="inspectorChange('http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath)">{{
                                                         item.userName }}
                                                 </el-button>
                                             </div>
@@ -143,13 +143,13 @@
                                             <label style="color:green;margin:5px 0;display:block">审核人列表</label>
                                             <el-checkbox-group v-model="auditor.ladder" @change="personChange">
                                                 <el-checkbox v-for="(item, index) in auditorList" :key="item.id"
-                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://172.24.97.210:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
                                                         item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
                                             </el-checkbox-group>
                                             <label style="color:green;margin:5px 0;display:block">负责人列表</label>
                                             <el-checkbox-group v-model="principal.ladder" @change="principalChange">
                                                 <el-checkbox v-for="(item, index) in principalList" :key="item.id"
-                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://172.24.97.210:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
+                                                    :label="['2', '3', '5'].includes(multiplex) ? 'http://140.249.209.176:8084/LightningDetection/UserSign/' + item.signPath + '&' + item.id + '-' + item.roleId : item.id + '-' + item.roleId + '+' + item.signPath">{{
                                                         item.trueName + '(' + item.roleName + ')' }}</el-checkbox>
                                             </el-checkbox-group>
                                             <span class="footer">
@@ -468,15 +468,15 @@ export default {
                 this.tanFlog = false;
             }
             if (fileName != "null" || back == "-1") {
-                strUrl = `http://172.24.97.210:8084/LightningDetection/ProjectTestRecord/${fileName}`;
+                strUrl = `http://140.249.209.176:8084/LightningDetection/ProjectTestRecord/${fileName}`;
             } else if (category != "null" && company != '2' && company != '3') {
-                strUrl = "http://172.24.97.210:8090/fanglei/TestTempTextNew.doc";
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempTextNew.doc";
             } else if (company == '2') {
-                strUrl = "http://172.24.97.210:8090/fanglei/Qi_TestTempText.doc";
+                strUrl = "http://140.249.209.176:9080/fanglei/Qi_TestTempText.doc";
             } else if (company == '3') {
-                strUrl = "http://172.24.97.210:8090/fanglei/TestTempText_cx.doc";
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempText_cx.doc";
             } else {
-                strUrl = "http://172.24.97.210:8090/fanglei/TestTempText.doc";
+                strUrl = "http://140.249.209.176:9080/fanglei/TestTempText.doc";
             }
             //通过对象WebOffice的Open方法打开个一个服务器文档
             WebOffice.UserName = "杞人气象科技服务(北京)有限公司";
@@ -785,7 +785,7 @@ export default {
                     ID = ID.split("&")[0];
                 }
                 const re = WebOffice.Save(
-                    `http://172.24.97.210:8084/LightningDetection/record-temporary/save?examineId=${ID}&remarks=${this.textarea}`
+                    `http://140.249.209.176:8084/LightningDetection/record-temporary/save?examineId=${ID}&remarks=${this.textarea}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -831,7 +831,7 @@ export default {
                 ID = ID.split("&")[0];
             }
             const re = WebOffice.Save(
-                `http://172.24.97.210:8084/LightningDetection/record-examine/saveFormalFile?examineId=${ID}`
+                `http://140.249.209.176:8084/LightningDetection/record-examine/saveFormalFile?examineId=${ID}`
             );
             const res = re.substring(0, 3);
             if (res == "200") {
@@ -857,7 +857,7 @@ export default {
                     .split("&")[7]
                     .split("=")[1];
                 const re = WebOffice.Save(
-                    `http://172.24.97.210:8084/LightningDetection/project-record/updateTestImg?projectId=${ID}&makeUserid=${makeUserid}&roleId=${roleIdMap}&remarks=${this.textarea}`
+                    `http://140.249.209.176:8084/LightningDetection/project-record/updateTestImg?projectId=${ID}&makeUserid=${makeUserid}&roleId=${roleIdMap}&remarks=${this.textarea}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -898,7 +898,7 @@ export default {
                 this.$message("请先选择转交用户");
             } else {
                 const re = WebOffice.Save(
-                    `http://172.24.97.210:8084/LightningDetection/record-examine/TransferProject?transferUser=${this.lessonForm.ladder.toString()}&id=${id}&roleId=${identity}`
+                    `http://140.249.209.176:8084/LightningDetection/record-examine/TransferProject?transferUser=${this.lessonForm.ladder.toString()}&id=${id}&roleId=${identity}`
                 );
                 const res = re.substring(0, 3);
                 if (res == "200") {
@@ -937,7 +937,7 @@ export default {
                     this.$message("请先选择审核人和负责人");
                 } else {
                     const re = WebOffice.Save(
-                        `http://172.24.97.210:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}`
+                        `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}`
                     );
                     const res = re.substring(0, 3);
                     if (res == "200") {
@@ -990,7 +990,7 @@ export default {
                 this.$message("请先选择退回人");
             } else {
                 const re = WebOffice.Save(
-                    `http://172.24.97.210:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.goBack.ladder.toString().split(",")[0]
+                    `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.goBack.ladder.toString().split(",")[0]
                     }&roleId=${this.goBack.ladder.toString().split(",")[1]}`
                 );
                 const res = re.substring(0, 3);
@@ -1043,7 +1043,7 @@ export default {
                     let re;
                     if (["2", "3", "5"].includes(this.multiplex)) {
                         re = WebOffice.Save(
-                            `http://172.24.97.210:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder
+                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder
                                 .toString()
                                 .split("-")[1]
                                 .split("+")[0]
@@ -1055,7 +1055,7 @@ export default {
                         );
                     } else {
                         re = WebOffice.Save(
-                            `http://172.24.97.210:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder.toString().split("+")[0]
+                            `http://140.249.209.176:8084/LightningDetection/record-examine/examine?reviewer=${sessionID}&id=${id}&state=${num}&Reviewer=${this.auditor.ladder.toString().split("+")[0]
                             }&LiableUser=${this.principal.ladder.toString().split("+")[0]
                             }`
                         );
